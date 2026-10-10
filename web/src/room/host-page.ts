@@ -91,9 +91,9 @@ export function initHostPage(): void {
     settings.forEach((el) => (el.disabled = !c.editable));
     // After a phase ends, the natural next one is the main button.
     focusBtn?.classList.toggle("btn-primary", c.suggest !== "break");
-    focusBtn?.classList.toggle("btn-subtle", c.suggest === "break");
+    focusBtn?.classList.toggle("btn-ghost", c.suggest === "break");
     breakBtn?.classList.toggle("btn-warm", c.suggest !== "focus");
-    breakBtn?.classList.toggle("btn-subtle", c.suggest === "focus");
+    breakBtn?.classList.toggle("btn-ghost", c.suggest === "focus");
     // An odd number of visible buttons: the last one takes the full row.
     const visible = controls.filter((b) => !b.hidden);
     controls.forEach((b) => b.classList.remove("span-2"));
