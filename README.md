@@ -33,6 +33,35 @@ No chat, no sign-up needed to host or watch. Logging in is optional and only add
 - **Mobile first:** every page is built for phones first, with soft motion that respects
   `prefers-reduced-motion`.
 
+## How it works
+
+```
+ viewer / host browser                       Go server
+ ---------------------                       ------------------------------------------
+ GET /r/{id}            --- HTML (SSR) --->  controllers -> views (html/template)
+ WebSocket /ws/{id}     <-- state, ticks -->  realtime.Handler -> RoomHub -> room.Reduce (pure)
+ GET /api/weather       --- JSON, cached -->  weather.Service -> Open-Meteo
+ GET /api/stats/...     --- JSON ---------->  stats.Service -> PostgreSQL (focus sessions)
+```
+
+- **The server owns the timer.** It stores only `startedAt` and `duration`. Each browser works out the remaining
+  time from those and a clock offset measured with `ping`/`pong`, so nothing ticks over the network.
+- **Rooms live in memory.** Every change goes through the pure `room.Reduce` function and is broadcast to the
+  connected clients. Slow clients are dropped from a broadcast instead of blocking the room.
+- **Focus time is recorded when a focus phase ends** (reset, a new start, or the timer running out). Pauses are not
+  counted and sessions under 30 seconds are ignored.
+- **The host token** is random, shown once in the URL fragment (never sent to the server in a request), and only
+  its salted hash is stored.
+
+### WebSocket messages (short)
+
+| Direction | Messages |
+|---|---|
+| Client to server | `join`, `host.auth`, `timer.start`, `timer.pause`, `timer.resume`, `timer.reset`, `location.set`, `reaction`, `ping` |
+| Server to client | `state`, `host.ok`, `reaction.tick`, `pong`, `error` |
+
+Full protocol: [docs/ws-protocol.md](docs/ws-protocol.md). HTTP routes and JSON shapes: [docs/api.md](docs/api.md).
+
 ## Tech
 
 | Part | Choice |
@@ -125,6 +154,25 @@ Two options, both in [docs/runbook.md](docs/runbook.md):
 - See [the privacy page](internal/views/templates/pages/privacy.html) for the exact wording.
 - **Weather data: [Open-Meteo.com](https://open-meteo.com/), CC BY 4.0.** The free Open-Meteo API is for
   non-commercial use only. Pages that show weather credit it. A commercial product needs their paid plan.
+
+## Troubleshooting
+
+| Problem | What to check |
+|---|---|
+| "Continue with Google" does nothing or says access blocked | The Google app is in Testing mode: add your Gmail under Audience, Test users. The redirect URI must match `BASE_URL/auth/google/callback` exactly. |
+| `/admin` shows "Page not found" | You must be logged in with an email listed in `ADMIN_EMAILS`. The server reads `.env` only at start (`make dev` restarts on `.env` changes). |
+| No login option at all | Login needs `DATABASE_URL`. Without it the server runs anonymously. |
+| Email sign-in link does not arrive in development | It is printed in the server log, not sent. Set `SMTP_*` to really send it. |
+| The sky is plain or the weather chip is missing | The host has not chosen a place yet (host panel, "Sky place"). |
+| Port 8080 is busy | `ADDR=:8081 make dev`. |
+| Database tests are skipped | Set `TEST_DATABASE_URL` to a throwaway database and run `make test-db`. |
+| Old styles or scripts after an update | Hard-reload the page. Development serves assets with `no-cache`. |
+
+## Status
+
+Built and tested: rooms and the realtime timer, the living sky with real weather, record mode, optional login,
+statistics, the leaderboard and the admin page. Not done yet: the first production deploy (see the runbook),
+publishing the Google app to everyone, and a license. The plan and the history of decisions are in [docs/](docs/).
 
 ## Documentation
 
