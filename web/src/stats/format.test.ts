@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialOf, formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
+import { formatBytes, formatUptime, percent, initialOf, formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
 
 describe("formatDuration", () => {
   it("formats minutes and hours", () => {
@@ -94,5 +94,24 @@ describe("initialOf", () => {
     expect(initialOf("élan")).toBe("É");
     expect(initialOf("")).toBe("?");
     expect(initialOf("😀 fun")).toBe("😀");
+  });
+});
+
+describe("admin formatters", () => {
+  it("formats bytes", () => {
+    expect(formatBytes(512)).toBe("512 B");
+    expect(formatBytes(2048)).toBe("2.0 KB");
+    expect(formatBytes(12.4 * 1024 * 1024)).toBe("12.4 MB");
+    expect(formatBytes(150 * 1024 * 1024)).toBe("150 MB");
+  });
+  it("formats uptime", () => {
+    expect(formatUptime(42_000)).toBe("42s");
+    expect(formatUptime(125_000)).toBe("2m 5s");
+    expect(formatUptime(5 * 3600_000 + 12 * 60_000)).toBe("5h 12m");
+    expect(formatUptime(3 * 86400_000 + 4 * 3600_000)).toBe("3d 4h");
+  });
+  it("formats percent", () => {
+    expect(percent(1, 4)).toBe("25%");
+    expect(percent(1, 0)).toBe("-");
   });
 });

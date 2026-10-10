@@ -135,3 +135,33 @@ export function initialOf(name: string): string {
   const first = [...name.trim()][0];
   return first ? first.toUpperCase() : "?";
 }
+
+/** "12.4 MB", "830 KB", "1.2 GB". */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${Math.max(0, Math.round(bytes))} B`;
+  const units = ["KB", "MB", "GB", "TB"];
+  let value = bytes / 1024;
+  let i = 0;
+  while (value >= 1024 && i < units.length - 1) {
+    value /= 1024;
+    i++;
+  }
+  return `${value >= 100 ? Math.round(value) : value.toFixed(1)} ${units[i]}`;
+}
+
+/** "3d 4h", "5h 12m", "42s". */
+export function formatUptime(ms: number): string {
+  const s = Math.floor(Math.max(0, ms) / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
+  if (m > 0) return `${m}m ${s % 60}s`;
+  return `${s}s`;
+}
+
+/** A whole percent, or "-" when there is nothing to divide by. */
+export function percent(part: number, whole: number): string {
+  return whole > 0 ? `${Math.round((part / whole) * 100)}%` : "-";
+}
