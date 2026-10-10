@@ -21,7 +21,7 @@ Maqsad: TikTok/Instagram videolarida monitor ekranini yozib olish. Ekranda havol
 | Login | **Ixtiyoriy.** Anonim kirish asosiy (guard emas) |
 | Hosting | **Azure VM** (sizning serveringiz, doimiy ishlaydi) |
 | Reverse proxy / TLS | **Caddy** (avto HTTPS) |
-| Ob-havo | Open-Meteo (nokommersiya uchun bepul; shartlarni tekshirish) |
+| Ob-havo | Open-Meteo. Bepul API **faqat nokommersiya** (reklama/obuna bo'lsa litsenziya kerak), < 600 so'rov/daqiqa, CC BY 4.0 atributsiya. 2026-10-10 da hujjatdan tekshirildi |
 
 Bepul hostingning (Render va hokazo) uxlash muammosi **endi yo'q**, shuning uchun u variant rejadan olib tashlandi.
 
@@ -262,11 +262,11 @@ Internet → (ixtiyoriy Cloudflare) → Azure VM
 - **Tugash mezoni:** host va tomoshabin to'liq oqim bilan ishlaydi (osmonsiz ham).
 
 ### 6-bosqich: Jonli osmon (5-6 kun, eng qiziq qism)
-- [ ] `weather` adapteri, kesh, `/api/weather`.
-- [ ] Quyosh/oy hisobi, osmon gradienti, yulduzlar.
-- [ ] Bulutlar, yomg'ir, qor, tuman, chaqmoq (Canvas/WebGL).
-- [ ] Unumdorlik: tab yashirinsa to'xtash, `prefers-reduced-motion`, zaif qurilma rejimi.
-- [ ] "Yangilandi N daqiqa oldin".
+- [x] `weather` adapteri (Open-Meteo, hujjatdan tekshirilgan), kesh, `/api/weather`, shahar qidirish (`/api/places`).
+- [x] Quyosh/oy hisobi, osmon gradienti, yulduzlar.
+- [x] Bulutlar, yomg'ir, qor, tuman, chaqmoq (Canvas 2D).
+- [x] Unumdorlik: tab yashirinsa to'xtash, `prefers-reduced-motion`, zaif qurilma rejimi.
+- [x] "Yangilandi N daqiqa oldin" va Open-Meteo atributsiyasi (CC BY 4.0).
 - **Tugash mezoni:** turli ob-havo kodlarida to'g'ri ko'rinish, telefonda silliq (FPS o'lchanadi).
 
 ### 7-bosqich: Videoga mos rejim va o'sish (2-3 kun)
