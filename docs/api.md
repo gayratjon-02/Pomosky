@@ -13,5 +13,7 @@
 | GET/POST | `/login`, `/auth/callback`, `/logout` | Optional login | stub |
 | GET | `/account` | Profile and statistics | stub |
 | GET | `/static/*` | Built frontend assets | implemented |
+| GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |
+| GET | `/__dev/reload.js` | Browser auto-reload script; only with `DEV_RELOAD=true` | implemented |
 
 State-changing forms use CSRF tokens (TODO stage 4).

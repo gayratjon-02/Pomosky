@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
+	"github.com/gayratjon-02/Pomosky/internal/devreload"
 	"github.com/gayratjon-02/Pomosky/internal/middleware"
 )
 
@@ -27,6 +28,12 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /api/weather", c.WeatherAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
+
+	// Development only: browser auto-reload (never registered in production).
+	if a.dev != nil {
+		mux.Handle("GET /__dev/events", a.dev.EventsHandler())
+		mux.Handle("GET /__dev/reload.js", devreload.ScriptHandler())
+	}
 
 	// Static assets built from web/.
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir(a.cfg.StaticDir))))
