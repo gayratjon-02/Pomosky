@@ -27,6 +27,16 @@ func TestValidate(t *testing.T) {
 	}
 }
 
+func TestLoadTrustProxy(t *testing.T) {
+	if Load().TrustProxy {
+		t.Fatal("TRUST_PROXY must default to false")
+	}
+	t.Setenv("TRUST_PROXY", "true")
+	if !Load().TrustProxy {
+		t.Fatal("TRUST_PROXY=true was not picked up")
+	}
+}
+
 func TestLoadDevFlag(t *testing.T) {
 	t.Setenv("DEV_RELOAD", "true")
 	t.Setenv("DEV_VIEWS_DIR", "")

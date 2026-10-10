@@ -21,6 +21,11 @@ type Config struct {
 	SessionSecret string
 	HostTokenSalt string
 
+	// TrustProxy makes the server believe X-Forwarded-For. Enable it only when
+	// every request comes through a proxy you control (Caddy), otherwise clients
+	// could spoof their IP and dodge rate limits.
+	TrustProxy bool
+
 	// Development helpers. Dev enables template reloading from DevViewsDir and
 	// the browser auto-reload endpoints. It is rejected in production.
 	Dev         bool
@@ -62,6 +67,7 @@ func Load() Config {
 		DatabaseURL:   os.Getenv("DATABASE_URL"),
 		SessionSecret: os.Getenv("SESSION_SECRET"),
 		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
+		TrustProxy:    getenvBool("TRUST_PROXY", false),
 		Dev:           getenvBool("DEV_RELOAD", false),
 		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),
 		Weather: WeatherConfig{
