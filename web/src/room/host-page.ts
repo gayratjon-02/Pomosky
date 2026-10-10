@@ -6,6 +6,7 @@ import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { controlsFor } from "../ui/host-controls";
 import { initSounds } from "../ui/sound-events";
+import { shortcutFor } from "../ui/shortcuts";
 import { initShare } from "../ui/share";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
@@ -162,6 +163,21 @@ export function initHostPage(): void {
       () => toast("Could not read your location"),
       { maximumAge: 600_000, timeout: 10_000 },
     );
+  });
+
+  // Keyboard: Space or K pause and resume, F starts focus, B a break, Shift+R resets.
+  document.addEventListener("keydown", (e) => {
+    if (!client.state || e.repeat) return;
+    const t = e.target as HTMLElement;
+    const typing = t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName);
+    const action = shortcutFor(
+      { key: e.key, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey, typing },
+      controlsFor(client.state.timer, client.clock.serverNow()),
+    );
+    if (!action) return;
+    e.preventDefault(); // Space would otherwise scroll the page
+    const button = { "toggle-pause": pause, "start-focus": focusBtn, "start-break": breakBtn, reset: resetBtn }[action];
+    button?.click(); // the same code path as a mouse click, including the sounds
   });
 
   initSounds(client);
