@@ -26,6 +26,7 @@ Keep `internal/realtime/protocol.go` and `web/src/core/protocol.ts` in sync.
 | type | data |
 |---|---|
 | `state` | `{ roomId, timer, viewers, reactions, city, location?, serverNowMs }`: sent on join and after every change; carries the viewer count. `location` is `{ lat, lon, tz }` (rounded) and is absent until the host sets it |
+| `people` | `{ people: [{ name, avatarUrl? }], more }`: the named people in the room (signed-in users who allow it, once however many tabs, and viewers who chose a nickname), at most 12, `more` counts the rest. Sent on join and whenever the list changes; no ids or emails |
 | `host.ok` | none |
 | `reaction.tick` | `{ kind, count }` |
 | `weather` | not used: clients fetch `GET /api/weather?room={id}` instead (see api.md) |
