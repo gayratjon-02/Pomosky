@@ -1,6 +1,7 @@
 import { byId, maybeById } from "../core/dom";
 import { dayLabel, formatBytes, formatDuration, formatTotal, formatUptime, initialOf, percent } from "../stats/format";
 import { initAmbientSky } from "./ambient-sky";
+import { initTraffic } from "./admin-traffic";
 
 interface AdminDay {
   date: string;
@@ -226,6 +227,7 @@ function userRow(u: UserRow): HTMLElement {
 /** The operator's admin page: live numbers, totals, 30-day charts, users and system health. */
 export function initAdminPage(): void {
   initAmbientSky();
+  initTraffic();
 
   let sort: "newest" | "focus" = "newest";
   let page = 1;
