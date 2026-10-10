@@ -201,3 +201,13 @@ func TestRoomShowRejectsInvalidID(t *testing.T) {
 		t.Fatalf("status = %d, want 404", rec.Code)
 	}
 }
+
+func TestPagesDefaultToTheShareImage(t *testing.T) {
+	c := newTestControllers(t)
+	c.deps.Config = config.Config{BaseURL: "https://pomosky.com/"}
+	rec := httptest.NewRecorder()
+	c.Home(rec, httptest.NewRequest("GET", "/", nil))
+	if !strings.Contains(rec.Body.String(), `property="og:image" content="https://pomosky.com/static/og.png"`) {
+		t.Fatalf("no default share image in:\n%s", rec.Body.String())
+	}
+}

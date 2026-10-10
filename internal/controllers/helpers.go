@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 	"github.com/gayratjon-02/Pomosky/internal/views"
@@ -11,6 +12,9 @@ import (
 func (c *Controllers) render(w http.ResponseWriter, r *http.Request, status int, page string, data views.PageData) {
 	data.DevReload = c.deps.Config.Dev
 	data.CSRFToken = reqctx.CSRF(r.Context())
+	if data.OGImage == "" {
+		data.OGImage = strings.TrimRight(c.deps.Config.BaseURL, "/") + "/static/og.png"
+	}
 	if data.User == nil {
 		data.User = reqctx.User(r.Context())
 	}
