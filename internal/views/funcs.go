@@ -8,10 +8,12 @@ import (
 	"unicode/utf8"
 )
 
-func funcMap() template.FuncMap {
+func funcMap(r *Renderer) template.FuncMap {
 	return template.FuncMap{
 		"year":    func() int { return time.Now().Year() },
 		"initial": initial,
+		// asset turns a logical name ("base.css", "/static/landing.js") into the URL of the built file.
+		"asset": func(name string) string { return r.resolve(name) },
 	}
 }
 

@@ -19,15 +19,30 @@ type Renderer struct {
 	reload bool // development: re-parse the templates on every request
 
 	pages map[string]*template.Template // parsed once; unused when reload is set
+
+	resolveAsset func(string) string // maps logical asset names to built URLs; nil keeps /static/<name>
+}
+
+// SetAssetResolver sets how the asset template function turns a logical name
+// into a URL (the app passes the Vite manifest). Call it before serving.
+func (r *Renderer) SetAssetResolver(fn func(string) string) { r.resolveAsset = fn }
+
+func (r *Renderer) resolve(name string) string {
+	if r.resolveAsset != nil {
+		return r.resolveAsset(name)
+	}
+	return "/static/" + strings.TrimPrefix(name, "/static/")
 }
 
 // New parses every templates/pages/*.html from fsys once.
 func New(fsys fs.FS) (*Renderer, error) {
-	pages, err := parsePages(fsys)
+	r := &Renderer{fsys: fsys}
+	pages, err := parsePages(fsys, r)
 	if err != nil {
 		return nil, err
 	}
-	return &Renderer{fsys: fsys, pages: pages}, nil
+	r.pages = pages
+	return r, nil
 }
 
 // NewReloading is like New but re-parses the templates on every request, so
@@ -51,7 +66,7 @@ func FromDir(dir string) (*Renderer, error) {
 	return NewReloading(os.DirFS(dir))
 }
 
-func parsePages(fsys fs.FS) (map[string]*template.Template, error) {
+func parsePages(fsys fs.FS, r *Renderer) (map[string]*template.Template, error) {
 	files, err := fs.Glob(fsys, "templates/pages/*.html")
 	if err != nil {
 		return nil, err
@@ -62,7 +77,7 @@ func parsePages(fsys fs.FS) (map[string]*template.Template, error) {
 	pages := make(map[string]*template.Template, len(files))
 	for _, file := range files {
 		name := strings.TrimSuffix(path.Base(file), ".html")
-		t, err := template.New(name).Funcs(funcMap()).
+		t, err := template.New(name).Funcs(funcMap(r)).
 			ParseFS(fsys, "templates/layouts/*.html", "templates/partials/*.html", file)
 		if err != nil {
 			return nil, fmt.Errorf("views: parse %s: %w", file, err)
@@ -76,7 +91,7 @@ func (r *Renderer) lookup(page string) (*template.Template, error) {
 	pages := r.pages
 	if r.reload {
 		var err error
-		if pages, err = parsePages(r.fsys); err != nil {
+		if pages, err = parsePages(r.fsys, r); err != nil {
 			return nil, err
 		}
 	}

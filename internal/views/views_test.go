@@ -4,6 +4,7 @@ import (
 	"github.com/gayratjon-02/Pomosky/internal/models"
 	"net/http"
 	"net/http/httptest"
+	"path"
 	"strings"
 	"testing"
 )
@@ -51,6 +52,36 @@ func TestHeadCarriesShareTags(t *testing.T) {
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("head lacks %s", want)
+		}
+	}
+}
+
+func TestAssetFunctionUsesTheResolver(t *testing.T) {
+	r, err := Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	render := func() string {
+		rec := httptest.NewRecorder()
+		r.Render(rec, http.StatusOK, "privacy", PageData{Title: "T", Scripts: []string{"/static/landing.js"}})
+		return rec.Body.String()
+	}
+
+	// Without a resolver the plain names are used.
+	body := render()
+	for _, want := range []string{`href="/static/base.css"`, `src="/static/site.js"`, `src="/static/landing.js"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("default output lacks %s", want)
+		}
+	}
+
+	r.SetAssetResolver(func(name string) string {
+		return "/static/" + strings.TrimSuffix(strings.TrimPrefix(name, "/static/"), path.Ext(name)) + ".HASH123" + path.Ext(name)
+	})
+	body = render()
+	for _, want := range []string{`href="/static/base.HASH123.css"`, `src="/static/site.HASH123.js"`, `src="/static/landing.HASH123.js"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("resolved output lacks %s", want)
 		}
 	}
 }
