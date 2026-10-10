@@ -16,6 +16,7 @@
 | POST | `/logout` | End the session | implemented |
 | GET | `/account` | Profile and monthly statistics; anonymous visitors go to `/login` | implemented |
 | POST | `/account/delete` | Delete the account and its data (`confirm=delete`) | implemented |
+| GET | `/api/places?q=` | Place search for the host (JSON `{places:[{name,region,country,lat,lon,tz}]}`), rate limited, via Open-Meteo geocoding | implemented |
 | GET | `/api/stats?month=YYYY-MM&tz=Area/City` | Monthly focus statistics of the logged-in user (JSON, see below) | implemented |
 | GET | `/static/*` | Built frontend assets | implemented |
 | GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |

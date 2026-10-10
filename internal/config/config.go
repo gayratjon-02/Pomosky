@@ -39,8 +39,9 @@ type Config struct {
 
 // WeatherConfig configures the weather adapter and its cache.
 type WeatherConfig struct {
-	BaseURL  string
-	CacheTTL time.Duration
+	BaseURL      string
+	GeocodingURL string // place search
+	CacheTTL     time.Duration
 }
 
 // OAuthConfig holds the credentials of the optional social login.
@@ -74,8 +75,9 @@ func Load() Config {
 		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),
 		Weather: WeatherConfig{
 			// Default is the public Open-Meteo host; verify its terms and limits.
-			BaseURL:  getenv("OPEN_METEO_BASE", "https://api.open-meteo.com"),
-			CacheTTL: getenvDuration("WEATHER_CACHE_TTL", 10*time.Minute),
+			BaseURL:      getenv("OPEN_METEO_BASE", "https://api.open-meteo.com"),
+			GeocodingURL: getenv("OPEN_METEO_GEOCODING_BASE", "https://geocoding-api.open-meteo.com"),
+			CacheTTL:     getenvDuration("WEATHER_CACHE_TTL", 10*time.Minute),
 		},
 		OAuth: OAuthConfig{
 			GoogleClientID:     os.Getenv("OAUTH_GOOGLE_CLIENT_ID"),

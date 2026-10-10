@@ -36,6 +36,7 @@ type Deps struct {
 	Clock      ports.Clock
 	IDs        ports.IDGenerator
 	Weather    WeatherSource
+	Places     PlaceSearcher // nil: no place search
 }
 
 // Controllers groups all handlers; methods are split over files per area.

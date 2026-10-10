@@ -86,3 +86,45 @@ func TestWeatherAPIErrors(t *testing.T) {
 		}
 	}
 }
+
+type fakePlaces struct {
+	places []weather.Place
+	err    error
+	query  string
+}
+
+func (f *fakePlaces) Search(_ context.Context, q string, _ int) ([]weather.Place, error) {
+	f.query = q
+	return f.places, f.err
+}
+
+func TestPlacesAPI(t *testing.T) {
+	c := newTestControllers(t)
+	c.deps.Log = slog.New(slog.NewTextHandler(io.Discard, nil))
+	fp := &fakePlaces{places: []weather.Place{{Name: "Tashkent", Country: "Uzbekistan", Lat: 41.26, Lon: 69.21, Timezone: "Asia/Tashkent"}}}
+	c.deps.Places = fp
+
+	get := func(q string) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		c.PlacesAPI(rec, httptest.NewRequest("GET", "/api/places?q="+q, nil))
+		return rec
+	}
+	rec := get("+Tashkent+")
+	var body struct {
+		Places []placeJSON `json:"places"`
+	}
+	if rec.Code != 200 || json.Unmarshal(rec.Body.Bytes(), &body) != nil || len(body.Places) != 1 || body.Places[0].TZ != "Asia/Tashkent" || fp.query != "Tashkent" {
+		t.Fatalf("%d %s (query %q)", rec.Code, rec.Body.String(), fp.query)
+	}
+	if rec := get("a"); rec.Code != http.StatusBadRequest {
+		t.Fatalf("too short: %d", rec.Code)
+	}
+	fp.err = errors.New("down")
+	if rec := get("Seoul"); rec.Code != http.StatusBadGateway {
+		t.Fatalf("upstream error: %d", rec.Code)
+	}
+	c.deps.Places = nil
+	if rec := get("Seoul"); rec.Code != http.StatusNotImplemented {
+		t.Fatalf("disabled: %d", rec.Code)
+	}
+}

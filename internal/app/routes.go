@@ -35,6 +35,9 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 
 	// API and realtime.
 	mux.HandleFunc("GET /api/weather", c.WeatherAPI)
+	// Place search is limited per client: a burst of 5, then one a second.
+	placeLimit := middleware.RateLimit(ratelimit.New(1, 5, time.Now), a.cfg.TrustProxy)
+	mux.Handle("GET /api/places", placeLimit(http.HandlerFunc(c.PlacesAPI)))
 	mux.HandleFunc("GET /api/stats", c.StatsAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)

@@ -134,6 +134,7 @@ func New(cfg config.Config) (*App, error) {
 	if cfg.Weather.BaseURL != "" {
 		provider := openmeteo.New(cfg.Weather.BaseURL, nil)
 		deps.Weather = weather.NewService(provider, cfg.Weather.CacheTTL, clk.Now)
+		deps.Places = openmeteo.NewGeocoder(cfg.Weather.GeocodingURL, nil)
 	}
 	ctrl := controllers.New(deps)
 

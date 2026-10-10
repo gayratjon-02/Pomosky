@@ -1,6 +1,9 @@
 package weather
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // Snapshot is the current weather at a location, in provider-neutral form.
 type Snapshot struct {
@@ -142,4 +145,19 @@ func maxInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// Place is a geocoding result: somewhere the host can put the sky.
+type Place struct {
+	Name     string
+	Region   string // first-level admin area, may be empty
+	Country  string
+	Lat      float64
+	Lon      float64
+	Timezone string // IANA name
+}
+
+// Geocoder finds places by name.
+type Geocoder interface {
+	Search(ctx context.Context, query string, limit int) ([]Place, error)
 }
