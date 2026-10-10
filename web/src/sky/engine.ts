@@ -4,6 +4,7 @@ import { cloudsLayer } from "./layers/clouds";
 import { fogLayer } from "./layers/fog";
 import { horizonLayer } from "./layers/horizon";
 import { lightningLayer } from "./layers/lightning";
+import { meteorsLayer } from "./layers/meteors";
 import { moonLayer } from "./layers/moon";
 import { rainLayer } from "./layers/rain";
 import { snowLayer } from "./layers/snow";
@@ -49,6 +50,7 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
   const layers: Layer[] = [
     backgroundLayer(),
     starsLayer(),
+    meteorsLayer(),
     moonLayer(),
     sunLayer(),
     cloudsLayer(),
