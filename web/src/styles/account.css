@@ -61,3 +61,17 @@ body.account::before { content: ""; position: fixed; inset: 0; z-index: -1; back
 .delete-box summary { display: inline-flex; list-style: none; cursor: pointer; }
 .delete-box summary::-webkit-details-marker { display: none; }
 .delete-box form { margin-top: var(--space-4); max-width: 360px; }
+
+/* Logged-out preview: example data is visible but blurred behind a login prompt. */
+.preview-head { flex-wrap: wrap; }
+.preview-head .acct-who { min-width: 240px; }
+.acct-section.is-preview { position: relative; }
+.is-preview .stats-body { filter: blur(5px) saturate(0.8); opacity: 0.65; pointer-events: none; user-select: none; }
+.preview-gate {
+  position: absolute; z-index: 5; top: 140px; left: 50%; transform: translateX(-50%);
+  width: min(460px, calc(100% - 2 * var(--space-4)));
+  display: grid; gap: var(--space-3); justify-items: center; text-align: center;
+  padding: var(--space-5); border-radius: var(--radius-l); background: var(--glass-bg-strong);
+}
+.preview-gate strong { font-size: var(--text-lg); }
+.preview-gate p { color: var(--fg-muted); }

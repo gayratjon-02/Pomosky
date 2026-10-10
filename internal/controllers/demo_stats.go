@@ -7,23 +7,12 @@ import (
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/models"
-	"github.com/gayratjon-02/Pomosky/internal/views"
 )
 
-// DevAccount serves GET /__dev/account: the account page with a fake user and
-// fixture statistics, so the design can be built before login exists.
-func (c *Controllers) DevAccount(w http.ResponseWriter, r *http.Request) {
-	email := "ayla@example.com"
-	c.render(w, r, http.StatusOK, "account", views.PageData{
-		Title:   "Your account",
-		Scripts: []string{"/static/account.js"},
-		User:    &models.User{ID: "dev", Email: &email, Nickname: "Ayla", Provider: "google", CreatedAt: time.Now().AddDate(0, -3, 0)},
-		Data:    views.AccountPage{StatsURL: "/__dev/api/stats"},
-	})
-}
-
-// DevStats serves GET /__dev/api/stats: deterministic fixture data in the real shape.
-func (c *Controllers) DevStats(w http.ResponseWriter, r *http.Request) {
+// DemoStats serves GET /api/stats/demo: made-up example statistics in the real
+// shape. The statistics page shows them (blurred, labelled as an example) to
+// visitors who are not logged in, so they can see what logging in gives them.
+func (c *Controllers) DemoStats(w http.ResponseWriter, r *http.Request) {
 	month, ok := parseMonth(r, time.Now())
 	if !ok {
 		http.Error(w, "bad month", http.StatusBadRequest)

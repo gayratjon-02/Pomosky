@@ -15,7 +15,8 @@
     <span>Pomosky</span>
   </a>
   <nav class="site-nav" aria-label="Main">
-    {{if .User}}<a href="/account">Account</a>{{else}}<a href="/login">Log in</a>{{end}}
+    <a href="/account">Statistics</a>
+    {{if .User}}<a href="/account" class="nav-user">{{.User.Nickname}}</a>{{else}}<a href="/login">Log in</a>{{end}}
   </nav>
 </header>
 {{end}}

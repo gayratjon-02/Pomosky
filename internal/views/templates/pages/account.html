@@ -3,6 +3,15 @@
 <canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
 
 <div class="container acct" data-stats-url="{{.Data.StatsURL}}">
+  {{if .Data.Preview}}
+  <header class="acct-head glass preview-head">
+    <div class="acct-who">
+      <h1>Your focus time, month by month</h1>
+      <p class="muted">Host a room while logged in and Pomosky counts every focused minute for you. The numbers below are an example.</p>
+    </div>
+    <a class="btn btn-primary" href="/login">Log in to see yours</a>
+  </header>
+  {{else}}
   <header class="acct-head glass">
     <div class="avatar" aria-hidden="true">{{if .User}}{{printf "%.1s" .User.Nickname}}{{end}}</div>
     <div class="acct-who">
@@ -14,10 +23,20 @@
       <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
     </form>
   </header>
+  {{end}}
 
   {{template "flash" .}}
 
-  <section class="acct-section" aria-labelledby="stats-title">
+  <section class="acct-section{{if .Data.Preview}} is-preview{{end}}" aria-labelledby="stats-title">
+    {{if .Data.Preview}}
+    <div class="preview-gate glass" role="region" aria-label="Log in to see your statistics">
+      <strong>Example data</strong>
+      <p>Log in to see how long you really focused this month. Logging in is optional and free.</p>
+      <a class="btn btn-primary" href="/login">Log in</a>
+      <a class="btn btn-ghost" href="/">Back to the start</a>
+    </div>
+    {{end}}
+    <div class="stats-body">
     <div class="month-nav">
       <h2 id="stats-title">Focus time</h2>
       <div class="month-switch glass">
@@ -64,8 +83,10 @@
       </article>
     </div>
     <p class="muted fine" id="stats-error" hidden>Could not load your statistics. Please try again.</p>
+    </div>
   </section>
 
+  {{if not .Data.Preview}}
   <section class="acct-section glass danger-zone">
     <h2>Your data</h2>
     <p class="muted">Your account stores your sign-in identity, nickname and focus sessions. You can delete all of it at any time.</p>
@@ -79,5 +100,6 @@
       </form>
     </details>
   </section>
+  {{end}}
 </div>
 {{end}}

@@ -18,6 +18,7 @@ type LoginPage struct {
 // AccountPage is the Data of the account page.
 type AccountPage struct {
 	StatsURL string // where the page fetches the monthly statistics from
+	Preview  bool   // visitor is not logged in: example data behind a login prompt
 }
 
 // PageData is what every page template receives.

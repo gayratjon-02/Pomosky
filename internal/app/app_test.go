@@ -88,6 +88,8 @@ func TestRoutesSmoke(t *testing.T) {
 		{"GET", "/", http.StatusOK},
 		{"GET", "/healthz", http.StatusOK},
 		{"GET", "/privacy", http.StatusOK},
+		{"GET", "/account", http.StatusOK}, // example statistics for visitors
+		{"GET", "/api/stats/demo", http.StatusOK},
 		{"GET", "/nope", http.StatusNotFound},
 		{"GET", "/r/INVALID", http.StatusNotFound},
 		{"GET", "/r/abcd2345", http.StatusNotFound},  // no such live room

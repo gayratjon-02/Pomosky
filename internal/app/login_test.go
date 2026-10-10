@@ -34,11 +34,14 @@ func TestLoginAccountStatsAndDeleteFlow(t *testing.T) {
 	}
 	h := a.Handler()
 
-	// Anonymous visitors: the account page redirects, the API says 401.
+	// Anonymous visitors see the example statistics behind a login prompt; their own API says 401.
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, httptest.NewRequest("GET", "/account", nil))
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/login" {
-		t.Fatalf("anonymous /account = %d %s", rec.Code, rec.Header().Get("Location"))
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "Example data") || !strings.Contains(rec.Body.String(), "/api/stats/demo") {
+		t.Fatalf("anonymous /account = %d", rec.Code)
+	}
+	if strings.Contains(rec.Body.String(), "Delete my account") {
+		t.Fatal("the preview must not offer account deletion")
 	}
 	rec = httptest.NewRecorder()
 	h.ServeHTTP(rec, httptest.NewRequest("GET", "/api/stats", nil))

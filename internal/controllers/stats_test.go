@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-func TestDevStatsFixtureShape(t *testing.T) {
+func TestDemoStatsFixtureShape(t *testing.T) {
 	c := newTestControllers(t)
 	rec := httptest.NewRecorder()
-	c.DevStats(rec, httptest.NewRequest("GET", "/__dev/api/stats?month=2026-02", nil))
+	c.DemoStats(rec, httptest.NewRequest("GET", "/api/stats/demo?month=2026-02", nil))
 	if rec.Code != 200 {
 		t.Fatalf("status %d", rec.Code)
 	}
@@ -35,17 +35,17 @@ func TestDevStatsFixtureShape(t *testing.T) {
 	}
 }
 
-func TestDevStatsFutureMonthIsEmpty(t *testing.T) {
+func TestDemoStatsFutureMonthIsEmpty(t *testing.T) {
 	m := fixtureMonth(time.Now().AddDate(0, 3, 0), time.Now())
 	if m.TotalSeconds != 0 || m.ActiveDays != 0 {
 		t.Fatalf("future month has data: %+v", m)
 	}
 }
 
-func TestDevStatsRejectsBadMonth(t *testing.T) {
+func TestDemoStatsRejectsBadMonth(t *testing.T) {
 	c := newTestControllers(t)
 	rec := httptest.NewRecorder()
-	c.DevStats(rec, httptest.NewRequest("GET", "/__dev/api/stats?month=nope", nil))
+	c.DemoStats(rec, httptest.NewRequest("GET", "/api/stats/demo?month=nope", nil))
 	if rec.Code != 400 {
 		t.Fatalf("status %d", rec.Code)
 	}

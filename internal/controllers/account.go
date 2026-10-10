@@ -8,17 +8,20 @@ import (
 	"github.com/gayratjon-02/Pomosky/internal/views"
 )
 
-// Account serves GET /account: profile and statistics. Anonymous visitors are
-// sent to the login page.
+// Account serves GET /account: the statistics page. A logged-in user sees
+// their own numbers. Everyone else sees the same page filled with example data
+// behind a prompt to log in, so the feature is visible before signing up.
 func (c *Controllers) Account(w http.ResponseWriter, r *http.Request) {
+	page := views.AccountPage{StatsURL: "/api/stats"}
+	title := "Your statistics"
 	if reqctx.User(r.Context()) == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		page = views.AccountPage{StatsURL: "/api/stats/demo", Preview: true}
+		title = "Statistics"
 	}
 	c.render(w, r, http.StatusOK, "account", views.PageData{
-		Title:   "Your account",
+		Title:   title,
 		Scripts: []string{"/static/account.js"},
-		Data:    views.AccountPage{StatsURL: "/api/stats"},
+		Data:    page,
 	})
 }
 
