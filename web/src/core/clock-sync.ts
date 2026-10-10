@@ -17,6 +17,10 @@ export class ClockSync {
     if (this.samples.length > this.maxSamples) this.samples.shift();
   }
 
+  get sampleCount(): number {
+    return this.samples.length;
+  }
+
   get offsetMs(): number {
     if (this.samples.length === 0) return 0;
     const sorted = [...this.samples].sort((a, b) => a - b);

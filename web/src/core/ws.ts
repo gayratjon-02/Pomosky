@@ -19,7 +19,7 @@ export class ReconnectingSocket {
 
   constructor(
     private readonly url: string,
-    private readonly heartbeatMs = 25_000,
+    private readonly heartbeatMs = 25_000, // 0 disables the built-in ping
   ) {}
 
   connect(): void {
@@ -75,6 +75,7 @@ export class ReconnectingSocket {
 
   private startHeartbeat(): void {
     this.stopHeartbeat();
+    if (this.heartbeatMs <= 0) return;
     this.heartbeatTimer = window.setInterval(() => this.send("ping"), this.heartbeatMs);
   }
 
