@@ -41,7 +41,7 @@ only the internal packages listed in `allowed` in `archtest_test.go`. In short:
 | ports | room, models |
 | store/postgres | models, ports, room, apperr |
 | auth | models, ports, apperr |
-| realtime | room, ports, platform/httpx, platform/ratelimit |
+| realtime | room, ports, moderation, platform/ratelimit |
 | middleware | models, auth, platform/httpx, platform/ratelimit |
 | controllers | models, ports, room, views, config, weather, platform/httpx, apperr |
 | app, cmd | anything (composition root) |

@@ -92,7 +92,7 @@ func TestRoutesSmoke(t *testing.T) {
 		{"GET", "/r/INVALID", http.StatusNotFound},
 		{"GET", "/r/abcd2345", http.StatusNotImplemented},
 		{"POST", "/r/new", http.StatusNotImplemented},
-		{"GET", "/ws/abcd2345", http.StatusNotImplemented},
+		{"GET", "/ws/abcd2345", http.StatusNotFound}, // no such live room
 	}
 	for _, tc := range cases {
 		rec := httptest.NewRecorder()

@@ -8,7 +8,7 @@
 | GET | `/r/{id}` | Room (viewer); `?mode=record` for record mode | stub |
 | GET | `/r/{id}/host` | Host panel | stub |
 | POST | `/r/new` | Create a room, show host token once | stub |
-| GET | `/ws/{id}` | WebSocket | stub |
+| GET | `/ws/{id}` | WebSocket (see ws-protocol.md); 404 if the room does not exist | implemented |
 | GET | `/api/weather?room={id}` | Cached weather snapshot | stub |
 | GET/POST | `/login`, `/auth/callback`, `/logout` | Optional login | stub |
 | GET | `/account` | Profile and statistics | stub |

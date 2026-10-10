@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gayratjon-02/Pomosky/internal/auth"
 	"github.com/gayratjon-02/Pomosky/internal/config"
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
 	"github.com/gayratjon-02/Pomosky/internal/devreload"
@@ -62,8 +63,17 @@ func New(cfg config.Config) (*App, error) {
 		IDs:    idgen.Generator{},
 	})
 
+	wsHandler, err := realtime.NewHandler(hub, log, realtime.HandlerConfig{
+		Hosts: auth.HostTokens{Salt: cfg.HostTokenSalt},
+		Clock: clk,
+		IDs:   idgen.Generator{},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	a := &App{cfg: cfg, log: log, dev: watcher}
-	a.handler = a.routes(ctrl, realtime.NewHandler(hub, log))
+	a.handler = a.routes(ctrl, wsHandler)
 	return a, nil
 }
 
