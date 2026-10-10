@@ -4,6 +4,7 @@ import { load, save } from "../core/storage";
 import { startLiveSky } from "../sky/live-sky";
 import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
+import { controlsFor } from "../ui/host-controls";
 import { initShare } from "../ui/share";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
@@ -67,20 +68,51 @@ export function initHostPage(): void {
   });
   client.on("state", (s) => {
     setViewers(s.viewers);
-    if (pause) pause.textContent = s.timer.phase === "paused" ? "Resume" : "Pause";
+    applyControls();
   });
 
+  // Which buttons are visible follows the timer: start only when nothing runs, pause or
+  // resume while it does, reset once something has started. The server enforces the same rule.
+  const focusBtn = maybeById<HTMLButtonElement>("btn-focus");
+  const breakBtn = maybeById<HTMLButtonElement>("btn-break");
+  const resetBtn = maybeById<HTMLButtonElement>("btn-reset");
+  const settings = Array.from(document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#focus-min, #break-min, #label, #presets button"));
+  const applyControls = () => {
+    if (!client.state) return;
+    const c = controlsFor(client.state.timer, client.clock.serverNow());
+    if (focusBtn) focusBtn.hidden = !c.showStart;
+    if (breakBtn) breakBtn.hidden = !c.showStart;
+    if (pause) {
+      pause.hidden = !c.showPause;
+      pause.textContent = c.pauseLabel;
+    }
+    if (resetBtn) resetBtn.hidden = !c.showReset;
+    settings.forEach((el) => (el.disabled = !c.editable));
+    // After a phase ends, the natural next one is the main button.
+    focusBtn?.classList.toggle("btn-primary", c.suggest !== "break");
+    focusBtn?.classList.toggle("btn-subtle", c.suggest === "break");
+    breakBtn?.classList.toggle("btn-warm", c.suggest !== "focus");
+    breakBtn?.classList.toggle("btn-subtle", c.suggest === "focus");
+    // An odd number of visible buttons: the last one takes the full row.
+    const visible = controls.filter((b) => !b.hidden);
+    controls.forEach((b) => b.classList.remove("span-2"));
+    if (visible.length % 2 === 1) visible[visible.length - 1]?.classList.add("span-2");
+  };
+
   window.setInterval(() => {
-    if (client.state) renderer.render(client.state.timer, client.clock.serverNow());
+    if (!client.state) return;
+    renderer.render(client.state.timer, client.clock.serverNow());
+    applyControls();
   }, 250);
 
   const label = () => maybeById<HTMLInputElement>("label")?.value.trim() ?? "";
-  maybeById("btn-focus")?.addEventListener("click", () =>
-    client.start({ phase: "focus", durationMs: num("focus-min", 25) * 60_000, label: label() }),
-  );
-  maybeById("btn-break")?.addEventListener("click", () =>
-    client.start({ phase: "break", durationMs: num("break-min", 5) * 60_000, label: label() }),
-  );
+  const canStart = () => !!client.state && controlsFor(client.state.timer, client.clock.serverNow()).showStart;
+  focusBtn?.addEventListener("click", () => {
+    if (canStart()) client.start({ phase: "focus", durationMs: num("focus-min", 25) * 60_000, label: label() });
+  });
+  breakBtn?.addEventListener("click", () => {
+    if (canStart()) client.start({ phase: "break", durationMs: num("break-min", 5) * 60_000, label: label() });
+  });
   pause?.addEventListener("click", () => (client.state?.timer.phase === "paused" ? client.resume() : client.pause()));
   maybeById("btn-reset")?.addEventListener("click", () => client.reset());
 
