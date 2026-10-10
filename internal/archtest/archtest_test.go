@@ -33,6 +33,7 @@ var allowed = map[string][]string{
 	"stats":              {"models", "ports", "apperr"},
 	"admin":              {"models", "ports", "weather"},
 	"devreload":          {},
+	"assets":             {},
 	"analytics":          {"room"},
 	"views":              {"models"},
 	"auth":               {"models", "ports", "apperr"},
