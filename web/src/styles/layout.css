@@ -243,8 +243,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: 
 body { overflow-x: clip; }
 
 .brand, .site-nav a:not(.btn), .site-footer a, .user-menu-btn { min-height: 44px; display: inline-flex; align-items: center; }
-.site-footer { gap: 0 var(--space-5); padding-block: var(--space-3); }
-.site-footer nav { gap: var(--space-4); }
+.site-footer { gap: var(--space-2) var(--space-5); padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); }
+.site-footer nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-4); }
 
 @media (max-width: 640px), (pointer: coarse) {
   .btn { min-height: 46px; }
