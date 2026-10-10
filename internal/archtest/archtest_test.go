@@ -34,7 +34,7 @@ var allowed = map[string][]string{
 	"auth":               {"models", "ports", "apperr"},
 	"auth/google":        {"auth", "apperr"},
 	"auth/magiclink":     {"auth", "ports", "apperr"},
-	"store/postgres":     {"models", "ports", "room", "apperr"},
+	"store/postgres":     {"models", "ports", "room", "apperr", "store/postgres/sqlcgen"},
 	"realtime":           {"room", "ports", "moderation", "platform/ratelimit"},
 	"middleware":         {"models", "auth", "platform/httpx", "platform/ratelimit"},
 	"controllers":        {"models", "ports", "room", "views", "config", "weather", "platform/httpx", "apperr"},

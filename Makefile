@@ -41,9 +41,9 @@ migrate-up:
 migrate-down:
 	goose -dir migrations postgres "$(DATABASE_URL)" down
 
-# Requires sqlc: https://sqlc.dev
+# Regenerates internal/store/postgres/sqlcgen from the SQL in queries/.
 sqlc:
-	sqlc generate
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.30.0 generate
 
 up:
 	cd deploy && docker compose up -d --build

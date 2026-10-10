@@ -2,11 +2,11 @@ package postgres
 
 import (
 	"context"
+	"time"
 
-	"github.com/gayratjon-02/Pomosky/internal/apperr"
 	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/ports"
-	"github.com/gayratjon-02/Pomosky/internal/room"
+	"github.com/gayratjon-02/Pomosky/internal/store/postgres/sqlcgen"
 )
 
 // FocusSessionRepo implements ports.FocusSessionRepository.
@@ -17,12 +17,40 @@ var _ ports.FocusSessionRepository = (*FocusSessionRepo)(nil)
 // NewFocusSessionRepo creates the repository.
 func NewFocusSessionRepo(db *DB) *FocusSessionRepo { return &FocusSessionRepo{db: db} }
 
-// TODO(stage 4): implement with sqlc-generated queries.
-
 func (r *FocusSessionRepo) Create(ctx context.Context, s models.FocusSession) error {
-	return apperr.ErrNotImplemented
+	return mapErr(r.db.q.CreateFocusSession(ctx, sqlcgen.CreateFocusSessionParams{
+		RoomID:      string(s.RoomID),
+		StartedAt:   s.StartedAt,
+		EndedAt:     s.EndedAt,
+		FocusedMs:   s.Focused.Milliseconds(),
+		PeakViewers: int32(s.PeakViewers),
+	}))
 }
 
-func (r *FocusSessionRepo) ListByRoom(ctx context.Context, id room.ID, limit int) ([]models.FocusSession, error) {
-	return nil, apperr.ErrNotImplemented
+func (r *FocusSessionRepo) DailyTotals(ctx context.Context, owner models.UserID, from, to time.Time, tz string) ([]models.DayStat, error) {
+	rows, err := r.db.q.DailyFocusTotals(ctx, sqlcgen.DailyFocusTotalsParams{Tz: tz, Owner: string(owner), FromTs: from, ToTs: to})
+	if err != nil {
+		return nil, mapErr(err)
+	}
+	out := make([]models.DayStat, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, models.DayStat{
+			Date:     row.Day.Format("2006-01-02"),
+			Seconds:  row.FocusedMs / 1000,
+			Sessions: int(row.Sessions),
+		})
+	}
+	return out, nil
+}
+
+func (r *FocusSessionRepo) ActiveDays(ctx context.Context, owner models.UserID, since time.Time, tz string) ([]string, error) {
+	days, err := r.db.q.ActiveFocusDays(ctx, sqlcgen.ActiveFocusDaysParams{Tz: tz, Owner: string(owner), Since: since})
+	if err != nil {
+		return nil, mapErr(err)
+	}
+	out := make([]string, 0, len(days))
+	for _, d := range days {
+		out = append(out, d.Format("2006-01-02"))
+	}
+	return out, nil
 }

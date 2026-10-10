@@ -22,6 +22,7 @@ type UserRepository interface {
 	Create(ctx context.Context, u models.User) error
 	ByID(ctx context.Context, id models.UserID) (models.User, error)
 	ByEmail(ctx context.Context, email string) (models.User, error)
+	ByIdentity(ctx context.Context, provider, subject string) (models.User, error)
 	Delete(ctx context.Context, id models.UserID) error
 }
 
@@ -33,14 +34,21 @@ type SessionRepository interface {
 	DeleteExpired(ctx context.Context, now time.Time) (int64, error)
 }
 
-// FocusSessionRepository persists finished focus phases.
+// FocusSessionRepository persists finished focus phases and reads them back
+// as per-day totals for the statistics view.
 type FocusSessionRepository interface {
 	Create(ctx context.Context, s models.FocusSession) error
-	ListByRoom(ctx context.Context, id room.ID, limit int) ([]models.FocusSession, error)
+	// DailyTotals returns one entry per day that has focus time, for sessions
+	// that started in [from, to). Days are taken in the time zone tz (IANA name).
+	DailyTotals(ctx context.Context, owner models.UserID, from, to time.Time, tz string) ([]models.DayStat, error)
+	// ActiveDays returns the dates (YYYY-MM-DD) with any focus time since a moment, newest first.
+	ActiveDays(ctx context.Context, owner models.UserID, since time.Time, tz string) ([]string, error)
 }
 
-// StatsRepository persists per-user statistics.
-type StatsRepository interface {
-	Get(ctx context.Context, id models.UserID) (models.UserStats, error)
-	AddFocus(ctx context.Context, id models.UserID, d time.Duration, day time.Time) error
+// LoginTokenRepository stores one-time email sign-in tokens (hashed).
+type LoginTokenRepository interface {
+	Create(ctx context.Context, tokenHash, email string, expires time.Time) error
+	// Consume deletes the token and returns its email. It returns
+	// apperr.ErrNotFound when the token is unknown, used or expired.
+	Consume(ctx context.Context, tokenHash string, now time.Time) (string, error)
 }

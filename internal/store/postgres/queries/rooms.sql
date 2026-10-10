@@ -10,3 +10,9 @@ UPDATE rooms SET owner_user_id = $2 WHERE id = $1;
 
 -- name: UpdateRoomLocation :exec
 UPDATE rooms SET city = $2, lat_rounded = $3, lon_rounded = $4, tz = $5 WHERE id = $1;
+
+-- Rooms nobody has touched for a long time and that have no focus history.
+-- name: DeleteStaleEmptyRooms :execrows
+DELETE FROM rooms r
+WHERE r.created_at < $1
+  AND NOT EXISTS (SELECT 1 FROM focus_sessions fs WHERE fs.room_id = r.id);
