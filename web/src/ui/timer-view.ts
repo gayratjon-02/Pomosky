@@ -18,6 +18,7 @@ export class TimerRenderer {
   private readonly phase = maybeById("timer-phase");
   private readonly label = maybeById("timer-label");
   private readonly ring = maybeById("ring-progress");
+  private readonly knob = maybeById("ring-knob");
   private chimedFor = -1;
 
   render(t: TimerView, serverNowMs: number): void {
@@ -36,6 +37,7 @@ export class TimerRenderer {
       const progress = t.phase === "idle" ? 0 : 1 - Math.min(1, remaining / total);
       this.ring.style.strokeDasharray = String(RING_LENGTH);
       this.ring.style.strokeDashoffset = String(RING_LENGTH * (1 - progress));
+      if (this.knob) this.knob.style.transform = `rotate(${progress * 360}deg)`; // the knob rides the end of the arc
     }
 
     document.title = t.phase === "idle" ? "Pomosky" : `${text} · ${ended ? "Done" : PHASE_TEXT[t.phase]} · Pomosky`;
