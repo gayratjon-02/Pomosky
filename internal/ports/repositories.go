@@ -2,6 +2,7 @@ package ports
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/models"
@@ -77,4 +78,22 @@ type AdminRepository interface {
 	// Users lists users, newest first or most focused first, with the total count.
 	Users(ctx context.Context, mostFocused bool, limit, offset int) ([]models.AdminUser, int, error)
 	DatabaseSize(ctx context.Context) (int64, error)
+}
+
+// VisitRepository stores anonymous usage events and reads them back for the admin page.
+type VisitRepository interface {
+	Create(ctx context.Context, v models.Visit) error
+	// Traffic summarises the UTC days in [from, to).
+	Traffic(ctx context.Context, from, to time.Time) (models.TrafficOverview, error)
+}
+
+// VisitTracker records one usage event of an HTTP request. It never fails the
+// request and stores nothing that identifies a person. analytics.Collector implements it.
+type VisitTracker interface {
+	Track(r *http.Request, kind string)
+}
+
+// TrafficReader serves the traffic section of the admin page.
+type TrafficReader interface {
+	Traffic(ctx context.Context) (models.TrafficOverview, error)
 }
