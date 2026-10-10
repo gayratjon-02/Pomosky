@@ -31,6 +31,7 @@ var allowed = map[string][]string{
 	"moderation":         {},
 	"mail":               {"ports"},
 	"stats":              {"models", "ports", "apperr"},
+	"admin":              {"models", "ports", "weather"},
 	"devreload":          {},
 	"analytics":          {"room"},
 	"views":              {"models"},
