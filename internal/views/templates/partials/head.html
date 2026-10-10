@@ -6,6 +6,11 @@
 {{if .CanonicalURL}}<link rel="canonical" href="{{.CanonicalURL}}">{{end}}
 <meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}Pomosky{{end}}">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Pomosky">
+<meta property="og:description" content="{{if .Description}}{{.Description}}{{else}}Focus together under a living sky.{{end}}">
+{{if .CanonicalURL}}<meta property="og:url" content="{{.CanonicalURL}}">{{end}}
+<meta name="twitter:card" content="{{if .OGImage}}summary_large_image{{else}}summary{{end}}">
+<meta name="twitter:title" content="{{if .Title}}{{.Title}}{{else}}Pomosky{{end}}">
 {{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">{{end}}
 <meta name="theme-color" content="#0b1020">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">

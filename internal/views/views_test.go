@@ -35,3 +35,22 @@ func TestEmbeddedTemplatesRender(t *testing.T) {
 		}
 	}
 }
+
+func TestHeadCarriesShareTags(t *testing.T) {
+	r, err := Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	r.Render(rec, http.StatusOK, "privacy", PageData{Title: "Work together", Description: "Join this room", CanonicalURL: "https://pomosky.com/r/abc", OGImage: "https://pomosky.com/static/og.png"})
+	body := rec.Body.String()
+	for _, want := range []string{
+		`property="og:title" content="Work together"`, `property="og:description" content="Join this room"`,
+		`property="og:url" content="https://pomosky.com/r/abc"`, `property="og:image" content="https://pomosky.com/static/og.png"`,
+		`name="twitter:card" content="summary_large_image"`, `rel="icon"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("head lacks %s", want)
+		}
+	}
+}
