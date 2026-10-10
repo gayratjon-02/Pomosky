@@ -21,6 +21,11 @@ type Config struct {
 	SessionSecret string
 	HostTokenSalt string
 
+	// Development helpers. Dev enables template reloading from DevViewsDir and
+	// the browser auto-reload endpoints. It is rejected in production.
+	Dev         bool
+	DevViewsDir string
+
 	Weather WeatherConfig
 	OAuth   OAuthConfig
 	Mail    MailConfig
@@ -57,6 +62,8 @@ func Load() Config {
 		DatabaseURL:   os.Getenv("DATABASE_URL"),
 		SessionSecret: os.Getenv("SESSION_SECRET"),
 		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
+		Dev:           getenvBool("DEV_RELOAD", false),
+		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),
 		Weather: WeatherConfig{
 			// Default is the public Open-Meteo host; verify its terms and limits.
 			BaseURL:  getenv("OPEN_METEO_BASE", "https://api.open-meteo.com"),
@@ -85,6 +92,8 @@ func (c Config) Validate() error {
 		return nil
 	}
 	switch {
+	case c.Dev:
+		return errors.New("config: DEV_RELOAD must not be enabled in production")
 	case c.DatabaseURL == "":
 		return errors.New("config: DATABASE_URL is required in production")
 	case c.SessionSecret == "":
@@ -98,6 +107,15 @@ func (c Config) Validate() error {
 func getenv(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
+	}
+	return def
+}
+
+func getenvBool(key string, def bool) bool {
+	if v := os.Getenv(key); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			return b
+		}
 	}
 	return def
 }
