@@ -8,6 +8,7 @@ import { controlsFor } from "../ui/host-controls";
 import { initSounds } from "../ui/sound-events";
 import { shortcutFor } from "../ui/shortcuts";
 import { initShare } from "../ui/share";
+import { initWakeLock } from "../ui/wake-lock";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { PLACES } from "../core/places";
@@ -181,6 +182,7 @@ export function initHostPage(): void {
   });
 
   initSounds(client);
+  initWakeLock(client);
 
   client.connect();
 }
