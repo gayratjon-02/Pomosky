@@ -7,6 +7,7 @@
 3. `cd deploy && cp .env.example .env` and fill in the secrets.
 4. `docker compose up -d --build`
 5. Check `https://<domain>/healthz`.
+6. The server applies the database migrations itself on start. Login works only when Google credentials or SMTP settings are set (see `.env.example`); everything else works without them.
 
 ## Update
 
