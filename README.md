@@ -5,6 +5,18 @@ in silence. The sky behind the room is drawn from the real sun, moon and weather
 
 No chat, no sign-up needed to host or watch. Logging in is optional and only adds your own statistics.
 
+## Screenshots
+
+| Landing | Room (viewer) |
+|---|---|
+| ![Landing page](docs/images/landing.jpg) | ![Room with the live sky and weather](docs/images/room.jpg) |
+
+| Host panel | Statistics and leaderboard |
+|---|---|
+| ![Host panel](docs/images/host.jpg) | ![Monthly statistics](docs/images/statistics.jpg) |
+
+(The statistics screenshot uses made-up demo accounts.)
+
 ## What it does
 
 - **Rooms:** one click creates a room. The server owns the timer, so every device shows the same second,
