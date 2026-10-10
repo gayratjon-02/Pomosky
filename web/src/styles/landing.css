@@ -105,3 +105,8 @@ body.landing .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%;
   opacity: 0.55; transition: opacity var(--dur) var(--ease);
 }
 .feature:hover::before { opacity: 1; }
+
+/* Six cards read best as 1, 2 or 3 columns, never 4 and 2. */
+.features { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 600px) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 960px) { .features { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
