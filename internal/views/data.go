@@ -12,5 +12,6 @@ type PageData struct {
 	CSRFToken    string
 	User         *models.User // nil for anonymous visitors
 	Scripts      []string     // page-specific frontend bundles
+	DevReload    bool         // development only: include the browser auto-reload script
 	Data         any          // page-specific data
 }

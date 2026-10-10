@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gayratjon-02/Pomosky/internal/config"
 	"github.com/gayratjon-02/Pomosky/internal/views"
 )
 
@@ -31,6 +32,23 @@ func TestHomeAndHealth(t *testing.T) {
 	c.Health(rec, httptest.NewRequest("GET", "/healthz", nil))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"ok"`) {
 		t.Fatalf("health: %d %q", rec.Code, rec.Body.String())
+	}
+}
+
+func TestDevReloadScriptOnlyInDev(t *testing.T) {
+	v, err := views.Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const script = "/__dev/reload.js"
+
+	for _, dev := range []bool{false, true} {
+		c := New(Deps{Views: v, Config: config.Config{Dev: dev}})
+		rec := httptest.NewRecorder()
+		c.Home(rec, httptest.NewRequest("GET", "/", nil))
+		if got := strings.Contains(rec.Body.String(), script); got != dev {
+			t.Errorf("Dev=%v: page contains reload script = %v", dev, got)
+		}
 	}
 }
 

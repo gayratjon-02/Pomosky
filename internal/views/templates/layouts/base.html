@@ -10,6 +10,7 @@
 </main>
 {{template "footer" .}}
 {{range .Scripts}}<script type="module" src="{{.}}"></script>
+{{end}}{{if .DevReload}}<script src="/__dev/reload.js"></script>
 {{end}}
 </body>
 </html>{{end}}

@@ -7,6 +7,7 @@ import (
 )
 
 func (c *Controllers) render(w http.ResponseWriter, status int, page string, data views.PageData) {
+	data.DevReload = c.deps.Config.Dev
 	c.deps.Views.Render(w, status, page, data)
 }
 
