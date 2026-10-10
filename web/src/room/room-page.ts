@@ -1,9 +1,7 @@
 import { maybeById } from "../core/dom";
 import { load, save } from "../core/storage";
 import { RoomClient } from "../core/room-client";
-import { createSky } from "../sky";
-import { astroInputs } from "../sky/inputs";
-import { skyPlace } from "../sky/place";
+import { startLiveSky } from "../sky/live-sky";
 import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
@@ -22,15 +20,7 @@ export function initRoomPage(): void {
   const nickname = load(NICK_KEY) ?? "";
   const client = new RoomClient(roomId, nickname ? { nickname } : {});
 
-  const canvas = maybeById<HTMLCanvasElement>("sky");
-  const sky = canvas ? createSky(canvas) : null;
-  const refreshSky = () => {
-    const p = skyPlace(client?.state ?? null);
-    sky?.update(astroInputs(new Date(), p.lat, p.lon));
-  };
-  refreshSky();
-  sky?.start();
-  window.setInterval(refreshSky, 30_000);
+  startLiveSky(maybeById<HTMLCanvasElement>("sky"), client, roomId);
 
   const nickInput = maybeById<HTMLInputElement>("nick");
   if (nickInput) nickInput.value = nickname;
@@ -42,7 +32,6 @@ export function initRoomPage(): void {
 
   client.on("status", chip);
   client.on("state", (s) => {
-    refreshSky();
     setViewers(s.viewers);
     setReactionCounts(s.reactions);
   });

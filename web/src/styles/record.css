@@ -42,3 +42,6 @@ body.record { overflow: hidden; }
 @media (min-aspect-ratio: 9/16) {
   body.record::before { content: ""; position: fixed; inset: 0; z-index: -1; background: rgba(0, 0, 0, 0.35); }
 }
+
+.record-attr { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; }
+.record-attr .attribution { font-size: 0.62rem; }

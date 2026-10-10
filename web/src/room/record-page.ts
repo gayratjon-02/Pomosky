@@ -1,8 +1,6 @@
 import { maybeById } from "../core/dom";
 import { RoomClient } from "../core/room-client";
-import { createSky } from "../sky";
-import { astroInputs } from "../sky/inputs";
-import { skyPlace } from "../sky/place";
+import { startLiveSky } from "../sky/live-sky";
 import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { initReactions } from "../ui/reactions";
@@ -17,15 +15,7 @@ export function initRecordPage(): void {
 
   const client = new RoomClient(roomId);
 
-  const canvas = maybeById<HTMLCanvasElement>("sky");
-  const sky = canvas ? createSky(canvas) : null;
-  const refreshSky = () => {
-    const p = skyPlace(client?.state ?? null);
-    sky?.update(astroInputs(new Date(), p.lat, p.lon));
-  };
-  refreshSky();
-  sky?.start();
-  window.setInterval(refreshSky, 30_000);
+  startLiveSky(maybeById<HTMLCanvasElement>("sky"), client, roomId);
 
   const url = maybeById("join-url")?.dataset["url"];
   const qr = maybeById("qr");
@@ -39,7 +29,6 @@ export function initRecordPage(): void {
   const floatReaction = initReactions(() => {});
   client.on("status", createConnectionChip());
   client.on("state", (s) => {
-    refreshSky();
     setViewers(s.viewers);
   });
   client.on("tick", (t) => floatReaction(t.kind));

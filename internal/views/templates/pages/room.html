@@ -7,6 +7,7 @@
   <div class="room-top">
     <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">Connecting</span></span>
     {{template "presence" .}}
+    {{template "weather" .}}
   </div>
 
   {{template "timer" .}}
@@ -24,6 +25,7 @@
       <input class="input" id="nick" maxlength="24" placeholder="Your name (optional)">
       <button class="btn btn-subtle btn-sm" type="submit">Set</button>
     </form>
+    {{template "attribution" .}}
   </div>
 </section>
 {{end}}

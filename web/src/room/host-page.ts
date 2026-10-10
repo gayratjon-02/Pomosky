@@ -1,15 +1,14 @@
 import { maybeById } from "../core/dom";
 import { RoomClient } from "../core/room-client";
 import { load, save } from "../core/storage";
-import { createSky } from "../sky";
-import { astroInputs } from "../sky/inputs";
-import { skyPlace } from "../sky/place";
+import { startLiveSky } from "../sky/live-sky";
 import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { initShare } from "../ui/share";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { PLACES } from "../core/places";
+import { initPlaceSearch } from "../ui/place-search";
 
 
 const tokenKey = (roomId: string) => `pomosky.host.${roomId}`;
@@ -42,15 +41,7 @@ export function initHostPage(): void {
   const token = takeHostToken(roomId);
   const client = new RoomClient(roomId, token ? { hostToken: token } : {});
 
-  const canvas = maybeById<HTMLCanvasElement>("sky");
-  const sky = canvas ? createSky(canvas) : null;
-  const refreshSky = () => {
-    const p = skyPlace(client?.state ?? null);
-    sky?.update(astroInputs(new Date(), p.lat, p.lon));
-  };
-  refreshSky();
-  sky?.start();
-  window.setInterval(refreshSky, 30_000);
+  startLiveSky(maybeById<HTMLCanvasElement>("sky"), client, roomId);
 
   const renderer = new TimerRenderer();
   const badge = maybeById("host-badge");
@@ -75,7 +66,6 @@ export function initHostPage(): void {
     else if (e.code === "rate_limited") toast("Slow down a little");
   });
   client.on("state", (s) => {
-    refreshSky();
     setViewers(s.viewers);
     if (pause) pause.textContent = s.timer.phase === "paused" ? "Resume" : "Pause";
   });
@@ -113,6 +103,10 @@ export function initHostPage(): void {
       if (s.city && document.activeElement !== placeSelect) placeSelect.value = s.city;
     });
   }
+  initPlaceSearch((p) => {
+    client.setLocation({ city: p.name, lat: p.lat, lon: p.lon, tz: p.tz });
+    toast(`Sky moved to ${p.name}`);
+  });
   maybeById("use-device-place")?.addEventListener("click", () => {
     if (!navigator.geolocation) return toast("Your browser cannot share a location");
     navigator.geolocation.getCurrentPosition(

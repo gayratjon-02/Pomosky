@@ -6,6 +6,7 @@
 <section class="record-frame">
   <div class="record-top">
     <span class="chip presence"><span class="dot dot-live" id="conn-dot"></span><strong id="viewers">0</strong> <span id="viewers-label">people here</span></span>
+    {{template "weather" .}}
     <span class="sr-only" id="conn-text">Connecting</span>
   </div>
 
@@ -18,5 +19,6 @@
       <span class="record-join-url" id="join-url" data-url="{{.Data.ShareURL}}">{{.Data.ShareURL}}</span>
     </div>
   </div>
+  <div class="record-attr">{{template "attribution" .}}</div>
 </section>
 {{end}}

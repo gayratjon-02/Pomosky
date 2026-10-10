@@ -80,3 +80,8 @@ body[data-phase="ended"] .ring-progress { stroke: var(--warm-strong); animation:
 .nick .input { border: 0; background: transparent; min-width: 0; width: 200px; }
 
 @media (max-width: 480px) { .nick .input { width: 150px; } }
+
+/* Weather chip and the Open-Meteo credit (CC BY 4.0 asks for attribution). */
+.weather[hidden] { display: none; }
+.attribution { font-size: var(--text-xs); color: var(--fg-dim); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); }
+.attribution a { color: var(--fg-muted); }
