@@ -27,12 +27,12 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y postgresql debian-keyring debian-archive-keyring apt-transport-https curl gnupg openssl ca-certificates
+apt-get install -y postgresql curl gnupg openssl ca-certificates
 
-# Caddy from its official apt repository.
+# Caddy from the distribution's own packages. (Caddy's third-party apt repository
+# answered "402 Payment Required" in October 2026, so it is not used.)
+rm -f /etc/apt/sources.list.d/caddy-stable.list /usr/share/keyrings/caddy-stable-archive-keyring.gpg
 if ! command -v caddy >/dev/null; then
-  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' >/etc/apt/sources.list.d/caddy-stable.list
   apt-get update -y
   apt-get install -y caddy
 fi
