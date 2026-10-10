@@ -235,9 +235,9 @@ Internet → (ixtiyoriy Cloudflare) → Azure VM
 - **Tugash mezoni:** VM tayyor va WebSocket sinovdan o'tgan, shartlar tekshirilgan.
 
 ### 2-bosqich: Skelet va sof yadro (2 kun)
-- [ ] `go mod init`, papkalar, `Makefile`, CI.
-- [ ] `room`: `State`, `Event`, `reduce` va jadvalli testlar.
-- [ ] Minimal HTTP server, layout shablon, `healthz`.
+- [x] `go mod init`, papkalar, `Makefile`, CI.
+- [x] `room`: `State`, `Event`, `reduce` va jadvalli testlar.
+- [x] Minimal HTTP server, layout shablon, `healthz`.
 - **Tugash mezoni:** `go test ./...` o'tadi, yadroda tashqi paket yo'q.
 
 ### 3-bosqich: Sinxron taymer va WebSocket (3 kun)
