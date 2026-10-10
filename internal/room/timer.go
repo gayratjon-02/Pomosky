@@ -11,6 +11,7 @@ type Timer struct {
 	StartedAt       time.Time     // server time at which the running phase started
 	Duration        time.Duration // length of the current phase
 	PausedRemaining time.Duration // remaining time while Phase == PhasePaused
+	PausedFrom      Phase         // phase to return to on resume (only while paused)
 	Label           string        // what the host is working on
 }
 
