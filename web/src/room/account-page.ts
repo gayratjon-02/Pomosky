@@ -30,7 +30,7 @@ export function initAccountPage(): void {
     byId("month-label").textContent = monthLabel(month);
     byId<HTMLButtonElement>("month-next").disabled = month >= nowMonth;
     try {
-      const res = await fetch(`${url}?month=${month}`, { headers: { Accept: "application/json" } });
+      const res = await fetch(`${url}?month=${month}&tz=${encodeURIComponent(timeZone())}`, { headers: { Accept: "application/json" } });
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as MonthStats;
       if (mine !== request) return; // a newer month was requested meanwhile
@@ -52,6 +52,14 @@ export function initAccountPage(): void {
   });
 
   void load();
+}
+
+function timeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
 }
 
 function render(stats: MonthStats, isCurrent: boolean): void {

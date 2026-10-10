@@ -8,6 +8,13 @@ type RoomPage struct {
 	ShareURL string
 }
 
+// LoginPage is the Data of the login page.
+type LoginPage struct {
+	Google       bool   // show "Continue with Google"
+	MagicLink    bool   // show the email form
+	ConfirmToken string // set on the magic-link confirmation step
+}
+
 // AccountPage is the Data of the account page.
 type AccountPage struct {
 	StatsURL string // where the page fetches the monthly statistics from

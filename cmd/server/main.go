@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	_ "time/tzdata" // time zone names for statistics, also on minimal images
 
 	"github.com/gayratjon-02/Pomosky/internal/app"
 	"github.com/gayratjon-02/Pomosky/internal/config"
@@ -32,5 +33,6 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	defer a.Close()
 	return a.Run(ctx)
 }

@@ -22,10 +22,15 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	createRoom := middleware.RateLimit(ratelimit.New(0.1, 3, time.Now), a.cfg.TrustProxy)
 	mux.Handle("POST /r/new", createRoom(http.HandlerFunc(c.RoomCreate)))
 	mux.HandleFunc("GET /login", c.Login)
-	mux.HandleFunc("POST /login", c.LoginSubmit)
+	// Login attempts are limited per client: a burst of 5, then one every 5 seconds.
+	loginLimit := middleware.RateLimit(ratelimit.New(0.2, 5, time.Now), a.cfg.TrustProxy)
+	mux.Handle("POST /login", loginLimit(http.HandlerFunc(c.LoginSubmit)))
 	mux.HandleFunc("GET /auth/callback", c.AuthCallback)
+	mux.HandleFunc("GET /auth/google/callback", c.GoogleCallback)
+	mux.Handle("POST /auth/callback", loginLimit(http.HandlerFunc(c.AuthConfirm)))
 	mux.HandleFunc("POST /logout", c.Logout)
 	mux.HandleFunc("GET /account", c.Account)
+	mux.HandleFunc("POST /account/delete", c.AccountDelete)
 	mux.HandleFunc("GET /privacy", c.Privacy)
 
 	// API and realtime.
@@ -54,7 +59,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 		middleware.RequestID(),
 		middleware.Logging(a.log),
 		middleware.SecurityHeaders(middleware.DefaultCSP),
-		middleware.OptionalAuth(nil), // TODO(stage 4): pass auth.Service
+		middleware.OptionalAuth(a.sessions),
 		middleware.CSRF(a.cfg.IsProduction()),
 	)
 }

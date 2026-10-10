@@ -69,7 +69,15 @@
   <section class="acct-section glass danger-zone">
     <h2>Your data</h2>
     <p class="muted">Your account stores your sign-in identity, nickname and focus sessions. You can delete all of it at any time.</p>
-    <button class="btn btn-danger btn-sm" type="button" disabled title="Available once accounts are live">Delete my account</button>
+    <details class="delete-box">
+      <summary class="btn btn-danger btn-sm">Delete my account</summary>
+      <form method="post" action="/account/delete" class="stack">
+        <input type="hidden" name="csrf" value="{{.CSRFToken}}">
+        <label class="muted" for="confirm">Type <strong>delete</strong> to confirm. This cannot be undone.</label>
+        <input class="input" id="confirm" name="confirm" autocomplete="off" required pattern="delete">
+        <button class="btn btn-danger" type="submit">Delete everything</button>
+      </form>
+    </details>
   </section>
 </div>
 {{end}}

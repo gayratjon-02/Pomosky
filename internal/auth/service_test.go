@@ -195,7 +195,7 @@ func TestMagicLinkFlow(t *testing.T) {
 		}
 	}
 	u, err := url.Parse(link)
-	if err != nil || u.Query().Get("provider") != "magiclink" || u.Query().Get("token") == "" {
+	if err != nil || u.Query().Get("token") == "" {
 		t.Fatalf("link = %q", link)
 	}
 	token := u.Query().Get("token")

@@ -57,3 +57,7 @@ body.account::before { content: ""; position: fixed; inset: 0; z-index: -1; back
   .charts { grid-template-columns: 1fr; }
   .month-label { min-width: 7.5rem; }
 }
+
+.delete-box summary { display: inline-flex; list-style: none; cursor: pointer; }
+.delete-box summary::-webkit-details-marker { display: none; }
+.delete-box form { margin-top: var(--space-4); max-width: 360px; }

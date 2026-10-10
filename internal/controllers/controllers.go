@@ -29,6 +29,8 @@ type Deps struct {
 	Log        *slog.Logger
 	Views      *views.Renderer
 	Rooms      ports.RoomRepository
+	Accounts   ports.Accounts    // nil: login is off, everything else still works
+	Stats      ports.StatsReader // nil without a database
 	Live       ports.LiveRooms
 	HostTokens HostHasher
 	Clock      ports.Clock

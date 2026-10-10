@@ -19,8 +19,11 @@ func TestEmbeddedTemplatesRender(t *testing.T) {
 		}
 		rec := httptest.NewRecorder()
 		data := any(RoomPage{ID: "abc", ShareURL: "http://x/r/abc"})
-		if page == "account" {
+		switch page {
+		case "account":
 			data = AccountPage{StatsURL: "/api/stats"}
+		case "login":
+			data = LoginPage{Google: true, MagicLink: true}
 		}
 		r.Render(rec, http.StatusOK, page, PageData{Title: "Test", Data: data})
 		if rec.Code != http.StatusOK {

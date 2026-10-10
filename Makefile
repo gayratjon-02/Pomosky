@@ -1,4 +1,4 @@
-.PHONY: run dev build test vet fmt web-install web-dev web-build migrate-up migrate-down sqlc up down
+.PHONY: run dev build test test-db vet fmt web-install web-dev web-build migrate-up migrate-down sqlc up down
 
 run: web-build
 	go run ./cmd/server
@@ -18,6 +18,12 @@ build:
 
 test:
 	go test ./...
+
+# Also runs the tests that need PostgreSQL. They empty the tables of the database, so use a
+# throwaway one, e.g. TEST_DATABASE_URL=postgres://user@localhost:5432/pomosky_test?sslmode=disable
+test-db:
+	@test -n "$(TEST_DATABASE_URL)" || (echo "set TEST_DATABASE_URL"; exit 1)
+	go test -p 1 ./...
 
 vet:
 	go vet ./...

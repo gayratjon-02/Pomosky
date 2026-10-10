@@ -12,10 +12,14 @@ import (
 	"github.com/gayratjon-02/Pomosky/internal/config"
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
 	"github.com/gayratjon-02/Pomosky/internal/devreload"
+	"github.com/gayratjon-02/Pomosky/internal/middleware"
 	"github.com/gayratjon-02/Pomosky/internal/platform/clock"
 	"github.com/gayratjon-02/Pomosky/internal/platform/idgen"
 	"github.com/gayratjon-02/Pomosky/internal/platform/logger"
+	"github.com/gayratjon-02/Pomosky/internal/ports"
 	"github.com/gayratjon-02/Pomosky/internal/realtime"
+	"github.com/gayratjon-02/Pomosky/internal/stats"
+	"github.com/gayratjon-02/Pomosky/internal/store/postgres"
 	"github.com/gayratjon-02/Pomosky/internal/views"
 )
 
@@ -25,6 +29,9 @@ type App struct {
 	log     *slog.Logger
 	handler http.Handler
 	dev     *devreload.Watcher // nil unless cfg.Dev
+	db      *postgres.DB       // nil when DATABASE_URL is not set
+	// sessions resolves login cookies; nil means everyone is anonymous.
+	sessions middleware.SessionResolver
 }
 
 // New wires the application together.
@@ -54,17 +61,57 @@ func New(cfg config.Config) (*App, error) {
 
 	clk := clock.Real{}
 	hub := realtime.NewHub(log, clk)
+	ids := idgen.Generator{}
 
-	ctrl := controllers.New(controllers.Deps{
+	// Login, rooms of logged-in hosts and statistics need the database. Without
+	// DATABASE_URL the server still runs: rooms, timer and reactions are anonymous.
+	var (
+		db       *postgres.DB
+		accounts *auth.Service
+		statsSvc *stats.Service
+		rooms    ports.RoomRepository
+	)
+	if cfg.DatabaseURL != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		db, err = postgres.Open(ctx, cfg.DatabaseURL)
+		if err != nil {
+			return nil, err
+		}
+		if err = db.Migrate(ctx); err != nil {
+			_ = db.Close()
+			return nil, err
+		}
+		accounts = auth.NewService(auth.Deps{
+			Users:     postgres.NewUserRepo(db),
+			Sessions:  postgres.NewSessionRepo(db),
+			Tokens:    postgres.NewLoginTokenRepo(db),
+			Mailer:    newMailer(cfg, log),
+			Clock:     clk,
+			IDs:       ids,
+			Providers: oauthProviders(cfg),
+		}, auth.Options{BaseURL: cfg.BaseURL})
+		statsSvc = stats.New(postgres.NewFocusSessionRepo(db), clk)
+		rooms = postgres.NewRoomRepo(db)
+	}
+
+	deps := controllers.Deps{
 		Config: cfg,
 		Log:    log,
 		Views:  renderer,
 		Clock:  clk,
-		IDs:    idgen.Generator{},
+		IDs:    ids,
+		Rooms:  rooms,
 
 		Live:       hub,
 		HostTokens: auth.HostTokens{Salt: cfg.HostTokenSalt},
-	})
+	}
+	// Assigned only when set: a nil *Service inside the interface would not be nil.
+	if accounts != nil {
+		deps.Accounts = accounts
+		deps.Stats = statsSvc
+	}
+	ctrl := controllers.New(deps)
 
 	wsHandler, err := realtime.NewHandler(hub, log, realtime.HandlerConfig{
 		Hosts: auth.HostTokens{Salt: cfg.HostTokenSalt},
@@ -75,9 +122,20 @@ func New(cfg config.Config) (*App, error) {
 		return nil, err
 	}
 
-	a := &App{cfg: cfg, log: log, dev: watcher}
+	a := &App{cfg: cfg, log: log, dev: watcher, db: db}
+	if accounts != nil {
+		a.sessions = accounts
+	}
 	a.handler = a.routes(ctrl, wsHandler)
 	return a, nil
+}
+
+// Close releases resources held by the app (the database pool).
+func (a *App) Close() error {
+	if a.db != nil {
+		return a.db.Close()
+	}
+	return nil
 }
 
 // Handler returns the root HTTP handler (used by tests).

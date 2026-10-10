@@ -187,7 +187,7 @@ func (s *Service) SendMagicLink(ctx context.Context, email string) error {
 	if err := s.d.Tokens.Create(ctx, hash(token), addr, s.d.Clock.Now().Add(s.opts.LinkTTL)); err != nil {
 		return err
 	}
-	link := strings.TrimRight(s.opts.BaseURL, "/") + "/auth/callback?provider=" + MagicLinkProvider + "&token=" + url.QueryEscape(token)
+	link := strings.TrimRight(s.opts.BaseURL, "/") + "/auth/callback?token=" + url.QueryEscape(token)
 	body := fmt.Sprintf("Sign in to Pomosky:\n\n%s\n\nThe link works once and expires in %d minutes. If you did not ask for it, ignore this email.\n",
 		link, int(s.opts.LinkTTL.Minutes()))
 	return s.d.Mailer.Send(ctx, addr, "Your Pomosky sign-in link", body)
