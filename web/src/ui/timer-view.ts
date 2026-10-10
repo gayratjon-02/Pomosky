@@ -1,6 +1,7 @@
 import { maybeById } from "../core/dom";
 import type { Phase, TimerView } from "../core/protocol";
 import { formatMMSS, remainingMs } from "../core/timer";
+import { celebrate } from "./celebrate";
 import { chime } from "./sound";
 
 const PHASE_TEXT: Record<Phase, string> = {
@@ -45,6 +46,7 @@ export class TimerRenderer {
     if (ended && this.chimedFor !== t.startedAtMs) {
       this.chimedFor = t.startedAtMs;
       chime();
+      celebrate();
     }
   }
 }
