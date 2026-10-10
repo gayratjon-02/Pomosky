@@ -38,3 +38,8 @@
 
 .host-panel .input, .host-panel .select, .host-panel .field { min-width: 0; }
 .host-panel .btn { padding-inline: var(--space-3); }
+
+/* One visible button left on a row takes the full width. */
+.host-controls .span-2 { grid-column: 1 / -1; }
+/* Settings are locked while a phase runs or is paused. */
+.host-panel input:disabled, .host-panel .chip:disabled { opacity: 0.45; cursor: not-allowed; }
