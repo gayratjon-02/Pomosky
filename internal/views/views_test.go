@@ -13,7 +13,7 @@ func TestEmbeddedTemplatesRender(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, page := range []string{"home", "room", "host", "record", "login", "account", "privacy", "error"} {
+	for _, page := range []string{"home", "room", "host", "record", "login", "account", "privacy", "error", "admin"} {
 		if !r.Has(page) {
 			t.Errorf("missing page template %q", page)
 			continue

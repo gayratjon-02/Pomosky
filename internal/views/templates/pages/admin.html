@@ -1,0 +1,78 @@
+{{define "bodyclass"}}admin{{end}}
+{{define "content"}}
+<div class="container adm" id="adm">
+  <header class="adm-head">
+    <div>
+      <h1>Admin</h1>
+      <p class="muted fine">Operator view. Updated <span id="adm-updated">...</span></p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" id="adm-refresh">Refresh</button>
+  </header>
+
+  <section class="adm-section" aria-labelledby="live-title">
+    <h2 id="live-title"><span class="dot dot-live"></span> Live now</h2>
+    <div class="cards" id="adm-live">
+      <article class="glass card-stat"><span class="card-k">Rooms</span><strong class="card-v" id="l-rooms">-</strong><span class="card-sub">open on this server</span></article>
+      <article class="glass card-stat"><span class="card-k">Connected</span><strong class="card-v" id="l-clients">-</strong><span class="card-sub">browsers right now</span></article>
+      <article class="glass card-stat"><span class="card-k">Focusing</span><strong class="card-v" id="l-focus">-</strong><span class="card-sub" id="l-other"></span></article>
+    </div>
+  </section>
+
+  <section class="adm-section" aria-labelledby="ov-title">
+    <h2 id="ov-title">Overview</h2>
+    <div class="cards">
+      <article class="glass card-stat"><span class="card-k">Users</span><strong class="card-v" id="o-users">-</strong><span class="card-sub" id="o-users-sub"></span></article>
+      <article class="glass card-stat"><span class="card-k">New users</span><strong class="card-v" id="o-new-today">-</strong><span class="card-sub" id="o-new-sub">today</span></article>
+      <article class="glass card-stat"><span class="card-k">Active hosts</span><strong class="card-v" id="o-hosts-today">-</strong><span class="card-sub" id="o-hosts-sub">today</span></article>
+      <article class="glass card-stat"><span class="card-k">Focus, all time</span><strong class="card-v" id="o-focus">-</strong><span class="card-sub" id="o-focus-sub"></span></article>
+      <article class="glass card-stat"><span class="card-k">Sessions</span><strong class="card-v" id="o-sessions">-</strong><span class="card-sub" id="o-sessions-sub"></span></article>
+      <article class="glass card-stat"><span class="card-k">Anonymous share</span><strong class="card-v" id="o-anon">-</strong><span class="card-sub">of all focus time</span></article>
+    </div>
+  </section>
+
+  <section class="adm-section" aria-labelledby="ch-title">
+    <h2 id="ch-title">Last 30 days</h2>
+    <div class="charts adm-charts">
+      <article class="glass chart-card">
+        <h3>Focus time per day <small class="legend-inline"><i class="k-reg"></i>logged in <i class="k-anon"></i>anonymous</small></h3>
+        <div class="bars stacked" id="a-focus" role="img" aria-label="Focus time per day"></div>
+        <p class="muted fine" id="a-focus-detail">Tap a day.</p>
+      </article>
+      <article class="glass chart-card">
+        <h3>New users per day</h3>
+        <div class="bars" id="a-users" role="img" aria-label="New users per day"></div>
+        <p class="muted fine" id="a-users-detail">Tap a day.</p>
+      </article>
+      <article class="glass chart-card">
+        <h3>Active hosts per day</h3>
+        <div class="bars" id="a-hosts" role="img" aria-label="Active hosts per day"></div>
+        <p class="muted fine" id="a-hosts-detail">Tap a day.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="adm-section" aria-labelledby="us-title">
+    <div class="month-nav">
+      <h2 id="us-title">Users <small class="muted" id="us-total"></small></h2>
+      <div class="tabs glass" id="us-sort" role="tablist" aria-label="Sort users">
+        <button type="button" role="tab" data-sort="newest" aria-selected="true">Newest</button>
+        <button type="button" role="tab" data-sort="focus" aria-selected="false" tabindex="-1">Most focused</button>
+      </div>
+    </div>
+    <div class="glass users-card">
+      <ul class="users" id="us-list"></ul>
+      <p class="muted board-empty" id="us-empty" hidden>No users yet.</p>
+      <div class="pager">
+        <button type="button" class="btn btn-ghost btn-sm" id="us-prev">Previous</button>
+        <span class="muted fine" id="us-page"></span>
+        <button type="button" class="btn btn-ghost btn-sm" id="us-next">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="adm-section" aria-labelledby="sys-title">
+    <h2 id="sys-title">System</h2>
+    <dl class="glass sys" id="adm-sys"></dl>
+  </section>
+</div>
+{{end}}
