@@ -309,3 +309,72 @@ func TestLeaderboardOrdersAndHonoursTheSwitch(t *testing.T) {
 		t.Fatalf("user: %+v", u)
 	}
 }
+
+func TestAdminQueries(t *testing.T) {
+	db := testDB(t)
+	ctx := context.Background()
+	if _, err := db.SQL().Exec("TRUNCATE anonymous_focus"); err != nil {
+		t.Fatal(err)
+	}
+	admin := NewAdminRepo(db)
+	focus := NewFocusSessionRepo(db)
+	rooms := NewRoomRepo(db)
+	now := time.Now().UTC()
+
+	a := newUser(t, db, "ua", "a@example.com")
+	b := newUser(t, db, "ub", "b@example.com")
+	if err := NewUserRepo(db).SetLeaderboardVisible(ctx, "ub", false); err != nil {
+		t.Fatal(err)
+	}
+	ownerA, ownerB := a.ID, b.ID
+	_ = rooms.Create(ctx, models.Room{ID: "adminrma", OwnerUserID: &ownerA, HostTokenHash: "x"})
+	_ = rooms.Create(ctx, models.Room{ID: "adminrmb", OwnerUserID: &ownerB, HostTokenHash: "x"})
+	_ = focus.Create(ctx, models.FocusSession{RoomID: "adminrma", StartedAt: now.Add(-time.Hour), EndedAt: now, Focused: 40 * time.Minute})
+	_ = focus.Create(ctx, models.FocusSession{RoomID: "adminrma", StartedAt: now.Add(-2 * time.Hour), EndedAt: now, Focused: 20 * time.Minute})
+	_ = focus.Create(ctx, models.FocusSession{RoomID: "adminrmb", StartedAt: now.Add(-3 * time.Hour), EndedAt: now, Focused: 10 * time.Minute})
+	_ = focus.CreateAnonymous(ctx, now.Add(-time.Hour), 30*time.Minute)
+
+	tot, err := admin.Totals(ctx)
+	if err != nil || tot.Users != 2 || tot.Rooms != 2 || tot.RegisteredSeconds != 4200 || tot.RegisteredSessions != 3 || tot.AnonymousSeconds != 1800 || tot.AnonymousSessions != 1 || tot.HiddenUsers != 1 {
+		t.Fatalf("totals: %+v %v", tot, err)
+	}
+	if n, err := admin.NewUsersSince(ctx, now.Add(-time.Hour)); err != nil || n != 2 {
+		t.Fatalf("new users: %d %v", n, err)
+	}
+	if n, err := admin.ActiveHostsSince(ctx, now.Add(-90*time.Minute)); err != nil || n != 1 {
+		t.Fatalf("active hosts since 90 min: %d %v", n, err) // only user a focused in the last 90 minutes
+	}
+	if n, _ := admin.ActiveHostsSince(ctx, now.Add(-4*time.Hour)); n != 2 {
+		t.Fatalf("active hosts since 4 h: %d", n)
+	}
+
+	days, err := admin.Daily(ctx, now.Add(-48*time.Hour), now.Add(24*time.Hour), "UTC")
+	if err != nil || len(days) == 0 {
+		t.Fatalf("daily: %+v %v", days, err)
+	}
+	var regSec, anonSec int64
+	var newUsers int
+	for _, d := range days {
+		regSec += d.RegisteredSeconds
+		anonSec += d.AnonymousSeconds
+		newUsers += d.NewUsers
+	}
+	if regSec != 4200 || anonSec != 1800 || newUsers != 2 {
+		t.Fatalf("daily sums: reg %d anon %d users %d", regSec, anonSec, newUsers)
+	}
+
+	best, total, err := admin.Users(ctx, true, 10, 0)
+	if err != nil || total != 2 || len(best) != 2 || best[0].Email != "a@example.com" || best[0].FocusSeconds != 3600 || best[0].Sessions != 2 || best[0].LastFocusAt == nil {
+		t.Fatalf("most focused: %+v total %d %v", best, total, err)
+	}
+	if best[1].ShowOnLeaderboard || best[1].FocusSeconds != 600 {
+		t.Fatalf("second user: %+v", best[1])
+	}
+	newest, _, _ := admin.Users(ctx, false, 1, 1)
+	if len(newest) != 1 {
+		t.Fatalf("paging: %+v", newest)
+	}
+	if size, err := admin.DatabaseSize(ctx); err != nil || size <= 0 {
+		t.Fatalf("database size: %d %v", size, err)
+	}
+}
