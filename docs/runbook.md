@@ -16,6 +16,13 @@
 3. Check `https://<domain>/healthz`. Logs: `journalctl -u pomosky -f`.
 4. Backups: `sudo deploy/bare/backup.sh` from cron, and copy the file off the server.
 
+## Frontend file names
+
+The built files carry a content hash (`landing.CWdZvdpn.js`) and `dist/.vite/manifest.json` maps logical names
+to them. The server reads the manifest to write the right names into the pages, serves hashed files with
+`Cache-Control: immutable` for a year and never serves dot files. A deploy therefore cannot mix old and new
+files in a browser cache. Keep `.vite/` when copying `web/dist` (`release.sh` and the Dockerfile do).
+
 ## Update
 
 `deploy/scripts/deploy.sh` (pull, rebuild, restart).
