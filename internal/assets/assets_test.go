@@ -9,7 +9,7 @@ import (
 
 const sample = `{
   "src/entries/landing.ts": {"file": "landing.CWdZvdpn.js", "name": "landing", "isEntry": true, "imports": ["_astro.BY394th4.js"]},
-  "src/styles/base.css": {"file": "base.QFNHrnKh.css", "name": "base", "isEntry": true},
+  "src/styles/base.css": {"file": "base.QFNHrnKh.css", "src": "src/styles/base.css", "isEntry": true},
   "_astro.BY394th4.js": {"file": "chunks/astro.BY394th4.js", "name": "astro"}
 }`
 

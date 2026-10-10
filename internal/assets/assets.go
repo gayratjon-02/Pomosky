@@ -91,6 +91,7 @@ func parse(raw []byte) map[string]string {
 	var entries map[string]struct {
 		File    string `json:"file"`
 		Name    string `json:"name"`
+		Src     string `json:"src"`
 		IsEntry bool   `json:"isEntry"`
 	}
 	if json.Unmarshal(raw, &entries) != nil {
@@ -98,10 +99,14 @@ func parse(raw []byte) map[string]string {
 	}
 	files := make(map[string]string, len(entries))
 	for _, e := range entries {
-		if !e.IsEntry || e.File == "" || e.Name == "" {
+		name := e.Name
+		if name == "" { // a stylesheet entry has no name, only its source path
+			name = strings.TrimSuffix(path.Base(e.Src), path.Ext(e.Src))
+		}
+		if !e.IsEntry || e.File == "" || name == "" {
 			continue
 		}
-		files[e.Name+path.Ext(e.File)] = e.File
+		files[name+path.Ext(e.File)] = e.File
 	}
 	return files
 }
