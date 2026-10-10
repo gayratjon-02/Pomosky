@@ -145,3 +145,23 @@ func csrfFor(t *testing.T, h http.Handler) *http.Cookie {
 	t.Fatal("no csrf cookie")
 	return nil
 }
+
+// The Google button shares a form with the required email field, so it must
+// skip browser validation or it can never be clicked with an empty email.
+func TestGoogleButtonSkipsEmailValidation(t *testing.T) {
+	a, err := New(config.Config{Env: "development", StaticDir: t.TempDir(), OAuth: config.OAuthConfig{GoogleClientID: "id", GoogleClientSecret: "secret"}, DatabaseURL: os.Getenv("TEST_DATABASE_URL")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer a.Close()
+	if a.sessions == nil {
+		t.Skip("TEST_DATABASE_URL is not set")
+	}
+	rec := httptest.NewRecorder()
+	a.Handler().ServeHTTP(rec, httptest.NewRequest("GET", "/login", nil))
+	body := rec.Body.String()
+	i := strings.Index(body, `value="google"`)
+	if i < 0 || !strings.Contains(body[i:i+60], "formnovalidate") {
+		t.Fatalf("the Google button lacks formnovalidate")
+	}
+}
