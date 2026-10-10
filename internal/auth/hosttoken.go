@@ -21,3 +21,15 @@ func VerifyHostToken(salt, token, wantHash string) bool {
 	got := HashHostToken(salt, token)
 	return subtle.ConstantTimeCompare([]byte(got), []byte(wantHash)) == 1
 }
+
+// HostTokens hashes and verifies host tokens with a fixed salt. Controllers and
+// the realtime layer depend on small interfaces that this type satisfies.
+type HostTokens struct {
+	Salt string
+}
+
+// Hash returns the stored form of a token.
+func (h HostTokens) Hash(token string) string { return HashHostToken(h.Salt, token) }
+
+// Verify reports whether token matches the stored hash.
+func (h HostTokens) Verify(token, hash string) bool { return VerifyHostToken(h.Salt, token, hash) }

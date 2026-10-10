@@ -14,3 +14,17 @@ func TestHostToken(t *testing.T) {
 		t.Fatal("wrong salt accepted")
 	}
 }
+
+func TestHostTokensType(t *testing.T) {
+	tokens := HostTokens{Salt: "salt"}
+	hash := tokens.Hash("secret")
+	if hash != HashHostToken("salt", "secret") {
+		t.Fatal("Hash must match HashHostToken")
+	}
+	if !tokens.Verify("secret", hash) || tokens.Verify("other", hash) {
+		t.Fatal("Verify gave the wrong answer")
+	}
+	if tokens.Verify("", hash) {
+		t.Fatal("an empty token must never verify")
+	}
+}
