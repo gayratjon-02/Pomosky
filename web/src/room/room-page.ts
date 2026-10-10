@@ -5,7 +5,7 @@ import { startLiveSky } from "../sky/live-sky";
 import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
-import { setSoundEnabled, soundEnabled } from "../ui/sound";
+import { initSounds } from "../ui/sound-events";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { createConnectionChip } from "../ui/connection";
@@ -55,17 +55,7 @@ export function initRoomPage(): void {
     toast(value ? `Hello, ${value}` : "Name cleared");
   });
 
-  const soundBtn = maybeById<HTMLButtonElement>("sound-toggle");
-  const paintSound = () => {
-    if (!soundBtn) return;
-    soundBtn.textContent = soundEnabled() ? "Sound on" : "Sound off";
-    soundBtn.setAttribute("aria-pressed", String(soundEnabled()));
-  };
-  soundBtn?.addEventListener("click", () => {
-    setSoundEnabled(!soundEnabled());
-    paintSound();
-  });
-  paintSound();
+  initSounds(client);
 
   client.connect();
 }
