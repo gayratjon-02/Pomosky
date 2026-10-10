@@ -50,6 +50,11 @@ type HandlerConfig struct {
 	// (default 40: many viewers may share one network). Without ClientIP there is no limit.
 	ClientIP      func(*http.Request) string
 	MaxConnsPerIP int
+
+	// Identify returns the public identity of a signed-in browser that allows
+	// being shown to the room (key, name, picture URL). ok is false for everyone
+	// else. The app supplies it, because this package does not know about sessions.
+	Identify func(*http.Request) (key, name, avatarURL string, ok bool)
 }
 
 func (c HandlerConfig) withDefaults() HandlerConfig {
@@ -154,7 +159,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c.SetReadLimit(h.cfg.MaxMessageBytes)
-	h.serve(r.Context(), rh, wsConn{c})
+	h.serve(r.Context(), rh, wsConn{c}, h.identity(r))
+}
+
+// identity is what the room may show of the browser behind r.
+type identity struct{ key, name, avatar string }
+
+func (h *Handler) identity(r *http.Request) identity {
+	if h.cfg.Identify == nil {
+		return identity{}
+	}
+	if key, name, avatar, ok := h.cfg.Identify(r); ok {
+		return identity{key, name, avatar}
+	}
+	return identity{}
 }
 
 // session is the per-connection state of the read loop.
@@ -166,19 +184,23 @@ type session struct {
 	authFailures int
 }
 
-func (h *Handler) serve(parent context.Context, rh *RoomHub, conn Conn) {
+func (h *Handler) serve(parent context.Context, rh *RoomHub, conn Conn, who identity) {
 	ctx, cancel := context.WithCancel(parent)
 	defer cancel()
 
 	client := NewClient(h.cfg.IDs.NewSessionID(), conn, h.cfg.OutboxSize)
 	defer client.Close()
+	client.Account, client.AccountName, client.AccountAvatar = who.key, who.name, who.avatar
 
 	// Register before announcing, so the new client receives the state too.
 	rh.Join(client)
 	_ = rh.Apply(room.ViewerJoined{}, h.cfg.Clock.Now())
+	client.Send(rh.People()) // the newcomer needs the list even when it did not change
+	rh.Announce()
 	defer func() {
 		rh.Leave(client)
 		_ = rh.Apply(room.ViewerLeft{}, h.cfg.Clock.Now())
+		rh.Announce()
 	}()
 
 	go h.writeLoop(ctx, cancel, client, conn)
@@ -248,6 +270,7 @@ func (h *Handler) handle(s *session, data []byte) bool {
 			return true
 		}
 		s.client.Nickname = strings.TrimSpace(d.Nickname)
+		s.rh.Announce()
 
 	case TypeHostAuth:
 		var d HostAuthData
