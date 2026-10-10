@@ -1,2 +1,44 @@
-/* Record mode: big, calm, camera-friendly. Avoid thin lines and fast flicker (moire on camera). */
-body.record #sky { position: fixed; inset: 0; width: 100%; height: 100%; }
+/* Record mode: a clean 9:16 frame for screen recordings and streams. No header, no footer. */
+body.record .site-header,
+body.record .site-footer { display: none; }
+body.record { overflow: hidden; }
+
+.record-frame {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  gap: var(--space-5);
+  height: 100dvh;
+  width: min(100vw, calc(100dvh * 9 / 16));
+  margin-inline: auto;
+  padding: clamp(20px, 5dvh, 56px) var(--space-5);
+}
+
+.record-frame .timer { width: min(100%, 52dvh); }
+.record-frame .timer-digits { font-size: clamp(3.6rem, 14dvh, 8rem); }
+.record-frame .timer-label { font-size: clamp(1.1rem, 2.6dvh, 1.6rem); }
+.record-frame .timer-phase { font-size: clamp(0.8rem, 1.8dvh, 1.1rem); }
+
+.record-bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-l);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
+}
+
+.record-qr { width: clamp(84px, 14dvh, 132px); aspect-ratio: 1; border-radius: var(--radius-s); overflow: hidden; background: #fff; flex: none; }
+.record-qr svg { display: block; width: 100%; height: 100%; }
+.record-join { display: grid; gap: var(--space-1); min-width: 0; }
+.record-join-title { font-size: clamp(1.1rem, 2.6dvh, 1.6rem); font-weight: 800; letter-spacing: -0.02em; }
+.record-join-url { font: 600 clamp(0.7rem, 1.5dvh, 0.95rem) var(--font-mono); color: var(--fg-muted); overflow-wrap: anywhere; }
+
+/* On a wide screen the frame sits in the middle on a darkened backdrop. */
+@media (min-aspect-ratio: 9/16) {
+  body.record::before { content: ""; position: fixed; inset: 0; z-index: -1; background: rgba(0, 0, 0, 0.35); }
+}
