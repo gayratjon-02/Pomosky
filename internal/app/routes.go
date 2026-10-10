@@ -44,6 +44,9 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /api/stats/demo", c.DemoStats)
 	mux.HandleFunc("GET /api/stats/community", c.CommunityAPI)
 	mux.HandleFunc("GET /api/stats/leaderboard", c.LeaderboardAPI)
+	mux.HandleFunc("GET /admin", c.Admin)
+	mux.HandleFunc("GET /api/admin/overview", c.AdminOverviewAPI)
+	mux.HandleFunc("GET /api/admin/users", c.AdminUsersAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
 

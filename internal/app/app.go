@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gayratjon-02/Pomosky/internal/admin"
 	"github.com/gayratjon-02/Pomosky/internal/auth"
 	"github.com/gayratjon-02/Pomosky/internal/config"
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
@@ -135,6 +136,13 @@ func New(cfg config.Config) (*App, error) {
 		provider := openmeteo.New(cfg.Weather.BaseURL, nil)
 		deps.Weather = weather.NewService(provider, cfg.Weather.CacheTTL, clk.Now)
 		deps.Places = openmeteo.NewGeocoder(cfg.Weather.GeocodingURL, nil)
+	}
+	if db != nil {
+		var counters admin.WeatherCounters // a nil interface when weather is off
+		if ws, ok := deps.Weather.(*weather.Service); ok {
+			counters = ws
+		}
+		deps.Admin = admin.New(postgres.NewAdminRepo(db), hub, counters, clk)
 	}
 	ctrl := controllers.New(deps)
 

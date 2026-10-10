@@ -165,3 +165,64 @@ func TestGoogleButtonSkipsEmailValidation(t *testing.T) {
 		t.Fatalf("the Google button lacks formnovalidate")
 	}
 }
+
+// The admin page and its API are visible to operators only.
+func TestAdminAccessFlow(t *testing.T) {
+	dbURL := os.Getenv("TEST_DATABASE_URL")
+	if dbURL == "" {
+		t.Skip("TEST_DATABASE_URL is not set")
+	}
+	a, err := New(config.Config{Env: "development", StaticDir: t.TempDir(), DatabaseURL: dbURL, BaseURL: "http://pomosky.test", AdminEmails: []string{"boss@example.com"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer a.Close()
+	if _, err := a.db.SQL().Exec("TRUNCATE users CASCADE"); err != nil {
+		t.Fatal(err)
+	}
+	h := a.Handler()
+	svc := a.sessions.(*auth.Service)
+	get := func(path string, login *models.Login) *httptest.ResponseRecorder {
+		req := httptest.NewRequest("GET", path, nil)
+		if login != nil {
+			req.AddCookie(httpx.NewSessionCookie(login.Token, false, login.Expires))
+		}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		return rec
+	}
+	boss, _ := svc.SignIn(context.Background(), models.Identity{Provider: "google", Subject: "g-boss", Email: "boss@example.com", Name: "Boss"})
+	other, _ := svc.SignIn(context.Background(), models.Identity{Provider: "google", Subject: "g-other", Email: "other@example.com", Name: "Other"})
+
+	for _, path := range []string{"/admin", "/api/admin/overview", "/api/admin/users"} {
+		if rec := get(path, nil); rec.Code != http.StatusNotFound {
+			t.Errorf("anonymous %s = %d", path, rec.Code)
+		}
+		if rec := get(path, &other); rec.Code != http.StatusNotFound {
+			t.Errorf("non-operator %s = %d", path, rec.Code)
+		}
+		if rec := get(path, &boss); rec.Code != http.StatusOK {
+			t.Errorf("operator %s = %d", path, rec.Code)
+		}
+	}
+	var o struct {
+		Totals struct {
+			Users int `json:"users"`
+		} `json:"totals"`
+		Days []any `json:"days"`
+	}
+	rec := get("/api/admin/overview?tz=UTC", &boss)
+	if err := json.Unmarshal(rec.Body.Bytes(), &o); err != nil || o.Totals.Users != 2 || len(o.Days) != 30 {
+		t.Fatalf("overview: %s", rec.Body.String())
+	}
+	var u struct {
+		Users []struct {
+			Email string `json:"email"`
+		} `json:"users"`
+		Total int `json:"total"`
+	}
+	rec = get("/api/admin/users?sort=newest", &boss)
+	if err := json.Unmarshal(rec.Body.Bytes(), &u); err != nil || u.Total != 2 || len(u.Users) != 2 {
+		t.Fatalf("users: %s", rec.Body.String())
+	}
+}
