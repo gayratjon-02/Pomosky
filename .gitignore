@@ -16,3 +16,6 @@ web/dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Local build output (air)
+tmp/
