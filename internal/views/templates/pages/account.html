@@ -13,7 +13,7 @@
   </header>
   {{else}}
   <header class="acct-head glass">
-    <div class="avatar" aria-hidden="true">{{if .User}}{{printf "%.1s" .User.Nickname}}{{end}}</div>
+    <div class="avatar">{{if .User}}{{template "avatar" .User}}{{end}}</div>
     <div class="acct-who">
       <h1>{{if .User}}{{.User.Nickname}}{{end}}</h1>
       <p class="muted">{{if .User}}{{if .User.Email}}{{.User.Email}}{{end}}{{end}}</p>

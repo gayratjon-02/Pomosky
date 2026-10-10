@@ -12,6 +12,7 @@ type User struct {
 	Provider        string // "google", "magiclink"
 	ProviderSubject string
 	Nickname        string
+	AvatarURL       string // profile picture from the login provider, may be empty
 	CreatedAt       time.Time
 }
 
@@ -21,6 +22,7 @@ type Identity struct {
 	Subject  string // stable id at the provider (the lowercase email for magic links)
 	Email    string
 	Name     string
+	Picture  string // profile picture URL, may be empty
 }
 
 // Login is the result of a successful sign-in: the secret session token for

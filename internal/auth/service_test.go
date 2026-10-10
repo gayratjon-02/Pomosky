@@ -51,6 +51,13 @@ func (f *fakeUsers) Delete(_ context.Context, id models.UserID) error {
 	return nil
 }
 
+func (f *fakeUsers) UpdateAvatar(_ context.Context, id models.UserID, url string) error {
+	u := f.byID[id]
+	u.AvatarURL = url
+	f.byID[id] = u
+	return nil
+}
+
 type fakeSessions struct{ byID map[string]models.Session }
 
 func (f *fakeSessions) Create(_ context.Context, s models.Session) error {
@@ -230,5 +237,28 @@ func TestMagicLinkDisabledWithoutMailer(t *testing.T) {
 	}
 	if err := svc.SendMagicLink(context.Background(), "a@example.com"); !errors.Is(err, apperr.ErrNotImplemented) {
 		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestAvatarIsStoredFilteredAndRefreshed(t *testing.T) {
+	svc, _, _, _ := newTestService()
+	ctx := context.Background()
+	id := models.Identity{Provider: "google", Subject: "g1", Email: "a@example.com", Name: "Ayla", Picture: "https://lh3.googleusercontent.com/a/abc=s96-c"}
+
+	first, err := svc.SignIn(ctx, id)
+	if err != nil || first.User.AvatarURL != id.Picture {
+		t.Fatalf("first login: %+v %v", first.User, err)
+	}
+	// The picture changed at the provider: the next login refreshes it.
+	id.Picture = "https://lh3.googleusercontent.com/a/new=s96-c"
+	second, _ := svc.SignIn(ctx, id)
+	if second.User.AvatarURL != id.Picture {
+		t.Fatalf("avatar not refreshed: %q", second.User.AvatarURL)
+	}
+	// Only https URLs are kept.
+	for _, bad := range []string{"http://example.com/a.png", "javascript:alert(1)", "data:image/png;base64,AAAA", "/relative.png", strings.Repeat("a", 600)} {
+		if got := safeAvatarURL(bad); got != "" {
+			t.Errorf("safeAvatarURL(%q) = %q, want empty", bad[:min(len(bad), 30)], got)
+		}
 	}
 }

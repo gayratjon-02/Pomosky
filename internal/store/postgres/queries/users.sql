@@ -1,6 +1,9 @@
 -- name: CreateUser :exec
-INSERT INTO users (id, email, provider, provider_subject, nickname)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO users (id, email, provider, provider_subject, nickname, avatar_url)
+VALUES ($1, $2, $3, $4, $5, $6);
+
+-- name: UpdateUserAvatar :exec
+UPDATE users SET avatar_url = $2 WHERE id = $1;
 
 -- name: GetUser :one
 SELECT * FROM users WHERE id = $1;

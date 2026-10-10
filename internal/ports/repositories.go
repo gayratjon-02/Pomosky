@@ -26,6 +26,7 @@ type UserRepository interface {
 	ByEmail(ctx context.Context, email string) (models.User, error)
 	ByIdentity(ctx context.Context, provider, subject string) (models.User, error)
 	Delete(ctx context.Context, id models.UserID) error
+	UpdateAvatar(ctx context.Context, id models.UserID, url string) error
 }
 
 // SessionRepository persists login sessions.

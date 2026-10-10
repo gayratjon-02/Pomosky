@@ -99,6 +99,7 @@ func (p *Provider) Exchange(ctx context.Context, code string) (models.Identity, 
 		Email         string `json:"email"`
 		EmailVerified bool   `json:"email_verified"`
 		Name          string `json:"name"`
+		Picture       string `json:"picture"`
 	}
 	if err := p.doJSON(req, &info); err != nil {
 		return models.Identity{}, fmt.Errorf("google: userinfo: %w", err)
@@ -106,7 +107,7 @@ func (p *Provider) Exchange(ctx context.Context, code string) (models.Identity, 
 	if info.Sub == "" || info.Email == "" || !info.EmailVerified {
 		return models.Identity{}, errors.New("google: account without a verified email")
 	}
-	return models.Identity{Provider: "google", Subject: info.Sub, Email: info.Email, Name: info.Name}, nil
+	return models.Identity{Provider: "google", Subject: info.Sub, Email: info.Email, Name: info.Name, Picture: info.Picture}, nil
 }
 
 func (p *Provider) doJSON(req *http.Request, out any) error {

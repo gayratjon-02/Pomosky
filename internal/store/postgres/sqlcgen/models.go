@@ -50,4 +50,5 @@ type User struct {
 	ProviderSubject string
 	Nickname        string
 	CreatedAt       time.Time
+	AvatarUrl       string
 }

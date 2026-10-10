@@ -113,6 +113,13 @@ func (s *Service) SignIn(ctx context.Context, id models.Identity) (models.Login,
 		}
 	case err != nil:
 		return models.Login{}, err
+	default:
+		// The picture can change at the provider; keep ours current.
+		if pic := safeAvatarURL(id.Picture); pic != user.AvatarURL && (pic != "" || user.AvatarURL != "") {
+			if err := s.d.Users.UpdateAvatar(ctx, user.ID, pic); err == nil {
+				user.AvatarURL = pic
+			}
+		}
 	}
 
 	token := s.d.IDs.NewSessionID()
@@ -129,6 +136,7 @@ func (s *Service) createUser(ctx context.Context, id models.Identity) (models.Us
 		Provider:        id.Provider,
 		ProviderSubject: id.Subject,
 		Nickname:        nicknameFor(id),
+		AvatarURL:       safeAvatarURL(id.Picture),
 		CreatedAt:       s.d.Clock.Now(),
 	}
 	if id.Email != "" {
@@ -247,4 +255,17 @@ func normalizeEmail(raw string) (string, error) {
 		return "", apperr.ErrInvalid
 	}
 	return strings.ToLower(a.Address), nil
+}
+
+// safeAvatarURL keeps only https picture URLs of a sane length. The URL is
+// shown in an <img>, so anything else is dropped.
+func safeAvatarURL(raw string) string {
+	if len(raw) == 0 || len(raw) > 512 {
+		return ""
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Scheme != "https" || u.Host == "" {
+		return ""
+	}
+	return u.String()
 }

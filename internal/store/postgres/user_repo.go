@@ -23,6 +23,7 @@ func (r *UserRepo) Create(ctx context.Context, u models.User) error {
 		Provider:        u.Provider,
 		ProviderSubject: u.ProviderSubject,
 		Nickname:        u.Nickname,
+		AvatarUrl:       u.AvatarURL,
 	}))
 }
 
@@ -60,6 +61,7 @@ func toUser(row sqlcgen.User) models.User {
 		Provider:        row.Provider,
 		ProviderSubject: row.ProviderSubject,
 		Nickname:        row.Nickname,
+		AvatarURL:       row.AvatarUrl,
 		CreatedAt:       row.CreatedAt,
 	}
 	if row.Email.Valid {
@@ -67,4 +69,8 @@ func toUser(row sqlcgen.User) models.User {
 		u.Email = &email
 	}
 	return u
+}
+
+func (r *UserRepo) UpdateAvatar(ctx context.Context, id models.UserID, url string) error {
+	return mapErr(r.db.q.UpdateUserAvatar(ctx, sqlcgen.UpdateUserAvatarParams{ID: string(id), AvatarUrl: url}))
 }

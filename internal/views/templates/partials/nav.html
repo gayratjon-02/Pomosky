@@ -16,7 +16,25 @@
   </a>
   <nav class="site-nav" aria-label="Main">
     <a href="/account">Statistics</a>
-    {{if .User}}<a href="/account" class="nav-user">{{.User.Nickname}}</a>{{else}}<a href="/login">Log in</a>{{end}}
+    {{if .User}}
+    <details class="user-menu" id="user-menu">
+      <summary class="user-menu-btn" aria-label="Account menu">
+        <span class="avatar avatar-sm">{{template "avatar" .User}}</span>
+        <span class="user-menu-name">{{.User.Nickname}}</span>
+      </summary>
+      <div class="user-menu-panel glass" role="menu">
+        <div class="user-menu-who">
+          <strong>{{.User.Nickname}}</strong>
+          {{if .User.Email}}<small>{{.User.Email}}</small>{{end}}
+        </div>
+        <a href="/account" role="menuitem">My statistics</a>
+        <form method="post" action="/logout">
+          <input type="hidden" name="csrf" value="{{.CSRFToken}}">
+          <button type="submit" role="menuitem">Log out</button>
+        </form>
+      </div>
+    </details>
+    {{else}}<a href="/login">Log in</a>{{end}}
   </nav>
 </header>
 {{end}}

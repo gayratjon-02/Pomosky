@@ -11,8 +11,8 @@ import (
 )
 
 const createUser = `-- name: CreateUser :exec
-INSERT INTO users (id, email, provider, provider_subject, nickname)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO users (id, email, provider, provider_subject, nickname, avatar_url)
+VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 type CreateUserParams struct {
@@ -21,6 +21,7 @@ type CreateUserParams struct {
 	Provider        string
 	ProviderSubject string
 	Nickname        string
+	AvatarUrl       string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
@@ -30,6 +31,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.Provider,
 		arg.ProviderSubject,
 		arg.Nickname,
+		arg.AvatarUrl,
 	)
 	return err
 }
@@ -44,7 +46,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, email, provider, provider_subject, nickname, created_at FROM users WHERE id = $1
+SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
@@ -57,12 +59,13 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 		&i.ProviderSubject,
 		&i.Nickname,
 		&i.CreatedAt,
+		&i.AvatarUrl,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, provider, provider_subject, nickname, created_at FROM users WHERE email = $1
+SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
@@ -75,12 +78,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 		&i.ProviderSubject,
 		&i.Nickname,
 		&i.CreatedAt,
+		&i.AvatarUrl,
 	)
 	return i, err
 }
 
 const getUserByIdentity = `-- name: GetUserByIdentity :one
-SELECT id, email, provider, provider_subject, nickname, created_at FROM users WHERE provider = $1 AND provider_subject = $2
+SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url FROM users WHERE provider = $1 AND provider_subject = $2
 `
 
 type GetUserByIdentityParams struct {
@@ -98,6 +102,21 @@ func (q *Queries) GetUserByIdentity(ctx context.Context, arg GetUserByIdentityPa
 		&i.ProviderSubject,
 		&i.Nickname,
 		&i.CreatedAt,
+		&i.AvatarUrl,
 	)
 	return i, err
+}
+
+const updateUserAvatar = `-- name: UpdateUserAvatar :exec
+UPDATE users SET avatar_url = $2 WHERE id = $1
+`
+
+type UpdateUserAvatarParams struct {
+	ID        string
+	AvatarUrl string
+}
+
+func (q *Queries) UpdateUserAvatar(ctx context.Context, arg UpdateUserAvatarParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserAvatar, arg.ID, arg.AvatarUrl)
+	return err
 }

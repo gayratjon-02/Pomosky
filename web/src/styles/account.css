@@ -5,7 +5,7 @@ body.account::before { content: ""; position: fixed; inset: 0; z-index: -1; back
 .acct { display: grid; gap: var(--space-5); padding-block: var(--space-6) var(--space-8); }
 
 .acct-head { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--radius-l); }
-.avatar { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--warm)); color: var(--accent-contrast); font-size: 1.4rem; font-weight: 800; text-transform: uppercase; }
+
 .acct-who { flex: 1; min-width: 0; }
 .acct-who h1 { font-size: var(--text-xl); }
 .acct-who p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

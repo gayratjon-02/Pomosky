@@ -215,3 +215,24 @@ canvas {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- Avatar and account menu */
+
+.avatar { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--accent), var(--warm)); color: var(--accent-contrast); font-size: 1.4rem; font-weight: 800; }
+.avatar-sm { width: 32px; height: 32px; font-size: 0.95rem; }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-initial { line-height: 1; }
+
+.user-menu { position: relative; }
+.user-menu-btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 12px 4px 4px; border-radius: var(--radius-pill); cursor: pointer; list-style: none; color: var(--fg); font-weight: 600; font-size: var(--text-sm); transition: background var(--dur) var(--ease); }
+.user-menu-btn::-webkit-details-marker { display: none; }
+.user-menu-btn:hover, .user-menu[open] .user-menu-btn { background: rgba(255, 255, 255, 0.1); }
+.user-menu-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.user-menu-name { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-menu-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; min-width: 220px; display: grid; gap: 2px; padding: var(--space-2); border-radius: var(--radius-m); background: rgba(10, 15, 36, 0.97); }
+.user-menu-who { display: grid; padding: var(--space-2) var(--space-3) var(--space-3); border-bottom: 1px solid var(--glass-border); margin-bottom: var(--space-1); }
+.user-menu-who small { color: var(--fg-dim); overflow: hidden; text-overflow: ellipsis; }
+.user-menu-panel a, .user-menu-panel button { display: block; width: 100%; padding: 9px var(--space-3); border: 0; border-radius: var(--radius-s); background: transparent; color: var(--fg); text-align: left; text-decoration: none; font: 600 var(--text-sm) var(--font-sans); cursor: pointer; }
+.user-menu-panel a:hover, .user-menu-panel button:hover, .user-menu-panel a:focus-visible, .user-menu-panel button:focus-visible { background: rgba(255, 255, 255, 0.1); outline: none; }
+.user-menu-panel button { color: var(--danger); }
+@media (max-width: 480px) { .user-menu-name { display: none; } .user-menu-btn { padding-right: 4px; } }

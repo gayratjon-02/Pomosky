@@ -14,6 +14,7 @@ export default defineConfig({
         skylab: "src/entries/skylab.ts",
         ambient: "src/entries/ambient.ts",
         account: "src/entries/account.ts",
+        site: "src/entries/site.ts",
         base: "src/styles/base.css",
       },
       output: {
