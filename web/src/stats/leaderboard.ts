@@ -1,5 +1,6 @@
 import { maybeById } from "../core/dom";
-import { formatTotal, initialOf, type BoardPeriod, type LeaderRow } from "./format";
+import { avatarElement } from "../ui/avatar";
+import { formatTotal, type BoardPeriod, type LeaderRow } from "./format";
 
 const PERIODS: BoardPeriod[] = ["today", "week", "month", "all"];
 
@@ -19,35 +20,6 @@ async function fetchBoard(period: BoardPeriod): Promise<LeaderRow[] | null> {
   } catch {
     return null;
   }
-}
-
-function avatar(row: LeaderRow): HTMLElement {
-  const box = document.createElement("span");
-  box.className = "avatar avatar-sm";
-  if (row.avatarUrl) {
-    const img = document.createElement("img");
-    img.className = "avatar-img";
-    img.src = row.avatarUrl;
-    img.alt = "";
-    img.width = 64;
-    img.height = 64;
-    img.referrerPolicy = "no-referrer";
-    img.loading = "lazy";
-    img.addEventListener("error", () => {
-      box.replaceChildren(initialSpan(row.name)); // a broken picture falls back to the initial
-    });
-    box.appendChild(img);
-  } else {
-    box.appendChild(initialSpan(row.name));
-  }
-  return box;
-}
-
-function initialSpan(name: string): HTMLElement {
-  const s = document.createElement("span");
-  s.className = "avatar-initial";
-  s.textContent = initialOf(name);
-  return s;
 }
 
 function renderRows(list: HTMLElement, rows: LeaderRow[]): void {
@@ -83,7 +55,7 @@ function renderRows(list: HTMLElement, rows: LeaderRow[]): void {
     sessions.textContent = `${row.sessions} session${row.sessions === 1 ? "" : "s"}`;
     time.append(total, sessions);
 
-    li.append(rank, avatar(row), who, time);
+    li.append(rank, avatarElement(row.name, row.avatarUrl), who, time);
     list.appendChild(li);
   });
 }
