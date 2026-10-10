@@ -18,7 +18,7 @@ func TestEmbeddedTemplatesRender(t *testing.T) {
 			continue
 		}
 		rec := httptest.NewRecorder()
-		r.Render(rec, http.StatusOK, page, PageData{Title: "Test"})
+		r.Render(rec, http.StatusOK, page, PageData{Title: "Test", Data: RoomPage{ID: "abc", ShareURL: "http://x/r/abc"}})
 		if rec.Code != http.StatusOK {
 			t.Errorf("%s: status %d", page, rec.Code)
 		}

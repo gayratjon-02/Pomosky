@@ -1,9 +1,29 @@
 {{define "bodyclass"}}room{{end}}
 {{define "content"}}
-<canvas id="sky" aria-hidden="true"></canvas>
-<section class="room">
+<canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
+<div class="reaction-layer" id="reaction-layer" aria-hidden="true"></div>
+
+<section class="room-stage">
+  <div class="room-top">
+    <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">Connecting</span></span>
+    {{template "presence" .}}
+  </div>
+
   {{template "timer" .}}
-  {{template "presence" .}}
-  {{template "reactions" .}}
+
+  <div class="room-bottom">
+    {{template "reactions" .}}
+    <div class="row row-wrap room-actions">
+      <button type="button" class="btn btn-ghost btn-sm" id="copy-link" data-url="{{.Data.ShareURL}}">Copy link</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">Sound on</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="fullscreen">Fullscreen</button>
+      <a class="btn btn-ghost btn-sm" href="?mode=record">Record mode</a>
+    </div>
+    <form class="nick glass" id="nick-form" autocomplete="off">
+      <label class="sr-only" for="nick">Your name (optional)</label>
+      <input class="input" id="nick" maxlength="24" placeholder="Your name (optional)">
+      <button class="btn btn-subtle btn-sm" type="submit">Set</button>
+    </form>
+  </div>
 </section>
 {{end}}
