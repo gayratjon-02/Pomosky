@@ -50,11 +50,12 @@ type Session struct {
 }
 
 type User struct {
-	ID              string
-	Email           sql.NullString
-	Provider        string
-	ProviderSubject string
-	Nickname        string
-	CreatedAt       time.Time
-	AvatarUrl       string
+	ID                string
+	Email             sql.NullString
+	Provider          string
+	ProviderSubject   string
+	Nickname          string
+	CreatedAt         time.Time
+	AvatarUrl         string
+	ShowOnLeaderboard bool
 }

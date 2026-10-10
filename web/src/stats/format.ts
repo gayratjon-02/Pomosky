@@ -118,3 +118,20 @@ export interface CommunityStats {
   all: Period;
   days: DayStat[];
 }
+
+export type BoardPeriod = "today" | "week" | "month" | "all";
+
+export interface LeaderRow {
+  rank: number;
+  name: string;
+  avatarUrl?: string;
+  seconds: number;
+  sessions: number;
+  you?: boolean;
+}
+
+/** First letter of a name for the avatar fallback, "?" when empty. */
+export function initialOf(name: string): string {
+  const first = [...name.trim()][0];
+  return first ? first.toUpperCase() : "?";
+}

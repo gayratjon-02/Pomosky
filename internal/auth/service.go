@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/gayratjon-02/Pomosky/internal/apperr"
@@ -155,10 +156,10 @@ func (s *Service) createUser(ctx context.Context, id models.Identity) (models.Us
 func nicknameFor(id models.Identity) string {
 	name := strings.TrimSpace(id.Name)
 	if name == "" {
-		name, _, _ = strings.Cut(id.Email, "@")
-	}
-	if name == "" {
-		name = "Focuser"
+		// Never show a part of someone's email address on the public leaderboard:
+		// the name is "Focuser" plus four digits taken from the identity, and can be changed.
+		sum := sha256.Sum256([]byte(id.Provider + ":" + id.Subject))
+		name = fmt.Sprintf("Focuser %04d", (int(sum[0])<<8|int(sum[1]))%10000)
 	}
 	if utf8.RuneCountInString(name) > maxNicknameRunes {
 		name = string([]rune(name)[:maxNicknameRunes])
@@ -268,4 +269,29 @@ func safeAvatarURL(raw string) string {
 		return ""
 	}
 	return u.String()
+}
+
+const (
+	minNicknameRunes = 2
+	maxNicknameLen   = maxNicknameRunes
+)
+
+// SetNickname changes the public name after checking it.
+func (s *Service) SetNickname(ctx context.Context, id models.UserID, nickname string) error {
+	name := strings.Join(strings.Fields(nickname), " ") // trim and collapse whitespace
+	n := utf8.RuneCountInString(name)
+	if n < minNicknameRunes || n > maxNicknameLen {
+		return apperr.ErrInvalid
+	}
+	for _, r := range name {
+		if !unicode.IsPrint(r) {
+			return apperr.ErrInvalid
+		}
+	}
+	return s.d.Users.UpdateNickname(ctx, id, name)
+}
+
+// SetLeaderboardVisible switches the user's presence on the public leaderboard.
+func (s *Service) SetLeaderboardVisible(ctx context.Context, id models.UserID, visible bool) error {
+	return s.d.Users.SetLeaderboardVisible(ctx, id, visible)
 }

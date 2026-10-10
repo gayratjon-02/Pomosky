@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -249,5 +250,62 @@ func TestCommunityTotalsIncludeAnonymousFocus(t *testing.T) {
 	days, err := focus.CommunityDaily(ctx, time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC), time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC), "UTC")
 	if err != nil || len(days) != 1 || days[0].Date != "2026-10-02" || days[0].Seconds != 3000 {
 		t.Fatalf("daily: %+v %v", days, err)
+	}
+}
+
+func TestLeaderboardOrdersAndHonoursTheSwitch(t *testing.T) {
+	db := testDB(t)
+	ctx := context.Background()
+	users := NewUserRepo(db)
+	rooms := NewRoomRepo(db)
+	focus := NewFocusSessionRepo(db)
+	day := time.Date(2026, 10, 2, 1, 0, 0, 0, time.UTC)
+
+	for i, c := range []struct {
+		id      string
+		minutes int
+	}{{"ua", 30}, {"ub", 90}, {"uc", 60}} {
+		newUser(t, db, c.id, c.id+"@example.com")
+		owner := models.UserID(c.id)
+		room := room.ID(fmt.Sprintf("room%04d", i))
+		if err := rooms.Create(ctx, models.Room{ID: room, OwnerUserID: &owner, HostTokenHash: "x"}); err != nil {
+			t.Fatal(err)
+		}
+		if err := focus.Create(ctx, models.FocusSession{RoomID: room, StartedAt: day, EndedAt: day, Focused: time.Duration(c.minutes) * time.Minute}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	from, to := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC), time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC)
+
+	got, err := focus.Leaderboard(ctx, from, to, 10)
+	if err != nil || len(got) != 3 || got[0].UserID != "ub" || got[1].UserID != "uc" || got[2].UserID != "ua" || got[0].Seconds != 5400 {
+		t.Fatalf("order: %+v %v", got, err)
+	}
+	if limited, _ := focus.Leaderboard(ctx, from, to, 2); len(limited) != 2 {
+		t.Fatalf("limit: %d", len(limited))
+	}
+
+	// A user who switches it off disappears; switching back brings them back.
+	if err := users.SetLeaderboardVisible(ctx, "ub", false); err != nil {
+		t.Fatal(err)
+	}
+	got, _ = focus.Leaderboard(ctx, from, to, 10)
+	if len(got) != 2 || got[0].UserID != "uc" {
+		t.Fatalf("hidden user still listed: %+v", got)
+	}
+	_ = users.SetLeaderboardVisible(ctx, "ub", true)
+	if got, _ = focus.Leaderboard(ctx, from, to, 10); len(got) != 3 {
+		t.Fatalf("user not back: %+v", got)
+	}
+
+	// Outside the period nothing is listed.
+	if got, _ = focus.Leaderboard(ctx, time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC), time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC), 10); len(got) != 0 {
+		t.Fatalf("outside the period: %+v", got)
+	}
+	if err := users.UpdateNickname(ctx, "ua", "Ayla K"); err != nil {
+		t.Fatal(err)
+	}
+	if u, _ := users.ByID(ctx, "ua"); u.Nickname != "Ayla K" || !u.ShowOnLeaderboard {
+		t.Fatalf("user: %+v", u)
 	}
 }

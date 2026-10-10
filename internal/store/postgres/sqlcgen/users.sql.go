@@ -46,7 +46,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url FROM users WHERE id = $1
+SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url, show_on_leaderboard FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
@@ -60,12 +60,13 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 		&i.Nickname,
 		&i.CreatedAt,
 		&i.AvatarUrl,
+		&i.ShowOnLeaderboard,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url FROM users WHERE email = $1
+SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url, show_on_leaderboard FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
@@ -79,12 +80,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 		&i.Nickname,
 		&i.CreatedAt,
 		&i.AvatarUrl,
+		&i.ShowOnLeaderboard,
 	)
 	return i, err
 }
 
 const getUserByIdentity = `-- name: GetUserByIdentity :one
-SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url FROM users WHERE provider = $1 AND provider_subject = $2
+SELECT id, email, provider, provider_subject, nickname, created_at, avatar_url, show_on_leaderboard FROM users WHERE provider = $1 AND provider_subject = $2
 `
 
 type GetUserByIdentityParams struct {
@@ -103,8 +105,23 @@ func (q *Queries) GetUserByIdentity(ctx context.Context, arg GetUserByIdentityPa
 		&i.Nickname,
 		&i.CreatedAt,
 		&i.AvatarUrl,
+		&i.ShowOnLeaderboard,
 	)
 	return i, err
+}
+
+const setUserLeaderboardVisible = `-- name: SetUserLeaderboardVisible :exec
+UPDATE users SET show_on_leaderboard = $2 WHERE id = $1
+`
+
+type SetUserLeaderboardVisibleParams struct {
+	ID                string
+	ShowOnLeaderboard bool
+}
+
+func (q *Queries) SetUserLeaderboardVisible(ctx context.Context, arg SetUserLeaderboardVisibleParams) error {
+	_, err := q.db.ExecContext(ctx, setUserLeaderboardVisible, arg.ID, arg.ShowOnLeaderboard)
+	return err
 }
 
 const updateUserAvatar = `-- name: UpdateUserAvatar :exec
@@ -118,5 +135,19 @@ type UpdateUserAvatarParams struct {
 
 func (q *Queries) UpdateUserAvatar(ctx context.Context, arg UpdateUserAvatarParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserAvatar, arg.ID, arg.AvatarUrl)
+	return err
+}
+
+const updateUserNickname = `-- name: UpdateUserNickname :exec
+UPDATE users SET nickname = $2 WHERE id = $1
+`
+
+type UpdateUserNicknameParams struct {
+	ID       string
+	Nickname string
+}
+
+func (q *Queries) UpdateUserNickname(ctx context.Context, arg UpdateUserNicknameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserNickname, arg.ID, arg.Nickname)
 	return err
 }

@@ -1,6 +1,7 @@
 package views
 
 import (
+	"github.com/gayratjon-02/Pomosky/internal/models"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -25,7 +26,7 @@ func TestEmbeddedTemplatesRender(t *testing.T) {
 		case "login":
 			data = LoginPage{Google: true, MagicLink: true}
 		}
-		r.Render(rec, http.StatusOK, page, PageData{Title: "Test", Data: data})
+		r.Render(rec, http.StatusOK, page, PageData{Title: "Test", Data: data, User: &models.User{Nickname: "Ayla", ShowOnLeaderboard: true}})
 		if rec.Code != http.StatusOK {
 			t.Errorf("%s: status %d", page, rec.Code)
 		}

@@ -57,12 +57,13 @@ func (r *UserRepo) Delete(ctx context.Context, id models.UserID) error {
 
 func toUser(row sqlcgen.User) models.User {
 	u := models.User{
-		ID:              models.UserID(row.ID),
-		Provider:        row.Provider,
-		ProviderSubject: row.ProviderSubject,
-		Nickname:        row.Nickname,
-		AvatarURL:       row.AvatarUrl,
-		CreatedAt:       row.CreatedAt,
+		ID:                models.UserID(row.ID),
+		Provider:          row.Provider,
+		ProviderSubject:   row.ProviderSubject,
+		Nickname:          row.Nickname,
+		AvatarURL:         row.AvatarUrl,
+		ShowOnLeaderboard: row.ShowOnLeaderboard,
+		CreatedAt:         row.CreatedAt,
 	}
 	if row.Email.Valid {
 		email := row.Email.String
@@ -73,4 +74,12 @@ func toUser(row sqlcgen.User) models.User {
 
 func (r *UserRepo) UpdateAvatar(ctx context.Context, id models.UserID, url string) error {
 	return mapErr(r.db.q.UpdateUserAvatar(ctx, sqlcgen.UpdateUserAvatarParams{ID: string(id), AvatarUrl: url}))
+}
+
+func (r *UserRepo) UpdateNickname(ctx context.Context, id models.UserID, nickname string) error {
+	return mapErr(r.db.q.UpdateUserNickname(ctx, sqlcgen.UpdateUserNicknameParams{ID: string(id), Nickname: nickname}))
+}
+
+func (r *UserRepo) SetLeaderboardVisible(ctx context.Context, id models.UserID, visible bool) error {
+	return mapErr(r.db.q.SetUserLeaderboardVisible(ctx, sqlcgen.SetUserLeaderboardVisibleParams{ID: string(id), ShowOnLeaderboard: visible}))
 }

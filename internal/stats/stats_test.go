@@ -13,9 +13,20 @@ import (
 type fakeRepo struct {
 	totals         map[string]models.DayStat // by date
 	communityCalls int
+	boardCalls     int
+	board          []models.LeaderEntry
+	lastFrom       time.Time
+	lastTo         time.Time
+	lastLimit      int
 }
 
 func (f *fakeRepo) Create(context.Context, models.FocusSession) error { return nil }
+
+func (f *fakeRepo) Leaderboard(_ context.Context, from, to time.Time, limit int) ([]models.LeaderEntry, error) {
+	f.boardCalls++
+	f.lastFrom, f.lastTo, f.lastLimit = from, to, limit
+	return f.board, nil
+}
 
 func (f *fakeRepo) CreateAnonymous(context.Context, time.Time, time.Duration) error { return nil }
 
@@ -179,3 +190,54 @@ func TestCommunityIsCached(t *testing.T) {
 type movingClock struct{ t time.Time }
 
 func (c *movingClock) Now() time.Time { return c.t }
+
+func TestLeaderboardRanksMarksTheViewerAndCaches(t *testing.T) {
+	repo := &fakeRepo{totals: map[string]models.DayStat{}, board: []models.LeaderEntry{
+		{UserID: "u2", Nickname: "Bek", Seconds: 7200, Sessions: 3},
+		{UserID: "u1", Nickname: "Ayla", AvatarURL: "https://x/a.png", Seconds: 3600, Sessions: 2},
+	}}
+	clk := &movingClock{t: time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)}
+	svc := New(repo, clk)
+
+	rows, err := svc.Leaderboard(context.Background(), "week", "UTC", "u1")
+	if err != nil || len(rows) != 2 {
+		t.Fatalf("%+v %v", rows, err)
+	}
+	if rows[0].Rank != 1 || rows[0].Nickname != "Bek" || rows[0].You || rows[1].Rank != 2 || !rows[1].You {
+		t.Fatalf("rows = %+v", rows)
+	}
+	if repo.lastLimit != LeaderboardSize || !repo.lastFrom.Equal(time.Date(2026, 10, 4, 0, 0, 0, 0, time.UTC)) || !repo.lastTo.Equal(time.Date(2026, 10, 11, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("range %v - %v limit %d", repo.lastFrom, repo.lastTo, repo.lastLimit)
+	}
+
+	// Another viewer shares the cached list but sees their own mark.
+	other, _ := svc.Leaderboard(context.Background(), "week", "UTC", "u2")
+	if repo.boardCalls != 1 || !other[0].You || other[1].You {
+		t.Fatalf("cache or marks wrong: calls=%d %+v", repo.boardCalls, other)
+	}
+	anon, _ := svc.Leaderboard(context.Background(), "week", "UTC", "")
+	if anon[0].You || anon[1].You {
+		t.Fatal("an anonymous visitor has no own row")
+	}
+}
+
+func TestLeaderboardPeriodsAndErrors(t *testing.T) {
+	repo := &fakeRepo{totals: map[string]models.DayStat{}}
+	svc := New(repo, &movingClock{t: time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)})
+	want := map[string][2]string{
+		"today": {"2026-10-10", "2026-10-11"},
+		"month": {"2026-10-01", "2026-10-11"},
+		"all":   {"1970-01-01", "2026-10-11"},
+	}
+	for period, r := range want {
+		if _, err := svc.Leaderboard(context.Background(), period, "UTC", ""); err != nil {
+			t.Fatal(err)
+		}
+		if repo.lastFrom.Format("2006-01-02") != r[0] || repo.lastTo.Format("2006-01-02") != r[1] {
+			t.Errorf("%s: %s - %s", period, repo.lastFrom.Format("2006-01-02"), repo.lastTo.Format("2006-01-02"))
+		}
+	}
+	if _, err := svc.Leaderboard(context.Background(), "decade", "UTC", ""); !errors.Is(err, apperr.ErrInvalid) {
+		t.Fatalf("bad period: %v", err)
+	}
+}

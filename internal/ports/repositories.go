@@ -27,6 +27,8 @@ type UserRepository interface {
 	ByIdentity(ctx context.Context, provider, subject string) (models.User, error)
 	Delete(ctx context.Context, id models.UserID) error
 	UpdateAvatar(ctx context.Context, id models.UserID, url string) error
+	UpdateNickname(ctx context.Context, id models.UserID, nickname string) error
+	SetLeaderboardVisible(ctx context.Context, id models.UserID, visible bool) error
 }
 
 // SessionRepository persists login sessions.
@@ -43,6 +45,8 @@ type FocusSessionRepository interface {
 	Create(ctx context.Context, s models.FocusSession) error
 	// CreateAnonymous stores focus time of a room without an owner: when it started and how long, nothing else.
 	CreateAnonymous(ctx context.Context, startedAt time.Time, focused time.Duration) error
+	// Leaderboard returns the most focused users who allow it, for sessions that started in [from, to), best first.
+	Leaderboard(ctx context.Context, from, to time.Time, limit int) ([]models.LeaderEntry, error)
 	// CommunityBetween sums everyone's focus time for sessions that started in [from, to).
 	CommunityBetween(ctx context.Context, from, to time.Time) (models.Period, error)
 	// CommunityDaily returns one entry per day with any focus time, for everyone, days taken in tz.

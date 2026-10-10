@@ -18,6 +18,8 @@
 | POST | `/account/delete` | Delete the account and its data (`confirm=delete`) | implemented |
 | GET | `/api/places?q=` | Place search for the host (JSON `{places:[{name,region,country,lat,lon,tz}]}`), rate limited, via Open-Meteo geocoding | implemented |
 | GET | `/api/stats/demo?month=YYYY-MM` | Made-up example statistics in the same shape, for the logged-out preview | implemented |
+| GET | `/api/stats/leaderboard?period=today|week|month|all&tz=` | Most focused users who allow it, best first (JSON `{period, entries:[{rank,name,avatarUrl,seconds,sessions,you}]}`), no ids or emails | implemented |
+| POST | `/account/nickname`, `/account/leaderboard` | Change the public name; show or hide yourself on the leaderboard | implemented |
 | GET | `/api/stats/community?tz=` | Focus time of everyone: today, last 7 days, this month, all time and the last 30 days (JSON), public and cached for a minute | implemented |
 | GET | `/api/stats?month=YYYY-MM&tz=Area/City` | Monthly focus statistics of the logged-in user (JSON, see below) | implemented |
 | GET | `/static/*` | Built frontend assets | implemented |

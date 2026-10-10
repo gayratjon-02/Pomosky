@@ -33,3 +33,24 @@ type CommunityStats struct {
 	All   Period
 	Days  []DayStat // the last 30 days, every day present
 }
+
+// LeaderEntry is one row of the leaderboard. UserID is for the server only
+// (to mark the viewer's own row); it is never sent to browsers.
+type LeaderEntry struct {
+	UserID    UserID
+	Nickname  string
+	AvatarURL string
+	Seconds   int64
+	Sessions  int
+}
+
+// LeaderRow is a leaderboard line as shown to visitors: no user id, just rank,
+// public name, picture and the totals. You marks the viewer's own line.
+type LeaderRow struct {
+	Rank      int
+	Nickname  string
+	AvatarURL string
+	Seconds   int64
+	Sessions  int
+	You       bool
+}

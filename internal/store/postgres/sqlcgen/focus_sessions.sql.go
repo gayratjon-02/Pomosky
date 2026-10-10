@@ -216,3 +216,63 @@ func (q *Queries) DailyFocusTotals(ctx context.Context, arg DailyFocusTotalsPara
 	}
 	return items, nil
 }
+
+const leaderboardBetween = `-- name: LeaderboardBetween :many
+SELECT u.id AS user_id, u.nickname, u.avatar_url,
+       SUM(fs.focused_ms)::bigint AS focused_ms,
+       COUNT(*)::int AS sessions
+FROM focus_sessions fs
+JOIN rooms r ON r.id = fs.room_id
+JOIN users u ON u.id = r.owner_user_id
+WHERE u.show_on_leaderboard
+  AND fs.started_at >= $1::timestamptz
+  AND fs.started_at < $2::timestamptz
+GROUP BY u.id, u.nickname, u.avatar_url, u.created_at
+ORDER BY focused_ms DESC, u.created_at ASC
+LIMIT $3::int
+`
+
+type LeaderboardBetweenParams struct {
+	FromTs  time.Time
+	ToTs    time.Time
+	MaxRows int32
+}
+
+type LeaderboardBetweenRow struct {
+	UserID    string
+	Nickname  string
+	AvatarUrl string
+	FocusedMs int64
+	Sessions  int32
+}
+
+// The most focused users of a period. Only users who allow it are listed, and
+// no user id leaves the server (rows are identified by rank).
+func (q *Queries) LeaderboardBetween(ctx context.Context, arg LeaderboardBetweenParams) ([]LeaderboardBetweenRow, error) {
+	rows, err := q.db.QueryContext(ctx, leaderboardBetween, arg.FromTs, arg.ToTs, arg.MaxRows)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LeaderboardBetweenRow
+	for rows.Next() {
+		var i LeaderboardBetweenRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Nickname,
+			&i.AvatarUrl,
+			&i.FocusedMs,
+			&i.Sessions,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

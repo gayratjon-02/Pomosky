@@ -7,13 +7,14 @@ type UserID string
 
 // User is an optional registered account. Anonymous visitors have no User.
 type User struct {
-	ID              UserID
-	Email           *string
-	Provider        string // "google", "magiclink"
-	ProviderSubject string
-	Nickname        string
-	AvatarURL       string // profile picture from the login provider, may be empty
-	CreatedAt       time.Time
+	ID                UserID
+	Email             *string
+	Provider          string // "google", "magiclink"
+	ProviderSubject   string
+	Nickname          string
+	AvatarURL         string // profile picture from the login provider, may be empty
+	ShowOnLeaderboard bool   // appear on the public leaderboard (default true)
+	CreatedAt         time.Time
 }
 
 // Identity is who a login provider says the user is.

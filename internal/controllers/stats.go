@@ -117,3 +117,38 @@ func (c *Controllers) CommunityAPI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "public, max-age=60")
 	httpx.WriteJSON(w, http.StatusOK, toCommunityJSON(stats))
 }
+
+type leaderJSON struct {
+	Rank      int    `json:"rank"`
+	Name      string `json:"name"`
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	Seconds   int64  `json:"seconds"`
+	Sessions  int    `json:"sessions"`
+	You       bool   `json:"you,omitempty"`
+}
+
+// LeaderboardAPI serves GET /api/stats/leaderboard?period=today|week|month|all&tz=Area/City:
+// the most focused users who allow it, best first. Public. It never contains user ids or emails.
+func (c *Controllers) LeaderboardAPI(w http.ResponseWriter, r *http.Request) {
+	if c.deps.Stats == nil {
+		httpx.WriteError(w, apperr.ErrNotImplemented)
+		return
+	}
+	period := r.URL.Query().Get("period")
+	var viewer models.UserID
+	if u := reqctx.User(r.Context()); u != nil {
+		viewer = u.ID
+	}
+	rows, err := c.deps.Stats.Leaderboard(r.Context(), period, r.URL.Query().Get("tz"), viewer)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	out := make([]leaderJSON, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, leaderJSON{Rank: row.Rank, Name: row.Nickname, AvatarURL: row.AvatarURL, Seconds: row.Seconds, Sessions: row.Sessions, You: row.You})
+	}
+	// The viewer's own row differs per user, so shared caches must not keep it.
+	w.Header().Set("Cache-Control", "private, max-age=30")
+	httpx.WriteJSON(w, http.StatusOK, map[string]any{"period": period, "entries": out})
+}

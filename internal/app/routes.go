@@ -31,6 +31,8 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("POST /logout", c.Logout)
 	mux.HandleFunc("GET /account", c.Account)
 	mux.HandleFunc("POST /account/delete", c.AccountDelete)
+	mux.HandleFunc("POST /account/leaderboard", c.AccountLeaderboard)
+	mux.HandleFunc("POST /account/nickname", c.AccountNickname)
 	mux.HandleFunc("GET /privacy", c.Privacy)
 
 	// API and realtime.
@@ -41,6 +43,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /api/stats", c.StatsAPI)
 	mux.HandleFunc("GET /api/stats/demo", c.DemoStats)
 	mux.HandleFunc("GET /api/stats/community", c.CommunityAPI)
+	mux.HandleFunc("GET /api/stats/leaderboard", c.LeaderboardAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
 
@@ -53,7 +56,17 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	}
 
 	// Static assets built from web/.
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir(a.cfg.StaticDir))))
+	static := http.StripPrefix("/static/", http.FileServer(http.Dir(a.cfg.StaticDir)))
+	if a.dev != nil {
+		// Development: never reuse an old build of the frontend (the browser would
+		// otherwise keep stale CSS and JS by heuristic caching).
+		inner := static
+		static = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Cache-Control", "no-cache")
+			inner.ServeHTTP(w, r)
+		})
+	}
+	mux.Handle("GET /static/", static)
 
 	// Everything else.
 	mux.HandleFunc("/", c.NotFound)

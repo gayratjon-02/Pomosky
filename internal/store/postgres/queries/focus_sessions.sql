@@ -47,3 +47,19 @@ FROM (
 ) t
 GROUP BY day
 ORDER BY day;
+
+-- The most focused users of a period. Only users who allow it are listed, and
+-- no user id leaves the server (rows are identified by rank).
+-- name: LeaderboardBetween :many
+SELECT u.id AS user_id, u.nickname, u.avatar_url,
+       SUM(fs.focused_ms)::bigint AS focused_ms,
+       COUNT(*)::int AS sessions
+FROM focus_sessions fs
+JOIN rooms r ON r.id = fs.room_id
+JOIN users u ON u.id = r.owner_user_id
+WHERE u.show_on_leaderboard
+  AND fs.started_at >= sqlc.arg(from_ts)::timestamptz
+  AND fs.started_at < sqlc.arg(to_ts)::timestamptz
+GROUP BY u.id, u.nickname, u.avatar_url, u.created_at
+ORDER BY focused_ms DESC, u.created_at ASC
+LIMIT sqlc.arg(max_rows)::int;

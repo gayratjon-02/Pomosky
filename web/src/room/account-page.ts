@@ -15,12 +15,14 @@ import {
   type MonthStats,
 } from "../stats/format";
 import { initCommunity } from "../stats/community";
+import { initLeaderboard } from "../stats/leaderboard";
 import { initAmbientSky } from "./ambient-sky";
 
 /** Account page: monthly focus statistics with a calendar heatmap and daily bars. */
 export function initAccountPage(): void {
   initAmbientSky();
   void initCommunity();
+  initLeaderboard();
 
   const root = document.querySelector<HTMLElement>(".acct");
   const url = root?.dataset["statsUrl"];

@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/gayratjon-02/Pomosky/internal/apperr"
 	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
 	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 	"github.com/gayratjon-02/Pomosky/internal/views"
@@ -44,4 +46,38 @@ func (c *Controllers) AccountDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, httpx.ExpiredSessionCookie(c.secure()))
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// AccountLeaderboard serves POST /account/leaderboard: show (show=1) or hide the user on the leaderboard.
+func (c *Controllers) AccountLeaderboard(w http.ResponseWriter, r *http.Request) {
+	user := reqctx.User(r.Context())
+	if user == nil || c.deps.Accounts == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if err := c.deps.Accounts.SetLeaderboardVisible(r.Context(), user.ID, r.PostFormValue("show") == "1"); err != nil {
+		c.deps.Log.Error("set leaderboard visibility", "err", err)
+		http.Error(w, "could not save the setting", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/account#profile", http.StatusSeeOther)
+}
+
+// AccountNickname serves POST /account/nickname: change the public name.
+func (c *Controllers) AccountNickname(w http.ResponseWriter, r *http.Request) {
+	user := reqctx.User(r.Context())
+	if user == nil || c.deps.Accounts == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if err := c.deps.Accounts.SetNickname(r.Context(), user.ID, r.PostFormValue("nickname")); err != nil {
+		if errors.Is(err, apperr.ErrInvalid) {
+			http.Error(w, "the name must be 2 to 24 printable characters", http.StatusBadRequest)
+			return
+		}
+		c.deps.Log.Error("set nickname", "err", err)
+		http.Error(w, "could not save the name", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/account#profile", http.StatusSeeOther)
 }

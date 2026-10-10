@@ -16,3 +16,9 @@ SELECT * FROM users WHERE provider = $1 AND provider_subject = $2;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
+
+-- name: SetUserLeaderboardVisible :exec
+UPDATE users SET show_on_leaderboard = $2 WHERE id = $1;
+
+-- name: UpdateUserNickname :exec
+UPDATE users SET nickname = $2 WHERE id = $1;

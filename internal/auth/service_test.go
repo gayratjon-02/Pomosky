@@ -58,6 +58,20 @@ func (f *fakeUsers) UpdateAvatar(_ context.Context, id models.UserID, url string
 	return nil
 }
 
+func (f *fakeUsers) UpdateNickname(_ context.Context, id models.UserID, name string) error {
+	u := f.byID[id]
+	u.Nickname = name
+	f.byID[id] = u
+	return nil
+}
+
+func (f *fakeUsers) SetLeaderboardVisible(_ context.Context, id models.UserID, visible bool) error {
+	u := f.byID[id]
+	u.ShowOnLeaderboard = visible
+	f.byID[id] = u
+	return nil
+}
+
 type fakeSessions struct{ byID map[string]models.Session }
 
 func (f *fakeSessions) Create(_ context.Context, s models.Session) error {
@@ -210,7 +224,7 @@ func TestMagicLinkFlow(t *testing.T) {
 	token := u.Query().Get("token")
 
 	login, err := svc.CompleteMagicLink(ctx, token)
-	if err != nil || login.User.Provider != "magiclink" || login.User.Nickname != "ayla" {
+	if err != nil || login.User.Provider != "magiclink" || !strings.HasPrefix(login.User.Nickname, "Focuser ") || strings.Contains(login.User.Nickname, "ayla") {
 		t.Fatalf("CompleteMagicLink: %+v %v", login.User, err)
 	}
 	if _, err := svc.CompleteMagicLink(ctx, token); !errors.Is(err, apperr.ErrUnauthorized) {
@@ -259,6 +273,25 @@ func TestAvatarIsStoredFilteredAndRefreshed(t *testing.T) {
 	for _, bad := range []string{"http://example.com/a.png", "javascript:alert(1)", "data:image/png;base64,AAAA", "/relative.png", strings.Repeat("a", 600)} {
 		if got := safeAvatarURL(bad); got != "" {
 			t.Errorf("safeAvatarURL(%q) = %q, want empty", bad[:min(len(bad), 30)], got)
+		}
+	}
+}
+
+func TestSetNicknameValidates(t *testing.T) {
+	svc, _, _, _ := newTestService()
+	ctx := context.Background()
+	login, _ := svc.SignIn(ctx, models.Identity{Provider: "google", Subject: "g1", Name: "Ayla"})
+
+	if err := svc.SetNickname(ctx, login.User.ID, "  Ayla   Karimova "); err != nil {
+		t.Fatal(err)
+	}
+	u, _ := svc.UserFromSession(ctx, login.Token)
+	if u.Nickname != "Ayla Karimova" {
+		t.Fatalf("nickname = %q", u.Nickname)
+	}
+	for _, bad := range []string{"", " ", "a", strings.Repeat("x", 25), "bell\x07", "zero\u200bwidth\x00"} {
+		if err := svc.SetNickname(ctx, login.User.ID, bad); !errors.Is(err, apperr.ErrInvalid) {
+			t.Errorf("SetNickname(%q) = %v, want ErrInvalid", bad, err)
 		}
 	}
 }

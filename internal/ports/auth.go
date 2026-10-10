@@ -25,10 +25,16 @@ type Accounts interface {
 	SignOut(ctx context.Context, token string) error
 	// DeleteAccount permanently deletes the user, their rooms and focus history.
 	DeleteAccount(ctx context.Context, id models.UserID) error
+	// SetNickname changes the public name. It returns apperr.ErrInvalid for names that are too short, too long or not printable.
+	SetNickname(ctx context.Context, id models.UserID, nickname string) error
+	SetLeaderboardVisible(ctx context.Context, id models.UserID, visible bool) error
 }
 
 // StatsReader serves the monthly statistics of a user.
 type StatsReader interface {
+	// Leaderboard ranks the most focused users who allow it. period is today, week, month or all;
+	// viewer marks the caller's own row ("" for anonymous visitors).
+	Leaderboard(ctx context.Context, period, tz string, viewer models.UserID) ([]models.LeaderRow, error)
 	// Community returns the totals of everyone on Pomosky, days taken in tz (invalid names fall back to UTC).
 	Community(ctx context.Context, tz string) (models.CommunityStats, error)
 	// Month returns the statistics of month ("YYYY-MM") with days grouped in

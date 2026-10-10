@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
+import { initialOf, formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
 
 describe("formatDuration", () => {
   it("formats minutes and hours", () => {
@@ -84,5 +84,15 @@ describe("formatTotal", () => {
     expect(formatTotal(7 * 3600 + 5 * 60)).toBe("7h 05m");
     expect(formatTotal(1234 * 3600 + 59)).toBe("1,234 h");
     expect(formatTotal(100 * 3600)).toBe("100 h");
+  });
+});
+
+describe("initialOf", () => {
+  it("takes the first letter, capitalised", () => {
+    expect(initialOf("ayla")).toBe("A");
+    expect(initialOf("  Tik Tok")).toBe("T");
+    expect(initialOf("élan")).toBe("É");
+    expect(initialOf("")).toBe("?");
+    expect(initialOf("😀 fun")).toBe("😀");
   });
 });

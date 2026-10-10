@@ -78,3 +78,18 @@ func (r *FocusSessionRepo) CommunityDaily(ctx context.Context, from, to time.Tim
 	}
 	return out, nil
 }
+
+func (r *FocusSessionRepo) Leaderboard(ctx context.Context, from, to time.Time, limit int) ([]models.LeaderEntry, error) {
+	rows, err := r.db.q.LeaderboardBetween(ctx, sqlcgen.LeaderboardBetweenParams{FromTs: from, ToTs: to, MaxRows: int32(limit)})
+	if err != nil {
+		return nil, mapErr(err)
+	}
+	out := make([]models.LeaderEntry, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, models.LeaderEntry{
+			UserID: models.UserID(row.UserID), Nickname: row.Nickname, AvatarURL: row.AvatarUrl,
+			Seconds: row.FocusedMs / 1000, Sessions: int(row.Sessions),
+		})
+	}
+	return out, nil
+}

@@ -91,6 +91,22 @@
   </section>
 
 
+  <section class="acct-section" id="leaderboard" aria-labelledby="board-title">
+    <div class="month-nav">
+      <h2 id="board-title">Leaderboard</h2>
+      <div class="tabs glass" id="board-tabs" role="tablist" aria-label="Period">
+        <button type="button" role="tab" data-period="today" aria-selected="true">Today</button>
+        <button type="button" role="tab" data-period="week" aria-selected="false" tabindex="-1">Week</button>
+        <button type="button" role="tab" data-period="month" aria-selected="false" tabindex="-1">Month</button>
+        <button type="button" role="tab" data-period="all" aria-selected="false" tabindex="-1">All time</button>
+      </div>
+    </div>
+    <div class="glass board-card">
+      <ol class="board" id="board-list" aria-live="polite"></ol>
+      <p class="muted board-empty" id="board-empty" hidden>Nobody here yet. Host a room while logged in and be the first.</p>
+    </div>
+  </section>
+
   <section class="acct-section" id="community" aria-labelledby="community-title">
     <div class="month-nav">
       <h2 id="community-title">Everyone on Pomosky</h2>
@@ -108,6 +124,27 @@
       <p class="muted fine" id="c-detail">Hover or tap a day to see it.</p>
     </article>
   </section>
+
+  {{if not .Data.Preview}}
+  <section class="acct-section glass settings" id="profile" aria-labelledby="profile-title">
+    <h2 id="profile-title">Your public profile</h2>
+    <p class="muted">Your name and picture are shown on the leaderboard. Your email never is.</p>
+    <form method="post" action="/account/nickname" class="nick-form">
+      <input type="hidden" name="csrf" value="{{.CSRFToken}}">
+      <div class="field">
+        <label for="nickname">Name</label>
+        <input class="input" id="nickname" name="nickname" value="{{.User.Nickname}}" minlength="2" maxlength="24" required autocomplete="nickname">
+      </div>
+      <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+    <form method="post" action="/account/leaderboard" class="switch-form">
+      <input type="hidden" name="csrf" value="{{.CSRFToken}}">
+      <input type="hidden" name="show" value="{{if .User.ShowOnLeaderboard}}0{{else}}1{{end}}">
+      <p>{{if .User.ShowOnLeaderboard}}You are <strong>on</strong> the leaderboard.{{else}}You are <strong>hidden</strong> from the leaderboard.{{end}}</p>
+      <button class="btn btn-ghost" type="submit">{{if .User.ShowOnLeaderboard}}Hide me{{else}}Show me{{end}}</button>
+    </form>
+  </section>
+  {{end}}
 
   {{if not .Data.Preview}}
   <section class="acct-section glass danger-zone">

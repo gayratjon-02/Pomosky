@@ -25,6 +25,12 @@ type Service struct {
 
 	mu        sync.Mutex
 	community map[string]communityEntry // by time zone
+	boards    map[string]boardEntry     // by period and time zone
+}
+
+type boardEntry struct {
+	entries []models.LeaderEntry
+	at      time.Time
 }
 
 type communityEntry struct {
@@ -36,7 +42,7 @@ var _ ports.StatsReader = (*Service)(nil)
 
 // New creates the statistics Service.
 func New(sessions ports.FocusSessionRepository, clock ports.Clock) *Service {
-	return &Service{sessions: sessions, clock: clock, community: map[string]communityEntry{}}
+	return &Service{sessions: sessions, clock: clock, community: map[string]communityEntry{}, boards: map[string]boardEntry{}}
 }
 
 // Month implements ports.StatsReader.
@@ -193,4 +199,65 @@ func (s *Service) Community(ctx context.Context, tz string) (models.CommunitySta
 	s.community[key] = communityEntry{stats: out, at: now}
 	s.mu.Unlock()
 	return out, nil
+}
+
+// LeaderboardSize is how many users the leaderboard lists.
+const LeaderboardSize = 50
+
+// Leaderboard implements ports.StatsReader: the most focused users of a period
+// who allow it, best first. The list is cached for a minute per period and time
+// zone; the viewer's own row is marked afterwards, so the cache stays shared.
+func (s *Service) Leaderboard(ctx context.Context, period, tz string, viewer models.UserID) ([]models.LeaderRow, error) {
+	loc, err := time.LoadLocation(tz)
+	if err != nil || tz == "" {
+		loc = time.UTC
+	}
+	now := s.clock.Now()
+	from, to, ok := periodRange(period, now, loc)
+	if !ok {
+		return nil, fmt.Errorf("%w: period %q", apperr.ErrInvalid, period)
+	}
+
+	key := period + "|" + loc.String()
+	s.mu.Lock()
+	entry, cached := s.boards[key]
+	s.mu.Unlock()
+	if !cached || now.Sub(entry.at) >= communityCacheTTL {
+		entries, err := s.sessions.Leaderboard(ctx, from, to, LeaderboardSize)
+		if err != nil {
+			return nil, err
+		}
+		entry = boardEntry{entries: entries, at: now}
+		s.mu.Lock()
+		s.boards[key] = entry
+		s.mu.Unlock()
+	}
+
+	rows := make([]models.LeaderRow, 0, len(entry.entries))
+	for i, e := range entry.entries {
+		rows = append(rows, models.LeaderRow{
+			Rank: i + 1, Nickname: e.Nickname, AvatarURL: e.AvatarURL, Seconds: e.Seconds, Sessions: e.Sessions,
+			You: viewer != "" && e.UserID == viewer,
+		})
+	}
+	return rows, nil
+}
+
+// periodRange returns the time range of today, the last 7 days, this calendar
+// month or all time, in the given zone.
+func periodRange(period string, now time.Time, loc *time.Location) (from, to time.Time, ok bool) {
+	local := now.In(loc)
+	today := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, loc)
+	to = today.AddDate(0, 0, 1)
+	switch period {
+	case "today":
+		return today, to, true
+	case "week":
+		return today.AddDate(0, 0, -6), to, true
+	case "month":
+		return time.Date(local.Year(), local.Month(), 1, 0, 0, 0, 0, loc), to, true
+	case "all":
+		return time.Unix(0, 0), to, true
+	}
+	return time.Time{}, time.Time{}, false
 }
