@@ -22,6 +22,9 @@ export class TimerRenderer {
   private readonly knob = maybeById("ring-knob");
   private chimedFor = -1;
 
+  /** Called once when a running phase reaches its end. */
+  onEnd: (t: TimerView) => void = () => {};
+
   render(t: TimerView, serverNowMs: number): void {
     const remaining = remainingMs(t, serverNowMs);
     const text = t.phase === "idle" ? formatMMSS(0) : formatMMSS(remaining);
@@ -47,6 +50,7 @@ export class TimerRenderer {
       this.chimedFor = t.startedAtMs;
       chime();
       celebrate();
+      this.onEnd(t);
     }
   }
 }
