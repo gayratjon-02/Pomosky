@@ -36,5 +36,4 @@ details[open] > :not(summary) { animation: fade-up 320ms var(--ease) both; }
 
 .flash, .toast { animation-timing-function: var(--ease); }
 .timer-digits { transition: color var(--dur-slow) var(--ease); }
-.timer-ring .ring-progress { transition: stroke-dashoffset 900ms linear, stroke var(--dur-slow) var(--ease); }
 body { transition: background-color var(--dur-slow) var(--ease); }

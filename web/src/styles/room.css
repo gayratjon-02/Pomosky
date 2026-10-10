@@ -26,19 +26,34 @@ body.record .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; 
   place-items: center;
 }
 
-.timer-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring-track { fill: rgba(6, 10, 24, 0.28); stroke: rgba(255, 255, 255, 0.16); stroke-width: 6; }
+.timer-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+
+/* The ring takes its colours from the phase: blue to violet for focus, green to teal for a break. */
+body { --ring-a: #8ab4ff; --ring-b: #b79bff; --ring-glow: rgba(138, 180, 255, 0.6); }
+body[data-phase="break"] { --ring-a: #7be0b0; --ring-b: #5fd0e0; --ring-glow: rgba(123, 224, 176, 0.55); }
+body[data-phase="paused"] { --ring-a: #ffb36b; --ring-b: #ffd69a; --ring-glow: rgba(255, 179, 107, 0.45); }
+body[data-phase="ended"] { --ring-a: #ff9440; --ring-b: #ff6b8a; --ring-glow: rgba(255, 120, 100, 0.6); }
+
+.stop-a { stop-color: var(--ring-a); transition: stop-color var(--dur-slow) var(--ease); }
+.stop-b { stop-color: var(--ring-b); transition: stop-color var(--dur-slow) var(--ease); }
+
+.ring-ticks { fill: none; stroke: rgba(255, 255, 255, 0.24); stroke-width: 5; stroke-dasharray: 1.2 12.1; }
+.ring-disc { fill: url(#disc-grad); stroke: rgba(255, 255, 255, 0.07); stroke-width: 1; }
+.ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 8; }
 .ring-progress {
   fill: none;
-  stroke: var(--accent);
-  stroke-width: 6;
+  stroke: url(#ring-grad);
+  stroke-width: 8;
   stroke-linecap: round;
-  transition: stroke-dashoffset 400ms linear, stroke var(--dur-slow) var(--ease);
-  filter: drop-shadow(0 0 8px rgba(138, 180, 255, 0.55));
+  transition: stroke-dashoffset 900ms linear;
+  filter: drop-shadow(0 0 7px var(--ring-glow));
 }
-body[data-phase="break"] .ring-progress { stroke: var(--success); filter: drop-shadow(0 0 8px rgba(123, 224, 176, 0.55)); }
-body[data-phase="paused"] .ring-progress { stroke: var(--warm); filter: none; }
-body[data-phase="ended"] .ring-progress { stroke: var(--warm-strong); animation: pulse 1.4s ease-in-out infinite; }
+.ring-knob { transform-origin: 130px 130px; transition: transform 900ms linear, opacity var(--dur) var(--ease); }
+.ring-knob circle { fill: #fff; filter: drop-shadow(0 0 9px var(--ring-glow)); }
+body[data-phase="idle"] .ring-knob { opacity: 0; }
+body[data-phase="ended"] .ring-progress { animation: pulse 1.4s ease-in-out infinite; }
+body[data-running="1"] .ring-ticks { animation: ticks-spin 90s linear infinite; transform-origin: 130px 130px; }
+@keyframes ticks-spin { to { transform: rotate(360deg); } }
 
 .timer-inner { display: grid; justify-items: center; gap: var(--space-2); text-align: center; padding: 0 12%; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55); }
 .timer-phase {
