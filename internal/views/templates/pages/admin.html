@@ -30,6 +30,38 @@
     </div>
   </section>
 
+  <section class="adm-section" aria-labelledby="tr-title">
+    <h2 id="tr-title">Traffic</h2>
+    <p class="muted fine">Anonymous and cookie-free. A visitor is counted once per UTC day, so the same person on two days counts twice. Bots and people who send Do Not Track are left out.</p>
+    <div class="cards">
+      <article class="glass card-stat"><span class="card-k">Visitors</span><strong class="card-v" id="t-visitors">-</strong><span class="card-sub" id="t-visitors-sub"></span></article>
+      <article class="glass card-stat"><span class="card-k">Page views</span><strong class="card-v" id="t-views">-</strong><span class="card-sub" id="t-views-sub"></span></article>
+      <article class="glass card-stat"><span class="card-k">Rooms created</span><strong class="card-v" id="t-rooms">-</strong><span class="card-sub" id="t-rooms-sub"></span></article>
+      <article class="glass card-stat"><span class="card-k">Conversion</span><strong class="card-v" id="t-conv">-</strong><span class="card-sub" id="t-conv-sub"></span></article>
+    </div>
+    <div class="charts adm-charts">
+      <article class="glass chart-card">
+        <h3>Visitors per day</h3>
+        <div class="bars" id="t-chart-visitors" role="img" aria-label="Visitors per day"></div>
+        <p class="muted fine" id="t-visitors-detail">Tap a day.</p>
+      </article>
+      <article class="glass chart-card">
+        <h3>Rooms created per day</h3>
+        <div class="bars" id="t-chart-rooms" role="img" aria-label="Rooms created per day"></div>
+        <p class="muted fine" id="t-rooms-detail">Tap a day.</p>
+      </article>
+    </div>
+    <div class="tt-grid">
+      <article class="glass tt-card"><h3>Funnel <small class="muted">30 days</small></h3><ul class="tt" id="t-funnel"></ul></article>
+      <article class="glass tt-card"><h3>Where visitors come from <small class="muted">first page of the day</small></h3><ul class="tt" id="t-sources"></ul></article>
+      <article class="glass tt-card"><h3>Top pages</h3><ul class="tt" id="t-pages"></ul></article>
+      <article class="glass tt-card"><h3>Devices</h3><ul class="tt" id="t-devices"></ul></article>
+      <article class="glass tt-card"><h3>Operating systems</h3><ul class="tt" id="t-systems"></ul></article>
+      <article class="glass tt-card"><h3>Browsers <small class="muted">incl. Instagram and TikTok in-app</small></h3><ul class="tt" id="t-browsers"></ul></article>
+      <article class="glass tt-card"><h3>Countries <small class="muted">needs the Cloudflare proxy</small></h3><ul class="tt" id="t-countries"></ul></article>
+    </div>
+  </section>
+
   <section class="adm-section" aria-labelledby="ch-title">
     <h2 id="ch-title">Last 30 days</h2>
     <div class="charts adm-charts">
