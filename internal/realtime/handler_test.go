@@ -453,3 +453,40 @@ func (h *Hub) mustRoom(t *testing.T, id room.ID) *RoomHub {
 	}
 	return rh
 }
+
+func TestOnlyTheHostSetsTheLocationAndItIsRounded(t *testing.T) {
+	s := newTestServer(t, nil)
+	viewer := s.dial(t)
+	viewer.waitState(viewersIs(1))
+
+	viewer.send(TypeLocationSet, LocationSetData{City: "Seoul", Lat: 37.5665, Lon: 126.978, TZ: "Asia/Seoul"})
+	viewer.waitError(CodeForbidden)
+
+	viewer.becomeHost()
+	viewer.send(TypeLocationSet, LocationSetData{City: "Seoul", Lat: 37.56654321, Lon: 126.97801234, TZ: "Asia/Seoul"})
+	st := viewer.waitState(func(s StateData) bool { return s.City == "Seoul" })
+	if st.Location == nil || st.Location.Lat != 37.57 || st.Location.Lon != 126.98 || st.Location.TZ != "Asia/Seoul" {
+		t.Fatalf("location = %+v", st.Location)
+	}
+}
+
+func TestBadLocationsAreRejected(t *testing.T) {
+	s := newTestServer(t, nil)
+	host := s.dial(t)
+	host.waitState(viewersIs(1))
+	host.becomeHost()
+
+	for name, d := range map[string]LocationSetData{
+		"latitude out of range":  {City: "x", Lat: 91, Lon: 0, TZ: "UTC"},
+		"longitude out of range": {City: "x", Lat: 0, Lon: 181, TZ: "UTC"},
+		"unknown zone":           {City: "x", Lat: 1, Lon: 1, TZ: "Mars/Olympus"},
+		"missing zone":           {City: "x", Lat: 1, Lon: 1},
+		"long city":              {City: strings.Repeat("a", 200), Lat: 1, Lon: 1, TZ: "UTC"},
+	} {
+		host.send(TypeLocationSet, d)
+		host.waitError(CodeInvalid)
+		if got := s.hub.mustRoom(t, testRoomID).State().Location; got.TZ != "" {
+			t.Fatalf("%s: location was stored: %+v", name, got)
+		}
+	}
+}

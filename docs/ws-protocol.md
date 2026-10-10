@@ -17,6 +17,7 @@ Keep `internal/realtime/protocol.go` and `web/src/core/protocol.ts` in sync.
 | `timer.start` | `{ phase: "focus" or "break", durationMs, label }` | host |
 | `timer.pause` / `timer.resume` / `timer.reset` | none | host |
 | `timer.recover` | `{ timer }` (the host's last known timer) | host, used after a server restart; ignored if the room already has a timer |
+| `location.set` | `{ city, lat, lon, tz }` (tz is an IANA name; the server rounds lat/lon to 2 decimals, about 1 km) | host |
 | `reaction` | `{ kind }` (clap, coffee, fire, heart) | anyone |
 | `ping` | none | anyone, every ~25 s and a few times right after connecting (clock sync) |
 
@@ -24,7 +25,7 @@ Keep `internal/realtime/protocol.go` and `web/src/core/protocol.ts` in sync.
 
 | type | data |
 |---|---|
-| `state` | `{ roomId, timer, viewers, reactions, city, serverNowMs }`: sent on join and after every change; carries the viewer count |
+| `state` | `{ roomId, timer, viewers, reactions, city, location?, serverNowMs }`: sent on join and after every change; carries the viewer count. `location` is `{ lat, lon, tz }` (rounded) and is absent until the host sets it |
 | `host.ok` | none |
 | `reaction.tick` | `{ kind, count }` |
 | `weather` | reserved for stage 6 |

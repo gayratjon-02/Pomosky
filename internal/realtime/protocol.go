@@ -19,6 +19,7 @@ const (
 	TypeTimerReset   = "timer.reset"
 	TypeTimerRecover = "timer.recover"
 	TypeReaction     = "reaction"
+	TypeLocationSet  = "location.set"
 	TypePing         = "ping"
 
 	// server -> client
@@ -73,6 +74,13 @@ type TimerRecoverData struct {
 	Timer TimerView `json:"timer"`
 }
 
+type LocationSetData struct {
+	City string  `json:"city"`
+	Lat  float64 `json:"lat"`
+	Lon  float64 `json:"lon"`
+	TZ   string  `json:"tz"`
+}
+
 type ReactionData struct {
 	Kind string `json:"kind"`
 }
@@ -94,7 +102,15 @@ type StateData struct {
 	Viewers     int            `json:"viewers"`
 	Reactions   map[string]int `json:"reactions"`
 	City        string         `json:"city"`
+	Location    *LocationView  `json:"location,omitempty"` // the host's rounded place; absent until the host sets it
 	ServerNowMS int64          `json:"serverNowMs"`
+}
+
+// LocationView is the host's place, rounded to about 1 km by the core.
+type LocationView struct {
+	Lat float64 `json:"lat"`
+	Lon float64 `json:"lon"`
+	TZ  string  `json:"tz"`
 }
 
 type ReactionTickData struct {
@@ -185,7 +201,12 @@ func ToStateData(s room.State, now time.Time) StateData {
 	for k, v := range s.Reactions {
 		reactions[string(k)] = v
 	}
+	var loc *LocationView
+	if l := s.Location; l.City != "" || l.TZ != "" || l.LatRounded != 0 || l.LonRounded != 0 {
+		loc = &LocationView{Lat: l.LatRounded, Lon: l.LonRounded, TZ: l.TZ}
+	}
 	return StateData{
+		Location:    loc,
 		RoomID:      s.ID.String(),
 		Timer:       ToTimerView(s.Timer),
 		Viewers:     s.Viewers,

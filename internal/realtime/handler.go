@@ -234,6 +234,24 @@ func (h *Handler) handle(s *session, data []byte) bool {
 			h.sendError(s.client, CodeInvalid, "unknown reaction")
 		}
 
+	case TypeLocationSet:
+		if !s.client.IsHost {
+			h.sendError(s.client, CodeForbidden, "only the host can set the location")
+			return true
+		}
+		var d LocationSetData
+		if !h.decodeData(s.client, env, &d) {
+			return true
+		}
+		if _, err := time.LoadLocation(d.TZ); err != nil || d.TZ == "" {
+			h.sendError(s.client, CodeInvalid, "invalid time zone")
+			return true
+		}
+		ev := room.LocationSet{Location: room.Location{City: d.City, LatRounded: d.Lat, LonRounded: d.Lon, TZ: d.TZ}}
+		if err := s.rh.Apply(ev, now); err != nil {
+			h.sendError(s.client, CodeInvalid, "invalid location")
+		}
+
 	case TypeTimerStart, TypeTimerPause, TypeTimerResume, TypeTimerReset, TypeTimerRecover:
 		if !s.client.IsHost {
 			h.sendError(s.client, CodeForbidden, "only the host can control the timer")
