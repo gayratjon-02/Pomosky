@@ -1,0 +1,8 @@
+{{define "nav"}}
+<header class="site-header">
+  <a class="brand" href="/">Pomosky</a>
+  <nav>
+    {{if .User}}<a href="/account">Account</a>{{else}}<a href="/login">Log in</a>{{end}}
+  </nav>
+</header>
+{{end}}

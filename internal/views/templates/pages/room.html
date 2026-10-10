@@ -1,0 +1,9 @@
+{{define "bodyclass"}}room{{end}}
+{{define "content"}}
+<canvas id="sky" aria-hidden="true"></canvas>
+<section class="room">
+  {{template "timer" .}}
+  {{template "presence" .}}
+  {{template "reactions" .}}
+</section>
+{{end}}

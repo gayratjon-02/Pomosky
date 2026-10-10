@@ -1,0 +1,15 @@
+{{define "base"}}<!doctype html>
+<html lang="en">
+<head>
+{{template "head" .}}
+</head>
+<body class="{{block "bodyclass" .}}{{end}}">
+{{template "nav" .}}
+<main id="main">
+{{block "content" .}}{{end}}
+</main>
+{{template "footer" .}}
+{{range .Scripts}}<script type="module" src="{{.}}"></script>
+{{end}}
+</body>
+</html>{{end}}

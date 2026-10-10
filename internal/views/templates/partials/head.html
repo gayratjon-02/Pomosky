@@ -1,0 +1,12 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{if .Title}}{{.Title}} · {{end}}Pomosky</title>
+{{if .Description}}<meta name="description" content="{{.Description}}">{{end}}
+{{if .CanonicalURL}}<link rel="canonical" href="{{.CanonicalURL}}">{{end}}
+<meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}Pomosky{{end}}">
+<meta property="og:type" content="website">
+{{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">{{end}}
+<meta name="theme-color" content="#0b1020">
+<link rel="stylesheet" href="/static/base.css">
+{{end}}
