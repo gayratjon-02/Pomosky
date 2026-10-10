@@ -1,8 +1,10 @@
 package realtime
 
 import (
+	"bytes"
 	"context"
 	"log/slog"
+	"sort"
 	"sync"
 	"time"
 
@@ -180,6 +182,7 @@ type RoomHub struct {
 	peak     int       // most clients seen since the last recorded focus phase
 	credited time.Time // StartedAt of the focus phase already recorded at its natural end
 	emptyAt  time.Time // since when no client is connected; zero while someone is
+	people   []byte    // the last people message sent, to skip identical ones
 }
 
 func newRoomHub(state room.State, owner models.UserID, log *slog.Logger, recorder ports.FocusRecorder) *RoomHub {
@@ -311,6 +314,66 @@ func (r *RoomHub) React(kind room.ReactionKind, now time.Time) error {
 	}
 	r.broadcastLocked(payload)
 	return nil
+}
+
+// MaxPeople is how many named people one room lists; the rest are counted.
+const MaxPeople = 12
+
+// Announce sends the list of named people to the clients if it changed since
+// the last time. Call it after a client joined, left or chose a nickname.
+func (r *RoomHub) Announce() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	payload, err := Encode(TypePeople, r.peopleLocked())
+	if err != nil || bytes.Equal(payload, r.people) {
+		return
+	}
+	r.people = payload
+	r.broadcastLocked(payload)
+}
+
+// People returns the current people message for a client that just joined.
+func (r *RoomHub) People() []byte {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	payload, err := Encode(TypePeople, r.peopleLocked())
+	if err != nil {
+		return nil
+	}
+	return payload
+}
+
+// peopleLocked lists the named people: signed-in users who allow it (once,
+// however many tabs they have open) and viewers with a nickname. The order is
+// stable so the message only changes when the people do.
+func (r *RoomHub) peopleLocked() PeopleData {
+	type entry struct {
+		key string
+		PersonView
+	}
+	seen := map[string]bool{}
+	var all []entry
+	for c := range r.clients {
+		switch {
+		case c.Account != "":
+			if !seen["a:"+c.Account] {
+				seen["a:"+c.Account] = true
+				all = append(all, entry{"a:" + c.Account, PersonView{Name: c.AccountName, AvatarURL: c.AccountAvatar}})
+			}
+		case c.Nickname != "":
+			all = append(all, entry{"n:" + c.ID, PersonView{Name: c.Nickname}})
+		}
+	}
+	sort.Slice(all, func(i, j int) bool { return all[i].key < all[j].key })
+	out := PeopleData{People: []PersonView{}}
+	for i, e := range all {
+		if i >= MaxPeople {
+			out.More = len(all) - MaxPeople
+			break
+		}
+		out.People = append(out.People, e.PersonView)
+	}
+	return out
 }
 
 func (r *RoomHub) broadcastLocked(payload []byte) {
