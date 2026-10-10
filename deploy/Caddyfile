@@ -1,0 +1,18 @@
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Static assets use stable names for now, so keep the cache short.
+	# TODO: switch to hashed file names and use "public, max-age=31536000, immutable".
+	@static path /static/*
+	header @static Cache-Control "public, max-age=300"
+
+	# WebSocket upgrades are handled automatically by reverse_proxy.
+	reverse_proxy app:8080 {
+		header_up X-Real-IP {remote_host}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}
