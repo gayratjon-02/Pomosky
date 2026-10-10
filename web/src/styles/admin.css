@@ -48,3 +48,6 @@ body.admin::before { content: ""; position: fixed; inset: 0; z-index: -1; backgr
   .user-row { grid-template-columns: auto minmax(0, 1.3fr) minmax(0, 1fr) auto; grid-template-areas: "av who meta focus"; }
   .user-meta { display: grid; gap: 0; }
 }
+
+/* A day without focus time still shows a baseline in the stacked chart. */
+.bars.stacked .bar.zero { border-bottom: 3px solid rgba(255, 255, 255, 0.1); border-radius: 2px; }
