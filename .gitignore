@@ -1,0 +1,18 @@
+# Go
+/bin/
+*.test
+*.out
+
+# Node / frontend
+node_modules/
+web/dist/
+
+# Maxfiy va lokal
+.env
+.env.*
+!.env.example
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
