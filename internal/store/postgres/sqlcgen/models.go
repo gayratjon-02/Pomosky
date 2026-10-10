@@ -59,3 +59,19 @@ type User struct {
 	AvatarUrl         string
 	ShowOnLeaderboard bool
 }
+
+type Visit struct {
+	ID       int64
+	At       time.Time
+	Day      time.Time
+	Kind     string
+	Path     string
+	Visitor  string
+	Source   string
+	Medium   string
+	Campaign string
+	Device   string
+	Os       string
+	Browser  string
+	Country  string
+}
