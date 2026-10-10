@@ -43,3 +43,9 @@
 .host-controls .span-2 { grid-column: 1 / -1; }
 /* Settings are locked while a phase runs or is paused. */
 .host-panel input:disabled, .host-panel .chip:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* The main buttons sit right under the timer, big enough for a thumb. */
+.host-run { width: min(100%, 460px); display: grid; gap: var(--space-3); }
+.host-run .host-controls { gap: var(--space-3); }
+.host-run .host-controls .btn { min-height: 54px; font-size: var(--text-md); border-radius: var(--radius-l); }
+.plan-line { margin: 0; text-align: center; font-size: var(--text-sm); color: var(--fg-muted); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5); min-height: 1.4em; }
