@@ -128,3 +128,43 @@ func TestCSRFRejectsForeignOrigin(t *testing.T) {
 		t.Fatalf("same-origin status = %d", code)
 	}
 }
+
+type fakeTracker struct{ kinds, paths []string }
+
+func (f *fakeTracker) Track(r *http.Request, kind string) {
+	f.kinds = append(f.kinds, kind)
+	f.paths = append(f.paths, r.URL.Path)
+}
+
+func TestTrackPageviewsCountsOnlyHTMLPages(t *testing.T) {
+	tr := &fakeTracker{}
+	h := TrackPageviews(tr)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/missing":
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusNotFound)
+		case "/api/stats":
+			w.Header().Set("Content-Type", "application/json")
+		default:
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		}
+	}))
+	for _, c := range []struct{ method, path string }{
+		{"GET", "/"}, {"GET", "/privacy"}, {"GET", "/missing"}, {"GET", "/api/stats"},
+		{"GET", "/static/site.js"}, {"POST", "/login"}, {"GET", "/healthz"},
+	} {
+		h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(c.method, c.path, nil))
+	}
+	if len(tr.paths) != 2 || tr.paths[0] != "/" || tr.paths[1] != "/privacy" || tr.kinds[0] != "pageview" {
+		t.Fatalf("tracked %v", tr.paths)
+	}
+}
+
+func TestTrackPageviewsWithoutTrackerIsTransparent(t *testing.T) {
+	called := false
+	h := TrackPageviews(nil)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { called = true }))
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("GET", "/", nil))
+	if !called {
+		t.Fatal("handler not called")
+	}
+}
