@@ -2,6 +2,7 @@ import { maybeById } from "../core/dom";
 import { load, save } from "../core/storage";
 import { RoomClient } from "../core/room-client";
 import { startLiveSky } from "../sky/live-sky";
+import { setPeople } from "../ui/people";
 import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
@@ -37,6 +38,7 @@ export function initRoomPage(): void {
     setViewers(s.viewers);
     setReactionCounts(s.reactions);
   });
+  client.on("people", setPeople);
   client.on("tick", (t) => {
     floatReaction(t.kind);
     setReactionCounts({ [t.kind]: t.count });

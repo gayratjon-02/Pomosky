@@ -3,6 +3,7 @@ import { RoomClient } from "../core/room-client";
 import { load, save } from "../core/storage";
 import { startLiveSky } from "../sky/live-sky";
 import { createConnectionChip } from "../ui/connection";
+import { setPeople } from "../ui/people";
 import { setViewers } from "../ui/presence";
 import { controlsFor } from "../ui/host-controls";
 import { initNotifyToggle, notifyEnd } from "../ui/notify";
@@ -70,6 +71,7 @@ export function initHostPage(): void {
     else if (e.code === "invalid") toast("Check the minutes and the label");
     else if (e.code === "rate_limited") toast("Slow down a little");
   });
+  client.on("people", setPeople);
   client.on("state", (s) => {
     setViewers(s.viewers);
     applyControls();
