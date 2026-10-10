@@ -45,6 +45,9 @@ Error codes: `bad_request`, `forbidden`, `invalid`, `invalid_transition`, `rate_
 ## Rules
 
 - Only the host (after `host.auth`) can send `timer.*` messages; anyone else gets `forbidden`.
+- `timer.start` is accepted only when the timer is idle or the running phase has reached its end. While a phase
+  runs or is paused it is answered with `invalid_transition`, so pressing start twice never restarts the clock.
+  Pause, resume or reset first. `timer.pause` needs a running phase, `timer.resume` a paused one.
 - Messages are small: the server limits the frame size and the message rate per connection
   (`rate_limited`). Binary frames are not supported.
 - The heartbeat is required: a connection that sends nothing for a long time is closed, and
