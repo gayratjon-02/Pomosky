@@ -1,0 +1,2 @@
+/* Record mode: big, calm, camera-friendly. Avoid thin lines and fast flicker (moire on camera). */
+body.record #sky { position: fixed; inset: 0; width: 100%; height: 100%; }

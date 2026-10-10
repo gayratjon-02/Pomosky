@@ -1,0 +1,4 @@
+/* Room page: sky canvas behind the timer. */
+body.room #sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.room { display: grid; place-items: center; gap: 12px; min-height: 70vh; text-align: center; }
+.timer-digits { font-size: clamp(4rem, 18vw, 12rem); font-variant-numeric: tabular-nums; }
