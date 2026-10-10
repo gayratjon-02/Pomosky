@@ -20,13 +20,31 @@ func validLabel(label string) bool {
 	return utf8.RuneCountInString(label) <= MaxLabelLength
 }
 
-// startTimer starts a new focus or break phase, replacing whatever ran before.
+// canStart reports whether a new phase may begin: the timer is idle, or the
+// running phase has run to its end. A running or paused phase must be paused,
+// resumed or reset first, so pressing "start" twice can never restart the clock.
+func canStart(t Timer, now time.Time) bool {
+	switch t.Phase {
+	case PhaseIdle:
+		return true
+	case PhaseFocus, PhaseBreak:
+		return t.Remaining(now) == 0
+	default: // paused
+		return false
+	}
+}
+
+// startTimer starts a new focus or break phase when the timer is idle or the
+// previous phase has ended.
 func startTimer(s State, e TimerStart, now time.Time) (State, error) {
 	if e.Phase != PhaseFocus && e.Phase != PhaseBreak {
 		return s, ErrInvalidEvent
 	}
 	if !validPhaseDuration(e.Duration) || !validLabel(e.Label) {
 		return s, ErrInvalidEvent
+	}
+	if !canStart(s.Timer, now) {
+		return s, ErrInvalidTransition
 	}
 	s.Timer = Timer{
 		Phase:     e.Phase,

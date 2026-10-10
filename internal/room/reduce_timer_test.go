@@ -1,6 +1,7 @@
 package room
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -44,12 +45,38 @@ func TestStartTimerRejectsInvalidInput(t *testing.T) {
 	}
 }
 
-func TestStartTimerReplacesRunningPhase(t *testing.T) {
-	s := mustReduce(t, newTestState(), t0, TimerStart{Phase: PhaseFocus, Duration: 25 * time.Minute})
-	s = mustReduce(t, s, t0.Add(5*time.Minute), TimerStart{Phase: PhaseBreak, Duration: 5 * time.Minute})
+func TestStartTimerIsRefusedWhileRunningOrPaused(t *testing.T) {
+	running := mustReduce(t, newTestState(), t0, TimerStart{Phase: PhaseFocus, Duration: 25 * time.Minute, Label: "api"})
+	start := TimerStart{Phase: PhaseBreak, Duration: 5 * time.Minute}
 
-	if s.Timer.Phase != PhaseBreak || !s.Timer.StartedAt.Equal(t0.Add(5*time.Minute)) {
-		t.Fatalf("break did not replace focus: %+v", s.Timer)
+	if _, err := Reduce(running, start, t0.Add(5*time.Minute)); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("start while running: %v", err)
+	}
+	// Pressing the same start again must not restart the clock either.
+	if _, err := Reduce(running, TimerStart{Phase: PhaseFocus, Duration: 25 * time.Minute}, t0.Add(time.Minute)); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("second start: %v", err)
+	}
+	paused := mustReduce(t, running, t0.Add(5*time.Minute), TimerPause{})
+	if _, err := Reduce(paused, start, t0.Add(6*time.Minute)); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("start while paused: %v", err)
+	}
+	// The timer is unchanged by the refusals.
+	if running.Timer.StartedAt != t0 || running.Timer.Label != "api" {
+		t.Fatalf("state changed: %+v", running.Timer)
+	}
+}
+
+func TestStartTimerIsAllowedAfterThePhaseEnded(t *testing.T) {
+	focus := mustReduce(t, newTestState(), t0, TimerStart{Phase: PhaseFocus, Duration: 25 * time.Minute})
+	end := t0.Add(25 * time.Minute)
+	s := mustReduce(t, focus, end, TimerStart{Phase: PhaseBreak, Duration: 5 * time.Minute})
+	if s.Timer.Phase != PhaseBreak || !s.Timer.StartedAt.Equal(end) {
+		t.Fatalf("timer = %+v", s.Timer)
+	}
+	// After a reset the timer is idle and may start again.
+	reset := mustReduce(t, focus, t0.Add(time.Minute), TimerReset{})
+	if _, err := Reduce(reset, TimerStart{Phase: PhaseFocus, Duration: time.Minute}, t0.Add(2*time.Minute)); err != nil {
+		t.Fatalf("start after reset: %v", err)
 	}
 }
 
