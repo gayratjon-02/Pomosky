@@ -3,7 +3,7 @@ package config
 import "testing"
 
 func TestValidate(t *testing.T) {
-	prod := Config{Env: "production", DatabaseURL: "db", SessionSecret: "s", HostTokenSalt: "h"}
+	prod := Config{Env: "production", DatabaseURL: "db", HostTokenSalt: "h"}
 
 	cases := []struct {
 		name    string
@@ -13,9 +13,8 @@ func TestValidate(t *testing.T) {
 		{"development needs nothing", Config{Env: "development"}, false},
 		{"development may enable dev reload", Config{Env: "development", Dev: true}, false},
 		{"complete production config", prod, false},
-		{"production without database", Config{Env: "production", SessionSecret: "s", HostTokenSalt: "h"}, true},
-		{"production without session secret", Config{Env: "production", DatabaseURL: "db", HostTokenSalt: "h"}, true},
-		{"production without host token salt", Config{Env: "production", DatabaseURL: "db", SessionSecret: "s"}, true},
+		{"production without database", Config{Env: "production", HostTokenSalt: "h"}, true},
+		{"production without host token salt", Config{Env: "production", DatabaseURL: "db"}, true},
 		{"production rejects dev reload", func() Config { c := prod; c.Dev = true; return c }(), true},
 	}
 	for _, tc := range cases {

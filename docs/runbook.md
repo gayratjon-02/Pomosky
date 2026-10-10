@@ -4,7 +4,7 @@
 
 1. Prepare the VM: Docker + Compose, firewall (NSG) allowing only 80/443 (and SSH from your IP), SSH key login only.
 2. Point DNS (A record) at the VM's static public IP.
-3. `cd deploy && cp .env.example .env` and fill in the secrets.
+3. `cd deploy && ./scripts/init-env.sh <your-domain>` (random secrets, mode 600) and add login/SMTP settings if wanted. Variables: `docs/env.md`.
 4. `docker compose up -d --build`
 5. Check `https://<domain>/healthz`.
 6. The server applies the database migrations itself on start. Login works only when Google credentials or SMTP settings are set (see `.env.example`); everything else works without them.

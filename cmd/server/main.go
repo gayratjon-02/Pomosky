@@ -21,6 +21,13 @@ func main() {
 }
 
 func run() error {
+	// A .env file is a local-development convenience; production gets its
+	// environment from the deployment (docker compose env_file, systemd).
+	if os.Getenv("APP_ENV") != "production" {
+		if err := config.LoadDotenv(".env"); err != nil {
+			return err
+		}
+	}
 	cfg := config.Load()
 	if err := cfg.Validate(); err != nil {
 		return err

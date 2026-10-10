@@ -166,7 +166,7 @@ MVP'da kerak emas (bitta nusxa, xona holati xotirada). Keyin kerak bo'lsa VM'da 
 - Sessiya cookie: `httpOnly`, `Secure`, `SameSite=Lax`, Postgres'da. Sahifa va API bir domen bo'lgani uchun cross-domain cookie muammosi yo'q.
 
 ### Muhit o'zgaruvchilari
-`PORT`, `DATABASE_URL`, `SESSION_SECRET`, `HOST_TOKEN_SALT`, `WEATHER_CACHE_TTL`, `OPEN_METEO_BASE`, `BASE_URL`, login usuliga qarab `OAUTH_GOOGLE_*` yoki email xizmati kaliti. Hech narsa kodga yoki repoga tushmaydi (`.env` fayl `.gitignore`da, VM'da ruxsatlari cheklangan).
+`PORT`, `DATABASE_URL`, `HOST_TOKEN_SALT`, `WEATHER_CACHE_TTL`, `OPEN_METEO_BASE`, `BASE_URL`, login usuliga qarab `OAUTH_GOOGLE_*` yoki email xizmati kaliti. Hech narsa kodga yoki repoga tushmaydi (`.env` fayl `.gitignore`da, VM'da ruxsatlari cheklangan).
 
 ---
 

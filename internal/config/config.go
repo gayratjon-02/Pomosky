@@ -18,7 +18,6 @@ type Config struct {
 	BaseURL       string // public base URL, used for links and OAuth callbacks
 	StaticDir     string // directory with built frontend assets
 	DatabaseURL   string
-	SessionSecret string
 	HostTokenSalt string
 	RoomIdleTTL   time.Duration // how long a room with nobody connected stays alive
 
@@ -67,7 +66,6 @@ func Load() Config {
 		BaseURL:       getenv("BASE_URL", "http://localhost:8080"),
 		StaticDir:     getenv("STATIC_DIR", "web/dist"),
 		DatabaseURL:   os.Getenv("DATABASE_URL"),
-		SessionSecret: os.Getenv("SESSION_SECRET"),
 		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
 		RoomIdleTTL:   getenvDuration("ROOM_IDLE_TTL", 10*time.Minute),
 		TrustProxy:    getenvBool("TRUST_PROXY", false),
@@ -106,8 +104,6 @@ func (c Config) Validate() error {
 		return errors.New("config: DEV_RELOAD must not be enabled in production")
 	case c.DatabaseURL == "":
 		return errors.New("config: DATABASE_URL is required in production")
-	case c.SessionSecret == "":
-		return errors.New("config: SESSION_SECRET is required in production")
 	case c.HostTokenSalt == "":
 		return errors.New("config: HOST_TOKEN_SALT is required in production")
 	}
