@@ -5,6 +5,7 @@ import {
   ServerMsg,
   type Envelope,
   type ErrorData,
+  type LocationSetData,
   type PongData,
   type ReactionTickData,
   type StateData,
@@ -63,6 +64,10 @@ export class RoomClient extends Emitter<RoomEvents> {
 
   react(kind: string): void {
     this.socket.send(ClientMsg.Reaction, { kind });
+  }
+
+  setLocation(data: LocationSetData): void {
+    this.socket.send(ClientMsg.LocationSet, data);
   }
 
   start(data: TimerStartData): void {

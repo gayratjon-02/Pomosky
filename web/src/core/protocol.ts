@@ -16,12 +16,26 @@ export interface TimerView {
   label: string;
 }
 
+export interface LocationView {
+  lat: number;
+  lon: number;
+  tz: string;
+}
+
+export interface LocationSetData {
+  city: string;
+  lat: number;
+  lon: number;
+  tz: string;
+}
+
 export interface StateData {
   roomId: string;
   timer: TimerView;
   viewers: number;
   reactions: Record<string, number>;
   city: string;
+  location?: LocationView;
   serverNowMs: number;
 }
 
@@ -54,6 +68,7 @@ export const ClientMsg = {
   TimerReset: "timer.reset",
   TimerRecover: "timer.recover",
   Reaction: "reaction",
+  LocationSet: "location.set",
   Ping: "ping",
 } as const;
 

@@ -3,14 +3,14 @@ import { RoomClient } from "../core/room-client";
 import { load, save } from "../core/storage";
 import { createSky } from "../sky";
 import { astroInputs } from "../sky/inputs";
+import { skyPlace } from "../sky/place";
 import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { initShare } from "../ui/share";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
+import { PLACES } from "../core/places";
 
-const DEFAULT_LAT = 37.57; // TODO(stage 6): the host picks a place
-const DEFAULT_LON = 126.98;
 
 const tokenKey = (roomId: string) => `pomosky.host.${roomId}`;
 
@@ -39,15 +39,19 @@ export function initHostPage(): void {
   const roomId = location.pathname.split("/")[2];
   if (!roomId) return;
 
+  const token = takeHostToken(roomId);
+  const client = new RoomClient(roomId, token ? { hostToken: token } : {});
+
   const canvas = maybeById<HTMLCanvasElement>("sky");
   const sky = canvas ? createSky(canvas) : null;
-  const refreshSky = () => sky?.update(astroInputs(new Date(), DEFAULT_LAT, DEFAULT_LON));
+  const refreshSky = () => {
+    const p = skyPlace(client?.state ?? null);
+    sky?.update(astroInputs(new Date(), p.lat, p.lon));
+  };
   refreshSky();
   sky?.start();
   window.setInterval(refreshSky, 30_000);
 
-  const token = takeHostToken(roomId);
-  const client = new RoomClient(roomId, token ? { hostToken: token } : {});
   const renderer = new TimerRenderer();
   const badge = maybeById("host-badge");
   const pause = maybeById<HTMLButtonElement>("btn-pause");
@@ -71,6 +75,7 @@ export function initHostPage(): void {
     else if (e.code === "rate_limited") toast("Slow down a little");
   });
   client.on("state", (s) => {
+    refreshSky();
     setViewers(s.viewers);
     if (pause) pause.textContent = s.timer.phase === "paused" ? "Resume" : "Pause";
   });
@@ -94,6 +99,32 @@ export function initHostPage(): void {
     if (!b) return;
     maybeById<HTMLInputElement>("focus-min")!.value = b.dataset["focus"] ?? "25";
     maybeById<HTMLInputElement>("break-min")!.value = b.dataset["break"] ?? "5";
+  });
+
+  // Place of the sky. Picking one sends it to the server, which rounds it to about 1 km.
+  const placeSelect = maybeById<HTMLSelectElement>("place");
+  if (placeSelect) {
+    for (const p of PLACES) placeSelect.add(new Option(p.name, p.name));
+    placeSelect.addEventListener("change", () => {
+      const p = PLACES.find((x) => x.name === placeSelect.value);
+      if (p) client.setLocation({ city: p.name, lat: p.lat, lon: p.lon, tz: p.tz });
+    });
+    client.on("state", (s) => {
+      if (s.city && document.activeElement !== placeSelect) placeSelect.value = s.city;
+    });
+  }
+  maybeById("use-device-place")?.addEventListener("click", () => {
+    if (!navigator.geolocation) return toast("Your browser cannot share a location");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        // Rounded by the server; the exact point is never stored.
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+        client.setLocation({ city: "My place", lat: pos.coords.latitude, lon: pos.coords.longitude, tz });
+        toast("Sky moved to your place");
+      },
+      () => toast("Could not read your location"),
+      { maximumAge: 600_000, timeout: 10_000 },
+    );
   });
 
   client.connect();

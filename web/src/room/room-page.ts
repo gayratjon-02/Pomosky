@@ -3,6 +3,7 @@ import { load, save } from "../core/storage";
 import { RoomClient } from "../core/room-client";
 import { createSky } from "../sky";
 import { astroInputs } from "../sky/inputs";
+import { skyPlace } from "../sky/place";
 import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
@@ -11,9 +12,6 @@ import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { createConnectionChip } from "../ui/connection";
 
-// TODO(stage 6): replace with the host's rounded location once the room carries it.
-const DEFAULT_LAT = 37.57;
-const DEFAULT_LON = 126.98;
 const NICK_KEY = "pomosky.nick";
 
 /** Viewer page: connects to the room, shows the timer, reactions and the live sky. */
@@ -21,18 +19,22 @@ export function initRoomPage(): void {
   const roomId = location.pathname.split("/")[2];
   if (!roomId) return;
 
+  const nickname = load(NICK_KEY) ?? "";
+  const client = new RoomClient(roomId, nickname ? { nickname } : {});
+
   const canvas = maybeById<HTMLCanvasElement>("sky");
   const sky = canvas ? createSky(canvas) : null;
-  const refreshSky = () => sky?.update(astroInputs(new Date(), DEFAULT_LAT, DEFAULT_LON));
+  const refreshSky = () => {
+    const p = skyPlace(client?.state ?? null);
+    sky?.update(astroInputs(new Date(), p.lat, p.lon));
+  };
   refreshSky();
   sky?.start();
   window.setInterval(refreshSky, 30_000);
 
-  const nickname = load(NICK_KEY) ?? "";
   const nickInput = maybeById<HTMLInputElement>("nick");
   if (nickInput) nickInput.value = nickname;
 
-  const client = new RoomClient(roomId, nickname ? { nickname } : {});
   const renderer = new TimerRenderer();
   const chip = createConnectionChip();
   const floatReaction = initReactions((kind) => client.react(kind));
@@ -40,6 +42,7 @@ export function initRoomPage(): void {
 
   client.on("status", chip);
   client.on("state", (s) => {
+    refreshSky();
     setViewers(s.viewers);
     setReactionCounts(s.reactions);
   });
