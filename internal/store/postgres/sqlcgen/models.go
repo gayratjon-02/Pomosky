@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+type AnonymousFocu struct {
+	ID        int64
+	StartedAt time.Time
+	FocusedMs int64
+}
+
 type FocusSession struct {
 	ID          int64
 	RoomID      string

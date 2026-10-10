@@ -79,3 +79,41 @@ func (c *Controllers) StatsAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	writeStats(w, stats)
 }
+
+type periodJSON struct {
+	Seconds  int64 `json:"seconds"`
+	Sessions int   `json:"sessions"`
+}
+
+type communityJSON struct {
+	Today periodJSON `json:"today"`
+	Week  periodJSON `json:"week"`
+	Month periodJSON `json:"month"`
+	All   periodJSON `json:"all"`
+	Days  []dayJSON  `json:"days"`
+}
+
+func toCommunityJSON(c models.CommunityStats) communityJSON {
+	p := func(x models.Period) periodJSON { return periodJSON{Seconds: x.Seconds, Sessions: x.Sessions} }
+	days := make([]dayJSON, 0, len(c.Days))
+	for _, d := range c.Days {
+		days = append(days, dayJSON{Date: d.Date, Seconds: d.Seconds, Sessions: d.Sessions})
+	}
+	return communityJSON{Today: p(c.Today), Week: p(c.Week), Month: p(c.Month), All: p(c.All), Days: days}
+}
+
+// CommunityAPI serves GET /api/stats/community?tz=Area/City: how much everyone
+// has focused on Pomosky, public and cached.
+func (c *Controllers) CommunityAPI(w http.ResponseWriter, r *http.Request) {
+	if c.deps.Stats == nil {
+		httpx.WriteError(w, apperr.ErrNotImplemented)
+		return
+	}
+	stats, err := c.deps.Stats.Community(r.Context(), r.URL.Query().Get("tz"))
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	w.Header().Set("Cache-Control", "public, max-age=60")
+	httpx.WriteJSON(w, http.StatusOK, toCommunityJSON(stats))
+}

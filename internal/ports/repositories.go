@@ -41,6 +41,12 @@ type SessionRepository interface {
 // as per-day totals for the statistics view.
 type FocusSessionRepository interface {
 	Create(ctx context.Context, s models.FocusSession) error
+	// CreateAnonymous stores focus time of a room without an owner: when it started and how long, nothing else.
+	CreateAnonymous(ctx context.Context, startedAt time.Time, focused time.Duration) error
+	// CommunityBetween sums everyone's focus time for sessions that started in [from, to).
+	CommunityBetween(ctx context.Context, from, to time.Time) (models.Period, error)
+	// CommunityDaily returns one entry per day with any focus time, for everyone, days taken in tz.
+	CommunityDaily(ctx context.Context, from, to time.Time, tz string) ([]models.DayStat, error)
 	// DailyTotals returns one entry per day that has focus time, for sessions
 	// that started in [from, to). Days are taken in the time zone tz (IANA name).
 	DailyTotals(ctx context.Context, owner models.UserID, from, to time.Time, tz string) ([]models.DayStat, error)

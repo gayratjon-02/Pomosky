@@ -81,3 +81,7 @@ body.landing .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%;
 }
 .hero { position: relative; }
 .hero-sub, .hero-note { color: rgba(255, 255, 255, 0.92); text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7); }
+
+.hero-count { display: inline-flex; gap: var(--space-2); align-items: baseline; padding: 6px 14px; border-radius: var(--radius-pill); background: rgba(6, 10, 24, 0.45); border: 1px solid var(--glass-border); color: rgba(255, 255, 255, 0.92); font-size: var(--text-sm); }
+.hero-count[hidden] { display: none; }
+.hero-count strong { color: var(--warm); font-size: var(--text-md); }

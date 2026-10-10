@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
+import { formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
 
 describe("formatDuration", () => {
   it("formats minutes and hours", () => {
@@ -74,5 +74,15 @@ describe("dayShare and defaultDay", () => {
     expect(defaultDay(days, "2026-10-10")).toBe("2026-09-02");
     expect(defaultDay([{ date: "2026-09-01", seconds: 0, sessions: 0 }], "2026-10-10")).toBe("2026-09-01");
     expect(defaultDay([], "2026-10-10")).toBe("");
+  });
+});
+
+describe("formatTotal", () => {
+  it("switches to plain hours for big numbers", () => {
+    expect(formatTotal(0)).toBe("0m");
+    expect(formatTotal(42 * 60)).toBe("42m");
+    expect(formatTotal(7 * 3600 + 5 * 60)).toBe("7h 05m");
+    expect(formatTotal(1234 * 3600 + 59)).toBe("1,234 h");
+    expect(formatTotal(100 * 3600)).toBe("100 h");
   });
 });

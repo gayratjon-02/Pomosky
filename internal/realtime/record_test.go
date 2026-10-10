@@ -88,14 +88,22 @@ func TestStartingANewPhaseEndsTheOldOne(t *testing.T) {
 	}
 }
 
-func TestNothingIsRecordedForAnonymousBreaksOrBlips(t *testing.T) {
-	anon, anonRec := ownedRoom("")
+func TestAnonymousRoomsAreRecordedAsAnonymous(t *testing.T) {
+	anon, rec := ownedRoom("")
 	startFocus(t, anon, t0, 25*time.Minute)
 	_ = anon.Apply(room.TimerReset{}, t0.Add(10*time.Minute))
-	anon.sweep(t0.Add(time.Hour), 24*time.Hour)
-	if len(anonRec.got) != 0 {
-		t.Fatalf("anonymous room recorded %+v", anonRec.got)
+	if len(rec.got) != 1 || !rec.got[0].Anonymous || rec.got[0].Focused != 10*time.Minute {
+		t.Fatalf("recorded %+v", rec.got)
 	}
+	owned, ownedRec := ownedRoom("u1")
+	startFocus(t, owned, t0, 25*time.Minute)
+	_ = owned.Apply(room.TimerReset{}, t0.Add(10*time.Minute))
+	if len(ownedRec.got) != 1 || ownedRec.got[0].Anonymous {
+		t.Fatalf("owned room recorded %+v", ownedRec.got)
+	}
+}
+
+func TestNothingIsRecordedForBreaksOrBlips(t *testing.T) {
 
 	rh, rec := ownedRoom("u1")
 	if err := rh.Apply(room.TimerStart{Phase: room.PhaseBreak, Duration: 5 * time.Minute}, t0); err != nil {

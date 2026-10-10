@@ -1,4 +1,6 @@
 import { maybeById } from "../core/dom";
+import { fetchCommunity } from "../stats/community";
+import { formatTotal } from "../stats/format";
 import { createSky, moonLight, moonPosition, sunPosition } from "../sky";
 
 // Landing page: a time-lapse of one day over Seoul loops behind the hero so the
@@ -42,4 +44,15 @@ export function initLanding(): void {
     const elapsed = (performance.now() - t0) / 1000;
     apply(new Date(base.getTime() + (elapsed / DAY_SECONDS) * 86_400_000));
   }, 500);
+}
+
+/** "1,234 h focused together so far", from the community totals; hidden while there is nothing to show. */
+export async function showCommunityLine(): Promise<void> {
+  const line = maybeById("community-line");
+  const hours = maybeById("community-hours");
+  if (!line || !hours) return;
+  const stats = await fetchCommunity();
+  if (!stats || stats.all.seconds < 60) return;
+  hours.textContent = formatTotal(stats.all.seconds);
+  line.hidden = false;
 }

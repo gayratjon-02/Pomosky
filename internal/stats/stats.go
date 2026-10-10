@@ -4,6 +4,7 @@ package stats
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/apperr"
@@ -14,17 +15,28 @@ import (
 // maxStreakLookback bounds the streak query; a streak longer than this is shown as this many days.
 const maxStreakLookback = 400 * 24 * time.Hour
 
+// communityCacheTTL keeps the public totals from hitting the database on every page view.
+const communityCacheTTL = time.Minute
+
 // Service implements ports.StatsReader.
 type Service struct {
 	sessions ports.FocusSessionRepository
 	clock    ports.Clock
+
+	mu        sync.Mutex
+	community map[string]communityEntry // by time zone
+}
+
+type communityEntry struct {
+	stats models.CommunityStats
+	at    time.Time
 }
 
 var _ ports.StatsReader = (*Service)(nil)
 
 // New creates the statistics Service.
 func New(sessions ports.FocusSessionRepository, clock ports.Clock) *Service {
-	return &Service{sessions: sessions, clock: clock}
+	return &Service{sessions: sessions, clock: clock, community: map[string]communityEntry{}}
 }
 
 // Month implements ports.StatsReader.
@@ -115,4 +127,70 @@ func streak(active []string, ref time.Time, refIsToday bool) int {
 		d = d.AddDate(0, 0, -1)
 	}
 	return n
+}
+
+// Community implements ports.StatsReader: today, the last 7 days, this month
+// and all time for everyone, plus the last 30 days day by day. The result is
+// cached for a minute per time zone.
+func (s *Service) Community(ctx context.Context, tz string) (models.CommunityStats, error) {
+	loc, err := time.LoadLocation(tz)
+	if err != nil || tz == "" {
+		loc = time.UTC
+	}
+	key := loc.String()
+	now := s.clock.Now()
+
+	s.mu.Lock()
+	entry, ok := s.community[key]
+	s.mu.Unlock()
+	if ok && now.Sub(entry.at) < communityCacheTTL {
+		return entry.stats, nil
+	}
+
+	local := now.In(loc)
+	today := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, loc)
+	tomorrow := today.AddDate(0, 0, 1)
+	weekStart := today.AddDate(0, 0, -6)
+	monthStart := time.Date(local.Year(), local.Month(), 1, 0, 0, 0, 0, loc)
+	chartStart := today.AddDate(0, 0, -29)
+	epoch := time.Unix(0, 0)
+
+	var out models.CommunityStats
+	for _, w := range []struct {
+		dst      *models.Period
+		from, to time.Time
+	}{
+		{&out.Today, today, tomorrow},
+		{&out.Week, weekStart, tomorrow},
+		{&out.Month, monthStart, tomorrow},
+		{&out.All, epoch, tomorrow},
+	} {
+		p, err := s.sessions.CommunityBetween(ctx, w.from, w.to)
+		if err != nil {
+			return models.CommunityStats{}, err
+		}
+		*w.dst = p
+	}
+
+	rows, err := s.sessions.CommunityDaily(ctx, chartStart, tomorrow, key)
+	if err != nil {
+		return models.CommunityStats{}, err
+	}
+	byDate := make(map[string]models.DayStat, len(rows))
+	for _, r := range rows {
+		byDate[r.Date] = r
+	}
+	for d := chartStart; d.Before(tomorrow); d = d.AddDate(0, 0, 1) {
+		date := d.Format("2006-01-02")
+		day, ok := byDate[date]
+		if !ok {
+			day = models.DayStat{Date: date}
+		}
+		out.Days = append(out.Days, day)
+	}
+
+	s.mu.Lock()
+	s.community[key] = communityEntry{stats: out, at: now}
+	s.mu.Unlock()
+	return out, nil
 }

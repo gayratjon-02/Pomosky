@@ -23,3 +23,27 @@ JOIN rooms r ON r.id = fs.room_id
 WHERE r.owner_user_id = sqlc.arg(owner)::text
   AND fs.started_at >= sqlc.arg(since)::timestamptz
 ORDER BY day DESC;
+
+-- name: CreateAnonymousFocus :exec
+INSERT INTO anonymous_focus (started_at, focused_ms) VALUES ($1, $2);
+
+-- Community totals: logged-in hosts and anonymous hosts together.
+-- name: CommunityFocusBetween :one
+SELECT COALESCE(SUM(t.ms), 0)::bigint AS focused_ms, COUNT(*)::int AS sessions
+FROM (
+    SELECT focused_ms AS ms FROM focus_sessions WHERE started_at >= sqlc.arg(from_ts)::timestamptz AND started_at < sqlc.arg(to_ts)::timestamptz
+    UNION ALL
+    SELECT focused_ms AS ms FROM anonymous_focus WHERE started_at >= sqlc.arg(from_ts)::timestamptz AND started_at < sqlc.arg(to_ts)::timestamptz
+) t;
+
+-- name: CommunityDailyFocus :many
+SELECT (t.started_at AT TIME ZONE sqlc.arg(tz)::text)::date AS day,
+       SUM(t.ms)::bigint AS focused_ms,
+       COUNT(*)::int AS sessions
+FROM (
+    SELECT started_at, focused_ms AS ms FROM focus_sessions WHERE started_at >= sqlc.arg(from_ts)::timestamptz AND started_at < sqlc.arg(to_ts)::timestamptz
+    UNION ALL
+    SELECT started_at, focused_ms AS ms FROM anonymous_focus WHERE started_at >= sqlc.arg(from_ts)::timestamptz AND started_at < sqlc.arg(to_ts)::timestamptz
+) t
+GROUP BY day
+ORDER BY day;

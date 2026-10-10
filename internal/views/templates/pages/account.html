@@ -90,6 +90,25 @@
     </div>
   </section>
 
+
+  <section class="acct-section" id="community" aria-labelledby="community-title">
+    <div class="month-nav">
+      <h2 id="community-title">Everyone on Pomosky</h2>
+      <span class="muted fine">Focus time of all hosts, logged in or not</span>
+    </div>
+    <div class="cards">
+      <article class="glass card-stat"><span class="card-k">Today</span><strong class="card-v" id="c-today">-</strong><span class="card-sub" id="c-today-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">Last 7 days</span><strong class="card-v" id="c-week">-</strong><span class="card-sub" id="c-week-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">This month</span><strong class="card-v" id="c-month">-</strong><span class="card-sub" id="c-month-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">All time</span><strong class="card-v" id="c-all">-</strong><span class="card-sub" id="c-all-n"></span></article>
+    </div>
+    <article class="glass chart-card">
+      <h3>Last 30 days</h3>
+      <div class="bars" id="c-bars" role="img" aria-label="Focus time of everyone, per day"></div>
+      <p class="muted fine" id="c-detail">Hover or tap a day to see it.</p>
+    </article>
+  </section>
+
   {{if not .Data.Preview}}
   <section class="acct-section glass danger-zone">
     <h2>Your data</h2>

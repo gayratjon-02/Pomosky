@@ -14,4 +14,5 @@ type FocusSession struct {
 	EndedAt     time.Time
 	Focused     time.Duration // time actually spent focusing; pauses are not counted
 	PeakViewers int
+	Anonymous   bool // the room has no owner: only the time is kept, for the community totals
 }

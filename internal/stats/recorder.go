@@ -49,7 +49,13 @@ func (r *Recorder) run() {
 	defer close(r.done)
 	for s := range r.ch {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		if err := r.repo.Create(ctx, s); err != nil {
+		var err error
+		if s.Anonymous {
+			err = r.repo.CreateAnonymous(ctx, s.StartedAt, s.Focused)
+		} else {
+			err = r.repo.Create(ctx, s)
+		}
+		if err != nil {
 			r.log.Error("store focus session", "room", s.RoomID, "err", err)
 		}
 		cancel()

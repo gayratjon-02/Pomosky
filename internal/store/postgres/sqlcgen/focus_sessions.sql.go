@@ -49,6 +49,95 @@ func (q *Queries) ActiveFocusDays(ctx context.Context, arg ActiveFocusDaysParams
 	return items, nil
 }
 
+const communityDailyFocus = `-- name: CommunityDailyFocus :many
+SELECT (t.started_at AT TIME ZONE $1::text)::date AS day,
+       SUM(t.ms)::bigint AS focused_ms,
+       COUNT(*)::int AS sessions
+FROM (
+    SELECT started_at, focused_ms AS ms FROM focus_sessions WHERE started_at >= $2::timestamptz AND started_at < $3::timestamptz
+    UNION ALL
+    SELECT started_at, focused_ms AS ms FROM anonymous_focus WHERE started_at >= $2::timestamptz AND started_at < $3::timestamptz
+) t
+GROUP BY day
+ORDER BY day
+`
+
+type CommunityDailyFocusParams struct {
+	Tz     string
+	FromTs time.Time
+	ToTs   time.Time
+}
+
+type CommunityDailyFocusRow struct {
+	Day       time.Time
+	FocusedMs int64
+	Sessions  int32
+}
+
+func (q *Queries) CommunityDailyFocus(ctx context.Context, arg CommunityDailyFocusParams) ([]CommunityDailyFocusRow, error) {
+	rows, err := q.db.QueryContext(ctx, communityDailyFocus, arg.Tz, arg.FromTs, arg.ToTs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CommunityDailyFocusRow
+	for rows.Next() {
+		var i CommunityDailyFocusRow
+		if err := rows.Scan(&i.Day, &i.FocusedMs, &i.Sessions); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const communityFocusBetween = `-- name: CommunityFocusBetween :one
+SELECT COALESCE(SUM(t.ms), 0)::bigint AS focused_ms, COUNT(*)::int AS sessions
+FROM (
+    SELECT focused_ms AS ms FROM focus_sessions WHERE started_at >= $1::timestamptz AND started_at < $2::timestamptz
+    UNION ALL
+    SELECT focused_ms AS ms FROM anonymous_focus WHERE started_at >= $1::timestamptz AND started_at < $2::timestamptz
+) t
+`
+
+type CommunityFocusBetweenParams struct {
+	FromTs time.Time
+	ToTs   time.Time
+}
+
+type CommunityFocusBetweenRow struct {
+	FocusedMs int64
+	Sessions  int32
+}
+
+// Community totals: logged-in hosts and anonymous hosts together.
+func (q *Queries) CommunityFocusBetween(ctx context.Context, arg CommunityFocusBetweenParams) (CommunityFocusBetweenRow, error) {
+	row := q.db.QueryRowContext(ctx, communityFocusBetween, arg.FromTs, arg.ToTs)
+	var i CommunityFocusBetweenRow
+	err := row.Scan(&i.FocusedMs, &i.Sessions)
+	return i, err
+}
+
+const createAnonymousFocus = `-- name: CreateAnonymousFocus :exec
+INSERT INTO anonymous_focus (started_at, focused_ms) VALUES ($1, $2)
+`
+
+type CreateAnonymousFocusParams struct {
+	StartedAt time.Time
+	FocusedMs int64
+}
+
+func (q *Queries) CreateAnonymousFocus(ctx context.Context, arg CreateAnonymousFocusParams) error {
+	_, err := q.db.ExecContext(ctx, createAnonymousFocus, arg.StartedAt, arg.FocusedMs)
+	return err
+}
+
 const createFocusSession = `-- name: CreateFocusSession :exec
 INSERT INTO focus_sessions (room_id, started_at, ended_at, focused_ms, peak_viewers)
 VALUES ($1, $2, $3, $4, $5)

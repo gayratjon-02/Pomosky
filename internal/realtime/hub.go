@@ -157,7 +157,7 @@ func newRoomHub(state room.State, owner models.UserID, log *slog.Logger, recorde
 
 // recordLocked writes the focus time of a timer that is ending to the recorder.
 func (r *RoomHub) recordLocked(t room.Timer, now time.Time) {
-	if r.owner == "" || r.recorder == nil {
+	if r.recorder == nil {
 		return
 	}
 	focused, ok := room.FocusedTime(t, now)
@@ -173,6 +173,7 @@ func (r *RoomHub) recordLocked(t room.Timer, now time.Time) {
 		EndedAt:     now,
 		Focused:     focused,
 		PeakViewers: r.peak,
+		Anonymous:   r.owner == "",
 	})
 	r.peak = len(r.clients)
 }
@@ -184,7 +185,7 @@ func (r *RoomHub) sweep(now time.Time, idleTTL time.Duration) (expired bool) {
 	defer r.mu.Unlock()
 
 	t := r.state.Timer
-	if r.owner != "" && t.Phase == room.PhaseFocus && t.Remaining(now) == 0 && !t.StartedAt.Equal(r.credited) {
+	if t.Phase == room.PhaseFocus && t.Remaining(now) == 0 && !t.StartedAt.Equal(r.credited) {
 		r.recordLocked(t, t.StartedAt.Add(t.Duration)) // at its end, the whole phase has been focused
 		r.credited = t.StartedAt
 	}

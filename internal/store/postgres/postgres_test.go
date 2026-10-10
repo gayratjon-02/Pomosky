@@ -214,3 +214,40 @@ func TestCleanupQueries(t *testing.T) {
 		t.Fatalf("room with history was deleted: %v", err)
 	}
 }
+
+func TestCommunityTotalsIncludeAnonymousFocus(t *testing.T) {
+	db := testDB(t)
+	ctx := context.Background()
+	if _, err := db.SQL().Exec("TRUNCATE anonymous_focus"); err != nil {
+		t.Fatal(err)
+	}
+	u := newUser(t, db, "u1", "a@example.com")
+	owner := u.ID
+	if err := NewRoomRepo(db).Create(ctx, models.Room{ID: "aaaaaaaa", OwnerUserID: &owner, HostTokenHash: "x"}); err != nil {
+		t.Fatal(err)
+	}
+	focus := NewFocusSessionRepo(db)
+	day := time.Date(2026, 10, 2, 1, 0, 0, 0, time.UTC)
+	if err := focus.Create(ctx, models.FocusSession{RoomID: "aaaaaaaa", StartedAt: day, EndedAt: day, Focused: 30 * time.Minute}); err != nil {
+		t.Fatal(err)
+	}
+	if err := focus.CreateAnonymous(ctx, day.Add(time.Hour), 20*time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	if err := focus.CreateAnonymous(ctx, day.AddDate(0, -2, 0), 10*time.Minute); err != nil { // an older one
+		t.Fatal(err)
+	}
+
+	month, err := focus.CommunityBetween(ctx, time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC), time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC))
+	if err != nil || month.Seconds != 3000 || month.Sessions != 2 {
+		t.Fatalf("month: %+v %v", month, err)
+	}
+	all, _ := focus.CommunityBetween(ctx, time.Unix(0, 0), time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC))
+	if all.Seconds != 3600 || all.Sessions != 3 {
+		t.Fatalf("all: %+v", all)
+	}
+	days, err := focus.CommunityDaily(ctx, time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC), time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC), "UTC")
+	if err != nil || len(days) != 1 || days[0].Date != "2026-10-02" || days[0].Seconds != 3000 {
+		t.Fatalf("daily: %+v %v", days, err)
+	}
+}

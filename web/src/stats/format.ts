@@ -97,3 +97,24 @@ export function defaultDay(days: DayStat[], todayKey: string): string {
   if (days.some((d) => d.date === todayKey)) return todayKey;
   return busiest(days)?.date ?? days[0]?.date ?? "";
 }
+
+/** Big totals read better in hours: "42m", "7h 05m", "1,234 h". */
+export function formatTotal(seconds: number): string {
+  const hours = Math.floor(Math.max(0, seconds) / 3600);
+  if (hours >= 100) return `${hours.toLocaleString("en-US")} h`;
+  return formatDuration(seconds);
+}
+
+export interface Period {
+  seconds: number;
+  sessions: number;
+}
+
+/** The JSON of GET /api/stats/community (see docs/api.md). */
+export interface CommunityStats {
+  today: Period;
+  week: Period;
+  month: Period;
+  all: Period;
+  days: DayStat[];
+}

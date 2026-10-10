@@ -18,6 +18,7 @@
 | POST | `/account/delete` | Delete the account and its data (`confirm=delete`) | implemented |
 | GET | `/api/places?q=` | Place search for the host (JSON `{places:[{name,region,country,lat,lon,tz}]}`), rate limited, via Open-Meteo geocoding | implemented |
 | GET | `/api/stats/demo?month=YYYY-MM` | Made-up example statistics in the same shape, for the logged-out preview | implemented |
+| GET | `/api/stats/community?tz=` | Focus time of everyone: today, last 7 days, this month, all time and the last 30 days (JSON), public and cached for a minute | implemented |
 | GET | `/api/stats?month=YYYY-MM&tz=Area/City` | Monthly focus statistics of the logged-in user (JSON, see below) | implemented |
 | GET | `/static/*` | Built frontend assets | implemented |
 | GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |
@@ -65,3 +66,20 @@ place and at most 60 upstream calls a minute. If the upstream fails, the last sn
 15 minutes and they are scaled). `fogDensity` and `thunder` come from the WMO weather code, which
 also fills precipitation when the numbers are 0 but the code says rain or snow.
 Errors: 400 bad room id, 404 unknown room or no place set, 502 weather unavailable.
+
+## GET /api/stats/community
+
+Query: `tz=Area/City` (days are taken in this zone; unknown names fall back to UTC). Public, cached for a minute.
+It sums the focus time of logged-in hosts and of anonymous hosts (stored only as start time and length).
+
+```json
+{
+  "today": { "seconds": 3600, "sessions": 2 },
+  "week":  { "seconds": 5400, "sessions": 3 },
+  "month": { "seconds": 6000, "sessions": 4 },
+  "all":   { "seconds": 13200, "sessions": 7 },
+  "days":  [{ "date": "2026-09-11", "seconds": 0, "sessions": 0 }]
+}
+```
+
+`week` is the last 7 days including today, `month` the current calendar month, `days` the last 30 days (every day present).

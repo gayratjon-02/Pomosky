@@ -40,6 +40,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.Handle("GET /api/places", placeLimit(http.HandlerFunc(c.PlacesAPI)))
 	mux.HandleFunc("GET /api/stats", c.StatsAPI)
 	mux.HandleFunc("GET /api/stats/demo", c.DemoStats)
+	mux.HandleFunc("GET /api/stats/community", c.CommunityAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
 

@@ -29,6 +29,8 @@ type Accounts interface {
 
 // StatsReader serves the monthly statistics of a user.
 type StatsReader interface {
+	// Community returns the totals of everyone on Pomosky, days taken in tz (invalid names fall back to UTC).
+	Community(ctx context.Context, tz string) (models.CommunityStats, error)
 	// Month returns the statistics of month ("YYYY-MM") with days grouped in
 	// the time zone tz (IANA name; invalid names fall back to UTC).
 	Month(ctx context.Context, user models.UserID, month, tz string) (models.MonthStats, error)
