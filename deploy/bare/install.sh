@@ -120,8 +120,7 @@ if [ "$domain" = "localhost" ]; then site=":80"; else site="$domain"; fi
 cat >/etc/caddy/Caddyfile <<CADDY
 ${site} {
 	encode zstd gzip
-	@static path /static/*
-	header @static Cache-Control "public, max-age=300"
+	# Cache headers of /static/* come from the app (hashed files are immutable).
 	reverse_proxy 127.0.0.1:8080
 	header {
 		Strict-Transport-Security "max-age=31536000"
