@@ -22,6 +22,7 @@
 | POST | `/account/nickname`, `/account/leaderboard` | Change the public name; show or hide yourself on the leaderboard | implemented |
 | GET | `/api/stats/community?tz=` | Focus time of everyone: today, last 7 days, this month, all time and the last 30 days (JSON), public and cached for a minute | implemented |
 | GET | `/api/stats?month=YYYY-MM&tz=Area/City` | Monthly focus statistics of the logged-in user (JSON, see below) | implemented |
+| GET | `/api/admin/traffic` | Anonymous traffic of the last 30 UTC days for operators: visitors and page views per day, rooms created, logins, sources, pages, devices, browsers, countries and the funnel (JSON, 404 for everyone else) | implemented |
 | GET | `/static/*` | Built frontend assets | implemented |
 | GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |
 | GET | `/__dev/reload.js` | Browser auto-reload script; only with `DEV_RELOAD=true` | implemented |
@@ -86,3 +87,7 @@ It sums the focus time of logged-in hosts and of anonymous hosts (stored only as
 ```
 
 `week` is the last 7 days including today, `month` the current calendar month, `days` the last 30 days (every day present).
+
+## Traffic analytics
+
+Every successful HTML page counts as a `pageview`; creating a room, starting a login and finishing a login are counted as `room_created`, `login_started` and `login_done`. Nothing is stored that identifies a person: no cookie, no IP address, no room id (paths are normalised to `/r/:id`). The visitor is `HMAC(key, UTC day, client address, User-Agent)`, truncated, so it changes every day. Bots, `DNT: 1` and `Sec-GPC: 1` are skipped. The source is `utm_source` (with `utm_medium`, `utm_campaign`), else the referrer's site, else an in-app browser (Instagram, TikTok, Facebook, Telegram), else `direct`. The country comes from `CF-IPCountry` when the site runs behind Cloudflare. Use `?utm_source=instagram&utm_medium=reel&utm_campaign=launch` in links to tell channels apart.
