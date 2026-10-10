@@ -15,6 +15,16 @@ APP_DIR=/opt/pomosky
 ENV_FILE=/etc/pomosky/pomosky.env
 random() { openssl rand -base64 48 | tr -d '/+=\n' | cut -c1-48; }
 
+# Small servers (under 2 GB RAM) get a 2 GB swap file so a memory spike does not kill the database.
+if [ "$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)" -lt 2000 ] && [ -z "$(swapon --show --noheadings)" ]; then
+  fallocate -l 2G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile >/dev/null
+  swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  echo "created a 2 GB swap file"
+fi
+
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y postgresql debian-keyring debian-archive-keyring apt-transport-https curl gnupg openssl ca-certificates
