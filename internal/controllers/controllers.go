@@ -1,0 +1,37 @@
+package controllers
+
+import (
+	"context"
+	"log/slog"
+
+	"github.com/gayratjon-02/Pomosky/internal/config"
+	"github.com/gayratjon-02/Pomosky/internal/ports"
+	"github.com/gayratjon-02/Pomosky/internal/views"
+	"github.com/gayratjon-02/Pomosky/internal/weather"
+)
+
+// WeatherSource is what controllers need from the weather layer.
+// *weather.Service implements it.
+type WeatherSource interface {
+	Current(ctx context.Context, lat, lon float64) (weather.Snapshot, error)
+}
+
+// Deps are the collaborators of the controllers, wired in internal/app.
+// Fields may be nil until the corresponding stage is implemented.
+type Deps struct {
+	Config  config.Config
+	Log     *slog.Logger
+	Views   *views.Renderer
+	Rooms   ports.RoomRepository
+	Clock   ports.Clock
+	IDs     ports.IDGenerator
+	Weather WeatherSource
+}
+
+// Controllers groups all handlers; methods are split over files per area.
+type Controllers struct {
+	deps Deps
+}
+
+// New creates the controllers.
+func New(d Deps) *Controllers { return &Controllers{deps: d} }
