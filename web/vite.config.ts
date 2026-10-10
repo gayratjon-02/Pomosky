@@ -1,10 +1,13 @@
 import { defineConfig } from "vite";
 
-// Stable output names so the Go templates can reference /static/<name>.js directly.
+// Built files carry a content hash in their name, and a manifest maps each entry
+// ("landing", "base", ...) to its current file. The Go templates look names up in the
+// manifest (see internal/assets), so a new build can never mix with cached old files.
 export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    manifest: true, // dist/.vite/manifest.json
     rollupOptions: {
       input: {
         landing: "src/entries/landing.ts",
@@ -19,9 +22,9 @@ export default defineConfig({
         base: "src/styles/base.css",
       },
       output: {
-        entryFileNames: "[name].js",
-        chunkFileNames: "chunks/[name].js",
-        assetFileNames: "[name][extname]",
+        entryFileNames: "[name].[hash].js",
+        chunkFileNames: "chunks/[name].[hash].js",
+        assetFileNames: "[name].[hash][extname]",
       },
     },
   },
