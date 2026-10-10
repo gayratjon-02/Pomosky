@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type Config struct {
 	DatabaseURL   string
 	HostTokenSalt string
 	RoomIdleTTL   time.Duration // how long a room with nobody connected stays alive
+	AdminEmails   []string      // logged-in users with these (verified) emails may open /admin
 
 	// TrustProxy makes the server believe X-Forwarded-For. Enable it only when
 	// every request comes through a proxy you control (Caddy), otherwise clients
@@ -68,6 +70,7 @@ func Load() Config {
 		DatabaseURL:   os.Getenv("DATABASE_URL"),
 		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
 		RoomIdleTTL:   getenvDuration("ROOM_IDLE_TTL", 10*time.Minute),
+		AdminEmails:   splitEmails(os.Getenv("ADMIN_EMAILS")),
 		TrustProxy:    getenvBool("TRUST_PROXY", false),
 		Dev:           getenvBool("DEV_RELOAD", false),
 		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),
@@ -142,4 +145,15 @@ func getenvDuration(key string, def time.Duration) time.Duration {
 		}
 	}
 	return def
+}
+
+// splitEmails parses a comma or space separated list into lower-case addresses.
+func splitEmails(raw string) []string {
+	var out []string
+	for _, part := range strings.FieldsFunc(raw, func(r rune) bool { return r == ',' || r == ';' || r == ' ' || r == '\n' || r == '\t' }) {
+		if e := strings.ToLower(strings.TrimSpace(part)); e != "" {
+			out = append(out, e)
+		}
+	}
+	return out
 }

@@ -113,3 +113,19 @@ func upper(s string) string {
 	}
 	return string(b)
 }
+
+func TestSplitEmails(t *testing.T) {
+	got := splitEmails(" Boss@Example.com, other@example.com;third@example.com\nfourth@example.com ,, ")
+	want := []string{"boss@example.com", "other@example.com", "third@example.com", "fourth@example.com"}
+	if len(got) != len(want) {
+		t.Fatalf("%v", got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("%v", got)
+		}
+	}
+	if splitEmails("") != nil {
+		t.Fatal("empty input should give nil")
+	}
+}
