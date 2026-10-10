@@ -23,8 +23,9 @@ type Hub struct {
 }
 
 var (
-	_ ports.Broadcaster = (*Hub)(nil)
-	_ ports.LiveRooms   = (*Hub)(nil)
+	_ ports.Broadcaster   = (*Hub)(nil)
+	_ ports.LiveRooms     = (*Hub)(nil)
+	_ ports.LiveInspector = (*Hub)(nil)
 )
 
 // NewHub creates an empty Hub. recorder receives the finished focus phases of
@@ -110,6 +111,36 @@ func (h *Hub) Sweep(now time.Time) {
 			h.log.Info("room closed after being empty", "room", id)
 		}
 	}
+}
+
+// LiveSummary implements ports.LiveInspector: counts of rooms, connected
+// browsers and timer phases right now. Nothing identifying is returned.
+func (h *Hub) LiveSummary() models.LiveSummary {
+	h.mu.RLock()
+	rooms := make([]*RoomHub, 0, len(h.rooms))
+	for _, rh := range h.rooms {
+		rooms = append(rooms, rh)
+	}
+	h.mu.RUnlock()
+
+	var sum models.LiveSummary
+	sum.Rooms = len(rooms)
+	for _, rh := range rooms {
+		rh.mu.Lock()
+		sum.Clients += len(rh.clients)
+		switch rh.state.Timer.Phase {
+		case room.PhaseFocus:
+			sum.Focus++
+		case room.PhaseBreak:
+			sum.Break++
+		case room.PhasePaused:
+			sum.Paused++
+		default:
+			sum.Idle++
+		}
+		rh.mu.Unlock()
+	}
+	return sum
 }
 
 // Len returns the number of live rooms.
