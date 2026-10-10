@@ -107,6 +107,15 @@ export function initHostPage(): void {
   }, 250);
 
   const label = () => maybeById<HTMLInputElement>("label")?.value.trim() ?? "";
+  // A line under the buttons says what "start" will do, from the minutes below.
+  const planLine = maybeById("plan-line");
+  const showPlan = () => {
+    if (planLine) planLine.textContent = `${num("focus-min", 25)} min focus, ${num("break-min", 5)} min break`;
+  };
+  showPlan();
+  maybeById("focus-min")?.addEventListener("input", showPlan);
+  maybeById("break-min")?.addEventListener("input", showPlan);
+
   const canStart = () => !!client.state && controlsFor(client.state.timer, client.clock.serverNow()).showStart;
   focusBtn?.addEventListener("click", () => {
     if (canStart()) client.start({ phase: "focus", durationMs: num("focus-min", 25) * 60_000, label: label() });
@@ -122,6 +131,7 @@ export function initHostPage(): void {
     if (!b) return;
     maybeById<HTMLInputElement>("focus-min")!.value = b.dataset["focus"] ?? "25";
     maybeById<HTMLInputElement>("break-min")!.value = b.dataset["break"] ?? "5";
+    showPlan();
   });
 
   // Place of the sky. Picking one sends it to the server, which rounds it to about 1 km.
