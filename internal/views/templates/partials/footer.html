@@ -2,6 +2,7 @@
 <footer class="site-footer">
   <small>&copy; {{year}} Pomosky. Work together under a live sky.</small>
   <nav class="row" aria-label="Footer">
+    <button type="button" class="btn btn-ghost btn-sm theme-toggle" id="theme-toggle" aria-pressed="false">Dark theme</button>
     <a href="/privacy">Privacy</a>
     {{if .User}}<a href="/account">Account</a>{{else}}<a href="/login">Log in</a>{{end}}
   </nav>
