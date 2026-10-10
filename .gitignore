@@ -19,3 +19,6 @@ web/dist/
 
 # Local build output (air)
 tmp/
+
+# Secrets kept on this machine only
+secrets.md
