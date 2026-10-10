@@ -3,7 +3,7 @@
   <small>&copy; {{year}} Pomosky. Work together under a live sky.</small>
   <nav class="row" aria-label="Footer">
     <a href="/privacy">Privacy</a>
-    <a href="/login">Log in</a>
+    {{if .User}}<a href="/account">Account</a>{{else}}<a href="/login">Log in</a>{{end}}
   </nav>
 </footer>
 {{end}}
