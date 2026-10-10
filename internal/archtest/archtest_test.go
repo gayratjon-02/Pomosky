@@ -28,6 +28,7 @@ var allowed = map[string][]string{
 	"platform/httpx":     {"apperr"},
 	"platform/ratelimit": {},
 	"moderation":         {},
+	"devreload":          {},
 	"analytics":          {"room"},
 	"views":              {"models"},
 	"auth":               {"models", "ports", "apperr"},

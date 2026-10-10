@@ -36,6 +36,7 @@ only the internal packages listed in `allowed` in `archtest_test.go`. In short:
 | Package | May import |
 |---|---|
 | room, apperr, weather, config | nothing internal (room/apperr/weather/models: no third-party either) |
+| devreload | nothing internal (development-only helper, standard library only) |
 | models | room |
 | ports | room, models |
 | store/postgres | models, ports, room, apperr |
