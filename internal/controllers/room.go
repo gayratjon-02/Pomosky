@@ -19,8 +19,9 @@ func (c *Controllers) liveRoom(w http.ResponseWriter, r *http.Request) (room.ID,
 	id := room.ID(r.PathValue("id"))
 	if !id.Valid() || c.deps.Live == nil || !c.deps.Live.Has(id) {
 		c.render(w, http.StatusNotFound, "error", views.PageData{
-			Title: "This room is not live",
-			Data:  "The host may have ended the session. Ask for a new link, or start your own room.",
+			Title:   "This room is not live",
+			Scripts: []string{"/static/ambient.js"},
+			Data:    "The host may have ended the session. Ask for a new link, or start your own room.",
 		})
 		return "", false
 	}

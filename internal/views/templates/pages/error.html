@@ -1,7 +1,15 @@
+{{define "bodyclass"}}error{{end}}
 {{define "content"}}
-<section class="error-page">
-  <h1>{{if .Title}}{{.Title}}{{else}}Something went wrong{{end}}</h1>
-  {{if .Data}}<p>{{.Data}}</p>{{end}}
-  <p><a href="/">Back to the start</a></p>
+<canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
+<section class="auth-wrap">
+  <div class="auth-card glass center-text">
+    <p class="error-emoji" aria-hidden="true">☁️</p>
+    <h1>{{if .Title}}{{.Title}}{{else}}Something went wrong{{end}}</h1>
+    {{if .Data}}<p class="muted">{{.Data}}</p>{{end}}
+    <div class="row row-wrap error-actions">
+      <a class="btn btn-ghost" href="/">Back to the start</a>
+      <form method="post" action="/r/new"><button class="btn btn-primary" type="submit">Start a room</button></form>
+    </div>
+  </div>
 </section>
 {{end}}

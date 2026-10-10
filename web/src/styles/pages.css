@@ -1,0 +1,16 @@
+/* Login, error and other centred card pages. */
+body.auth .sky-canvas,
+body.error .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+
+.auth-wrap { display: grid; place-items: center; min-height: calc(100dvh - var(--header-h) - 60px); padding: var(--space-6) var(--space-4); }
+.auth-card { width: min(440px, 100%); display: grid; gap: var(--space-4); padding: var(--space-6); border-radius: var(--radius-xl); }
+.auth-card h1 { font-size: var(--text-2xl); }
+.auth-card .btn { width: 100%; }
+.auth-skip { text-align: center; font-size: var(--text-sm); }
+.center-text { text-align: center; justify-items: center; }
+.error-emoji { font-size: 3rem; }
+.error-actions { justify-content: center; }
+.error-actions .btn { width: auto; }
+
+.divider { display: flex; align-items: center; gap: var(--space-3); color: var(--fg-dim); font-size: var(--text-sm); }
+.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--glass-border); }

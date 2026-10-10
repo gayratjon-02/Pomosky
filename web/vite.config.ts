@@ -12,6 +12,7 @@ export default defineConfig({
         host: "src/entries/host.ts",
         record: "src/entries/record.ts",
         skylab: "src/entries/skylab.ts",
+        ambient: "src/entries/ambient.ts",
         base: "src/styles/base.css",
       },
       output: {
