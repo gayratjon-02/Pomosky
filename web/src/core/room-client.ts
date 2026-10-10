@@ -6,6 +6,7 @@ import {
   type Envelope,
   type ErrorData,
   type LocationSetData,
+  type PeopleData,
   type PongData,
   type ReactionTickData,
   type StateData,
@@ -16,6 +17,7 @@ import { ReconnectingSocket, type SocketStatus } from "./ws";
 export interface RoomEvents extends Record<string, unknown> {
   status: SocketStatus;
   state: StateData;
+  people: PeopleData;
   tick: ReactionTickData;
   hostOk: undefined;
   error: ErrorData;
@@ -108,6 +110,9 @@ export class RoomClient extends Emitter<RoomEvents> {
         this.emit("state", data);
         break;
       }
+      case ServerMsg.People:
+        this.emit("people", env.data as PeopleData);
+        break;
       case ServerMsg.Pong: {
         const sentAt = this.pendingPings.shift();
         if (sentAt !== undefined) {
