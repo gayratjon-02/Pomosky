@@ -1,6 +1,7 @@
 package realtime
 
 import (
+	"errors"
 	"io"
 	"log/slog"
 	"testing"
@@ -79,12 +80,30 @@ func TestPausedTimeIsNotCounted(t *testing.T) {
 	}
 }
 
-func TestStartingANewPhaseEndsTheOldOne(t *testing.T) {
+func TestStartingAfterTheEndRecordsThePhaseOnce(t *testing.T) {
 	rh, rec := ownedRoom("u1")
 	startFocus(t, rh, t0, 25*time.Minute)
-	startFocus(t, rh, t0.Add(8*time.Minute), 50*time.Minute)
-	if len(rec.got) != 1 || rec.got[0].Focused != 8*time.Minute {
+
+	// The next phase may start once the focus phase has run to its end; the
+	// focus time is recorded once, whether or not the sweep saw it first.
+	if err := rh.Apply(room.TimerStart{Phase: room.PhaseBreak, Duration: 5 * time.Minute}, t0.Add(26*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	rh.sweep(t0.Add(27*time.Minute), time.Hour)
+	if len(rec.got) != 1 || rec.got[0].Focused != 25*time.Minute {
 		t.Fatalf("recorded %+v", rec.got)
+	}
+}
+
+func TestStartingWhileRunningIsRefusedAndRecordsNothing(t *testing.T) {
+	rh, rec := ownedRoom("u1")
+	startFocus(t, rh, t0, 25*time.Minute)
+	err := rh.Apply(room.TimerStart{Phase: room.PhaseFocus, Duration: 50 * time.Minute}, t0.Add(8*time.Minute))
+	if !errors.Is(err, room.ErrInvalidTransition) {
+		t.Fatalf("start while running: %v", err)
+	}
+	if len(rec.got) != 0 || rh.State().Timer.Duration != 25*time.Minute {
+		t.Fatalf("the refused start changed something: %+v %+v", rec.got, rh.State().Timer)
 	}
 }
 
