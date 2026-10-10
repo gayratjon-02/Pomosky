@@ -49,6 +49,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /admin", c.Admin)
 	mux.HandleFunc("GET /api/admin/overview", c.AdminOverviewAPI)
 	mux.HandleFunc("GET /api/admin/users", c.AdminUsersAPI)
+	mux.HandleFunc("GET /api/admin/traffic", c.AdminTrafficAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
 	mux.HandleFunc("GET /robots.txt", c.Robots)
@@ -72,6 +73,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 		middleware.Recover(a.log),
 		middleware.RequestID(),
 		middleware.Logging(a.log),
+		middleware.TrackPageviews(a.tracker),
 		a.securityHeaders(),
 		middleware.OptionalAuth(a.sessions),
 		middleware.CSRF(a.cfg.IsProduction()),
