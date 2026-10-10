@@ -5,14 +5,18 @@
 | GET | `/` | Landing | implemented |
 | GET | `/privacy` | Privacy page | implemented |
 | GET | `/healthz` | Health check | implemented |
-| GET | `/r/{id}` | Room (viewer); `?mode=record` for record mode | stub |
-| GET | `/r/{id}/host` | Host panel | stub |
-| POST | `/r/new` | Create a room, show host token once | stub |
+| GET | `/r/{id}` | Room (viewer); `?mode=record` for record mode | implemented |
+| GET | `/r/{id}/host` | Host panel | implemented |
+| POST | `/r/new` | Create a room; the host token goes in the URL fragment of the redirect. Logged-in hosts own the room | implemented |
 | GET | `/ws/{id}` | WebSocket (see ws-protocol.md); 404 if the room does not exist | implemented |
 | GET | `/api/weather?room={id}` | Cached weather snapshot | stub |
-| GET/POST | `/login`, `/auth/callback`, `/logout` | Optional login | stub |
-| GET | `/account` | Profile and statistics | stub |
-| GET | `/api/stats?month=YYYY-MM` | Monthly focus statistics of the logged-in user (JSON, see below) | stub |
+| GET, POST | `/login` | Login page; POST starts Google or emails a magic link (rate limited) | implemented |
+| GET, POST | `/auth/callback` | Magic link: GET shows a confirmation, POST spends the token and signs in | implemented |
+| GET | `/auth/google/callback` | Google redirect target (`code`, `state`) | implemented |
+| POST | `/logout` | End the session | implemented |
+| GET | `/account` | Profile and monthly statistics; anonymous visitors go to `/login` | implemented |
+| POST | `/account/delete` | Delete the account and its data (`confirm=delete`) | implemented |
+| GET | `/api/stats?month=YYYY-MM&tz=Area/City` | Monthly focus statistics of the logged-in user (JSON, see below) | implemented |
 | GET | `/static/*` | Built frontend assets | implemented |
 | GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |
 | GET | `/__dev/reload.js` | Browser auto-reload script; only with `DEV_RELOAD=true` | implemented |
@@ -22,7 +26,7 @@
 ## GET /api/stats
 
 Query: `month=YYYY-MM` (default: the current month). Needs a login; anonymous requests get 401.
-Days are grouped in the user's time zone (TODO(stage 4): decide how the zone is sent; likely a `tz` parameter or a stored profile setting).
+Days are grouped in the time zone given by `tz` (IANA name, the browser sends its own); an unknown name falls back to UTC. `streakDays` counts consecutive days with focus time ending today (or yesterday while today is still empty); for a past month it ends on the month's last day.
 
 ```json
 {
@@ -38,4 +42,4 @@ Days are grouped in the user's time zone (TODO(stage 4): decide how the zone is 
 
 `days` lists every day of the month in order, including days with no focus time.
 
-State-changing forms use CSRF tokens (TODO stage 4).
+Every POST needs the CSRF token (hidden field `csrf` or header `X-CSRF-Token`, same value as the `pomosky_csrf` cookie).

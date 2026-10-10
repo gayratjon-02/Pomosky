@@ -39,11 +39,15 @@ only the internal packages listed in `allowed` in `archtest_test.go`. In short:
 | devreload | nothing internal (development-only helper, standard library only) |
 | models | room |
 | ports | room, models |
-| store/postgres | models, ports, room, apperr |
+| platform/reqctx | models |
+| store/postgres | models, ports, room, apperr, store/postgres/sqlcgen |
 | auth | models, ports, apperr |
-| realtime | room, ports, moderation, platform/ratelimit |
-| middleware | models, auth, platform/httpx, platform/ratelimit |
-| controllers | models, ports, room, views, config, weather, platform/httpx, apperr |
+| auth/google | auth, models, apperr |
+| mail | ports |
+| stats | models, ports, apperr |
+| realtime | room, models, ports, moderation, platform/ratelimit |
+| middleware | models, platform/httpx, platform/ratelimit, platform/reqctx |
+| controllers | models, ports, room, views, config, weather, platform/httpx, platform/reqctx, apperr |
 | app, cmd | anything (composition root) |
 
 When a rule blocks you, the design is usually telling you something: move the
@@ -76,3 +80,16 @@ browser -- WebSocket --> realtime.Handler -> Client -> RoomHub.Apply(event)
 
 `OptionalAuth` middleware attaches a user when a valid session cookie exists and
 **never blocks**. Only host actions require a host token or room ownership.
+
+- **Sign-in:** Google (authorization code flow, state cookie) or an emailed one-time
+  link. The link opens a confirmation page and only the button spends the token, so mail
+  scanners cannot use it up. Without `DATABASE_URL` login is off and the rest works.
+- **Sessions:** a random token in an HttpOnly cookie; the database keeps only its SHA-256.
+  One-time link tokens are hashed the same way and deleted when used.
+- **CSRF:** every POST needs the double-submit token (`middleware.CSRF`) and a matching Origin.
+- **Rooms and statistics:** a logged-in host's room is stored with them as owner. The hub
+  reports every finished focus phase (`ports.FocusRecorder`; reset, a new start, or the
+  end of the timer found by a 5 s sweep) and `stats.Recorder` writes it asynchronously.
+  Pauses are not counted and sessions under 30 s are ignored. `stats.Service` builds the
+  monthly view (days in the user's time zone, streak, previous-month comparison).
+- **Deleting an account** removes the user, their rooms and their focus history (cascade).
