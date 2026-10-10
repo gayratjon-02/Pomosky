@@ -23,6 +23,7 @@
 | GET | `/static/*` | Built frontend assets | implemented |
 | GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |
 | GET | `/__dev/reload.js` | Browser auto-reload script; only with `DEV_RELOAD=true` | implemented |
+| GET | `/__dev/mobile?path=/account&w=390&h=844` | Shows a page in a phone-sized frame (the dev server lets the site frame itself); only with `DEV_RELOAD=true` | implemented |
 | GET | `/__dev/sky` | Sky lab playground (sliders for time, place and weather); only with `DEV_RELOAD=true` | implemented |
 
 ## GET /api/stats

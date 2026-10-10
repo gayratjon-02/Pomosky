@@ -1,0 +1,16 @@
+{{define "bodyclass"}}mobilelab{{end}}
+{{define "content"}}
+<div class="ml">
+  <nav class="ml-bar" aria-label="Pages">
+    <a href="?path=/&w=390">Home</a>
+    <a href="?path=/login&w=390">Login</a>
+    <a href="?path=/account&w=390">Stats</a>
+    <a href="?path=/privacy&w=390">Privacy</a>
+    <a href="?path=/nope&w=390">404</a>
+    <a href="?path={{.Data.Path}}&w=360&h=640">360x640</a>
+    <a href="?path={{.Data.Path}}&w=390">390x844</a>
+    <a href="?path={{.Data.Path}}&w=768&h=1024">768</a>
+  </nav>
+  <iframe class="ml-frame" src="{{.Data.Path}}" width="{{.Data.Width}}" height="{{.Data.Height}}" title="Preview of {{.Data.Path}}"></iframe>
+</div>
+{{end}}

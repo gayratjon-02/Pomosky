@@ -236,3 +236,20 @@ canvas {
 .user-menu-panel a:hover, .user-menu-panel button:hover, .user-menu-panel a:focus-visible, .user-menu-panel button:focus-visible { background: rgba(255, 255, 255, 0.1); outline: none; }
 .user-menu-panel button { color: var(--danger); }
 @media (max-width: 480px) { .user-menu-name { display: none; } .user-menu-btn { padding-right: 4px; } }
+
+/* ---- Touch targets and small screens (mobile first: these are the defaults) */
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
+body { overflow-x: clip; }
+
+.brand, .site-nav a:not(.btn), .site-footer a, .user-menu-btn { min-height: 44px; display: inline-flex; align-items: center; }
+.site-footer { gap: 0 var(--space-5); padding-block: var(--space-3); }
+.site-footer nav { gap: var(--space-4); }
+
+@media (max-width: 640px), (pointer: coarse) {
+  .btn { min-height: 46px; }
+  .btn-sm { min-height: 42px; }
+  .btn-icon { min-width: 42px; }
+  .input, .select { min-height: 46px; }
+  .chip, button.chip { min-height: 40px; }
+}

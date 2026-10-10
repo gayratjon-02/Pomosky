@@ -16,7 +16,7 @@ body.record { overflow: hidden; }
 }
 
 .record-frame .timer { width: min(100%, 52dvh); }
-.record-frame .timer-digits { font-size: clamp(3.6rem, 14dvh, 8rem); }
+.record-frame .timer-digits { font-size: clamp(3rem, min(14dvh, 19vw), 8rem); }
 .record-frame .timer-label { font-size: clamp(1.1rem, 2.6dvh, 1.6rem); }
 .record-frame .timer-phase { font-size: clamp(0.8rem, 1.8dvh, 1.1rem); }
 

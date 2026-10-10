@@ -1,0 +1,6 @@
+/* Development only: phone-sized frame. */
+body.mobilelab .site-header, body.mobilelab .site-footer { display: none; }
+.ml { display: grid; justify-items: center; gap: var(--space-3); padding: var(--space-3); }
+.ml-bar { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; }
+.ml-bar a { padding: 4px 10px; border-radius: var(--radius-pill); background: rgba(255,255,255,.1); font-size: var(--text-xs); text-decoration: none; }
+.ml-frame { border: 1px solid var(--glass-border); border-radius: 18px; background: #000; max-width: 100%; }

@@ -49,6 +49,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 		mux.Handle("GET /__dev/events", a.dev.EventsHandler())
 		mux.Handle("GET /__dev/reload.js", devreload.ScriptHandler())
 		mux.HandleFunc("GET /__dev/sky", c.SkyLab)
+		mux.HandleFunc("GET /__dev/mobile", c.MobileLab)
 	}
 
 	// Static assets built from web/.
@@ -61,8 +62,17 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 		middleware.Recover(a.log),
 		middleware.RequestID(),
 		middleware.Logging(a.log),
-		middleware.SecurityHeaders(middleware.DefaultCSP),
+		a.securityHeaders(),
 		middleware.OptionalAuth(a.sessions),
 		middleware.CSRF(a.cfg.IsProduction()),
 	)
+}
+
+// securityHeaders is the strict policy, except that in development the site may
+// frame itself so the mobile preview can show pages at phone width.
+func (a *App) securityHeaders() middleware.Middleware {
+	if a.dev != nil {
+		return middleware.SecurityHeaders(middleware.DevCSP, true)
+	}
+	return middleware.SecurityHeaders(middleware.DefaultCSP)
 }

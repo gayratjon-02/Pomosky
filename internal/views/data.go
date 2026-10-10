@@ -8,6 +8,12 @@ type RoomPage struct {
 	ShareURL string
 }
 
+// MobileLab is the Data of the development mobile preview page.
+type MobileLab struct {
+	Path          string
+	Width, Height int
+}
+
 // LoginPage is the Data of the login page.
 type LoginPage struct {
 	Google       bool   // show "Continue with Google"

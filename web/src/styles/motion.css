@@ -1,0 +1,40 @@
+/* Soft, smooth motion. Everything here is switched off by prefers-reduced-motion
+   (see the rule in layout.css), and nothing blocks interaction while it plays. */
+
+/* Every page fades in softly. (Cross-document view transitions were tried and dropped:
+   they flicker on pages that draw on a canvas.) */
+body { animation: page-in 380ms var(--ease) both; }
+@keyframes page-in { from { opacity: 0; } }
+
+/* Content settles in with a gentle rise, one block after another. */
+main > :not(canvas):not(.reaction-layer) { animation: fade-up 560ms var(--ease) both; }
+main > :not(canvas):nth-child(3) { animation-delay: 60ms; }
+main > :not(canvas):nth-child(4) { animation-delay: 120ms; }
+main > :not(canvas):nth-child(5) { animation-delay: 180ms; }
+
+.cards > *, .steps > *, .features > *, .faq > *, .charts > * { animation: fade-up 600ms var(--ease) both; }
+.cards > :nth-child(2), .steps > :nth-child(2), .features > :nth-child(2), .faq > :nth-child(2), .charts > :nth-child(2) { animation-delay: 70ms; }
+.cards > :nth-child(3), .steps > :nth-child(3), .features > :nth-child(3), .faq > :nth-child(3) { animation-delay: 140ms; }
+.cards > :nth-child(4), .features > :nth-child(4), .faq > :nth-child(4) { animation-delay: 210ms; }
+.features > :nth-child(5) { animation-delay: 280ms; }
+.features > :nth-child(6) { animation-delay: 350ms; }
+
+/* Surfaces respond to touch and hover with a small lift, never a jump. */
+.card-stat, .step, .feature, .btn, .chip, .heat, .reactions button {
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+@media (hover: hover) {
+  .card-stat:hover, .step:hover, .feature:hover { transform: translateY(-3px); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38); }
+}
+.btn:active, button.chip:active, .heat:active { transform: scale(0.97); }
+
+/* Menus and disclosures open softly. */
+.user-menu[open] .user-menu-panel { animation: menu-in 200ms var(--ease) both; transform-origin: top right; }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px) scale(0.97); } }
+details[open] > :not(summary) { animation: fade-up 320ms var(--ease) both; }
+
+.flash, .toast { animation-timing-function: var(--ease); }
+.timer-digits { transition: color var(--dur-slow) var(--ease); }
+.timer-ring .ring-progress { transition: stroke-dashoffset 900ms linear, stroke var(--dur-slow) var(--ease); }
+body { transition: background-color var(--dur-slow) var(--ease); }
