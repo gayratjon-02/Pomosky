@@ -326,10 +326,10 @@ func TestValidNicknameIsAccepted(t *testing.T) {
 	c.waitState(viewersIs(1))
 	c.send(TypeJoin, JoinData{Nickname: "Haeyeon"})
 	c.send(TypePing, nil)
-	// The first non-state frame after a valid join must be the pong, not an error.
+	// The first frame that is not a state or people update must be the pong, not an error.
 	for {
 		env := c.next()
-		if env.Type == TypeState {
+		if env.Type == TypeState || env.Type == TypePeople {
 			continue
 		}
 		if env.Type != TypePong {
@@ -522,4 +522,54 @@ func TestConnectionsPerClientAreLimited(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
+}
+
+func TestPeopleShowsNicknamesAndSignedInUsers(t *testing.T) {
+	s := newTestServer(t, func(c *HandlerConfig) {
+		c.Identify = func(r *http.Request) (string, string, string, bool) {
+			if r.URL.Query().Get("as") == "" {
+				return "", "", "", false
+			}
+			return "u1", "Ayla", "https://x/a.png", true
+		}
+	})
+	watcher := s.dial(t)
+	watcher.waitFor(TypePeople) // empty list on arrival
+
+	watcher.send(TypeJoin, JoinData{Nickname: "Bek"})
+	got := peopleNames(t, watcher.waitFor(TypePeople))
+	if len(got) != 1 || got[0] != "Bek" {
+		t.Fatalf("people after the nickname: %v", got)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	t.Cleanup(cancel)
+	c, _, err := websocket.Dial(ctx, s.url+"/ws/"+testRoomID+"?as=1", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { c.CloseNow() })
+	got = peopleNames(t, watcher.waitFor(TypePeople))
+	if len(got) != 2 {
+		t.Fatalf("people after a signed-in join: %v", got)
+	}
+
+	c.CloseNow()
+	got = peopleNames(t, watcher.waitFor(TypePeople))
+	if len(got) != 1 || got[0] != "Bek" {
+		t.Fatalf("people after the leave: %v", got)
+	}
+}
+
+func peopleNames(t *testing.T, env Envelope) []string {
+	t.Helper()
+	var d PeopleData
+	if err := json.Unmarshal(env.Data, &d); err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, p := range d.People {
+		names = append(names, p.Name)
+	}
+	return names
 }
