@@ -100,3 +100,24 @@ body[data-running="1"] .ring-ticks { animation: ticks-spin 90s linear infinite; 
 .weather[hidden] { display: none; }
 .attribution { font-size: var(--text-xs); color: var(--fg-dim); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); }
 .attribution a { color: var(--fg-muted); display: inline-block; padding: 12px 2px; margin: -12px 0; }
+
+/* Sparkle burst when a phase ends (see ui/celebrate.ts). */
+.celebration { position: fixed; inset: 0; z-index: 35; pointer-events: none; overflow: hidden; }
+.spark {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: var(--size, 8px);
+  height: var(--size, 8px);
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 10px currentColor;
+  animation: spark-burst 1.9s cubic-bezier(0.16, 0.8, 0.3, 1) var(--delay, 0ms) forwards;
+}
+.spark-star { border-radius: 2px; transform: rotate(45deg); }
+@keyframes spark-burst {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0) scale(0.4); }
+  12% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 140px)) rotate(var(--rot)) scale(1); }
+}
