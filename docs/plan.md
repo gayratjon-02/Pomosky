@@ -243,14 +243,14 @@ Internet → (ixtiyoriy Cloudflare) → Azure VM
 ### 3-bosqich: Sinxron taymer va WebSocket (3 kun)
 - [x] `ws` Hub: xona boshiga bitta, ulanganda to'liq holat.
 - [x] Server vaqti va mijoz offset hisobi (`room-client.ts`, `clock-sync.ts`).
-- [ ] Ulanganlar soni, qayta ulanish, ping/pong, `HostRecover`.
-- [ ] Host token bilan boshqarish, rate limit, orqaga bosim.
+- [x] Ulanganlar soni, qayta ulanish, ping/pong, `HostRecover` (server tomoni; server qayta ishga tushsa xona yo'qoladi, host yangi xona yaratadi).
+- [x] Host token bilan boshqarish, rate limit, orqaga bosim, IP bo'yicha ulanish chegarasi, bo'sh xonani o'chirish.
 - **Tugash mezoni:** 3 brauzer oynasida taymer bir xil (farq < 0.5 soniya), host yangilasa tiklanadi.
 
 ### 4-bosqich: Postgres va ixtiyoriy login (4 kun)
-- [ ] Migratsiyalar, `models` (sqlc), ulanishlar puli.
-- [ ] Login usuli tanlash va `auth` (Google OAuth yoki magic link), sessiya cookie, CSRF.
-- [ ] `OptionalAuth`, xona egaligi, fokus sessiyasi tarixi, hisobni o'chirish.
+- [x] Migratsiyalar (goose), repozitoriylar (sqlc), ulanishlar puli.
+- [x] Ikkala login usuli: Google OAuth (haqiqiy kalitlar bilan sinalmagan) va email magic link; sessiya cookie, CSRF.
+- [x] `OptionalAuth`, xona egaligi, fokus sessiyasi tarixi, oylik statistika, hisobni o'chirish.
 - [ ] Zaxira nusxa (kunlik `pg_dump`) va tiklash sinovi.
 - **Tugash mezoni:** anonim foydalanuvchi to'liq kira oladi, login qilgan statistikasi saqlanadi, zaxiradan tiklash ishlaydi.
 
