@@ -85,5 +85,6 @@ func (c *Controllers) RoomCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	c.deps.Live.Register(state, owner)
+	c.track(r, models.VisitRoomCreated)
 	http.Redirect(w, r, "/r/"+id.String()+"/host#token="+token, http.StatusSeeOther)
 }
