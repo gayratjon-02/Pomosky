@@ -6,6 +6,7 @@ import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
 import { initSounds } from "../ui/sound-events";
+import { initWakeLock } from "../ui/wake-lock";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { createConnectionChip } from "../ui/connection";
@@ -56,6 +57,7 @@ export function initRoomPage(): void {
   });
 
   initSounds(client);
+  initWakeLock(client);
 
   client.connect();
 }
