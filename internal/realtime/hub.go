@@ -1,18 +1,21 @@
 package realtime
 
 import (
+	"context"
 	"log/slog"
 	"sync"
 	"time"
 
+	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/ports"
 	"github.com/gayratjon-02/Pomosky/internal/room"
 )
 
 // Hub owns all live rooms of this server instance.
 type Hub struct {
-	log   *slog.Logger
-	clock ports.Clock
+	log      *slog.Logger
+	clock    ports.Clock
+	recorder ports.FocusRecorder // may be nil
 
 	mu    sync.RWMutex
 	rooms map[room.ID]*RoomHub
@@ -23,20 +26,21 @@ var (
 	_ ports.LiveRooms   = (*Hub)(nil)
 )
 
-// NewHub creates an empty Hub.
-func NewHub(log *slog.Logger, clock ports.Clock) *Hub {
-	return &Hub{log: log, clock: clock, rooms: map[room.ID]*RoomHub{}}
+// NewHub creates an empty Hub. recorder receives the finished focus phases of
+// rooms that have an owner; it may be nil.
+func NewHub(log *slog.Logger, clock ports.Clock, recorder ports.FocusRecorder) *Hub {
+	return &Hub{log: log, clock: clock, recorder: recorder, rooms: map[room.ID]*RoomHub{}}
 }
 
 // Open returns the live RoomHub for state.ID, creating it from state if it
-// does not exist yet.
-func (h *Hub) Open(state room.State) *RoomHub {
+// does not exist yet. owner is "" for anonymous rooms.
+func (h *Hub) Open(state room.State, owner models.UserID) *RoomHub {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if rh, ok := h.rooms[state.ID]; ok {
 		return rh
 	}
-	rh := newRoomHub(state, h.log)
+	rh := newRoomHub(state, owner, h.log, h.recorder)
 	h.rooms[state.ID] = rh
 	return rh
 }
@@ -50,7 +54,7 @@ func (h *Hub) Room(id room.ID) (*RoomHub, bool) {
 }
 
 // Register implements ports.LiveRooms. An already registered room is kept as is.
-func (h *Hub) Register(state room.State) { h.Open(state) }
+func (h *Hub) Register(state room.State, owner models.UserID) { h.Open(state, owner) }
 
 // Has implements ports.LiveRooms.
 func (h *Hub) Has(id room.ID) bool {
@@ -72,17 +76,88 @@ func (h *Hub) Publish(id room.ID, payload []byte) {
 	}
 }
 
-// RoomHub is the live side of one room: its state and its connected clients.
-type RoomHub struct {
-	log *slog.Logger
-
-	mu      sync.Mutex
-	state   room.State
-	clients map[*Client]struct{}
+// Sweep records the focus phases that ran to their end in rooms with an owner.
+// Nothing else notices the end of a phase, because the timer is only a start
+// time and a duration. Call it every few seconds (see RunSweeper).
+func (h *Hub) Sweep(now time.Time) {
+	h.mu.RLock()
+	rooms := make([]*RoomHub, 0, len(h.rooms))
+	for _, rh := range h.rooms {
+		rooms = append(rooms, rh)
+	}
+	h.mu.RUnlock()
+	for _, rh := range rooms {
+		rh.sweep(now)
+	}
 }
 
-func newRoomHub(state room.State, log *slog.Logger) *RoomHub {
-	return &RoomHub{log: log, state: state, clients: map[*Client]struct{}{}}
+// RunSweeper calls Sweep every interval until ctx is done.
+func (h *Hub) RunSweeper(ctx context.Context, interval time.Duration) {
+	t := time.NewTicker(interval)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case now := <-t.C:
+			h.Sweep(now)
+		}
+	}
+}
+
+// minRecordedFocus is the shortest focus time that counts toward statistics;
+// it keeps accidental starts out.
+const minRecordedFocus = 30 * time.Second
+
+// RoomHub is the live side of one room: its state and its connected clients.
+type RoomHub struct {
+	log      *slog.Logger
+	owner    models.UserID // "" for anonymous rooms
+	recorder ports.FocusRecorder
+
+	mu       sync.Mutex
+	state    room.State
+	clients  map[*Client]struct{}
+	peak     int       // most clients seen since the last recorded focus phase
+	credited time.Time // StartedAt of the focus phase already recorded at its natural end
+}
+
+func newRoomHub(state room.State, owner models.UserID, log *slog.Logger, recorder ports.FocusRecorder) *RoomHub {
+	return &RoomHub{log: log, owner: owner, recorder: recorder, state: state, clients: map[*Client]struct{}{}}
+}
+
+// recordLocked writes the focus time of a timer that is ending to the recorder.
+func (r *RoomHub) recordLocked(t room.Timer, now time.Time) {
+	if r.owner == "" || r.recorder == nil {
+		return
+	}
+	focused, ok := room.FocusedTime(t, now)
+	if !ok || focused < minRecordedFocus {
+		return
+	}
+	if t.Phase == room.PhaseFocus && t.StartedAt.Equal(r.credited) {
+		return // already recorded when it ended on its own
+	}
+	r.recorder.RecordFocus(models.FocusSession{
+		RoomID:      r.state.ID,
+		StartedAt:   now.Add(-focused),
+		EndedAt:     now,
+		Focused:     focused,
+		PeakViewers: r.peak,
+	})
+	r.peak = len(r.clients)
+}
+
+func (r *RoomHub) sweep(now time.Time) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	t := r.state.Timer
+	if r.owner == "" || t.Phase != room.PhaseFocus || t.Remaining(now) > 0 || t.StartedAt.Equal(r.credited) {
+		return
+	}
+	end := t.StartedAt.Add(t.Duration)
+	r.recordLocked(t, end) // at its end, the whole phase has been focused
+	r.credited = t.StartedAt
 }
 
 // State returns a copy of the current room state.
@@ -97,6 +172,9 @@ func (r *RoomHub) Join(c *Client) int {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.clients[c] = struct{}{}
+	if len(r.clients) > r.peak {
+		r.peak = len(r.clients)
+	}
 	return len(r.clients)
 }
 
@@ -120,9 +198,14 @@ func (r *RoomHub) Apply(ev room.Event, now time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	prev := r.state.Timer
 	next, err := room.Reduce(r.state, ev, now)
 	if err != nil {
 		return err
+	}
+	switch ev.(type) {
+	case room.TimerStart, room.TimerReset:
+		r.recordLocked(prev, now) // the previous focus phase ends here
 	}
 	r.state = next
 

@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
+	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 	"github.com/gayratjon-02/Pomosky/internal/room"
 	"github.com/gayratjon-02/Pomosky/internal/views"
 )
@@ -69,6 +71,19 @@ func (c *Controllers) RoomCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := c.deps.IDs.NewToken()
-	c.deps.Live.Register(room.New(id, c.deps.HostTokens.Hash(token), c.deps.Clock.Now()))
+	state := room.New(id, c.deps.HostTokens.Hash(token), c.deps.Clock.Now())
+
+	// A logged-in host owns the room: it is stored, and its focus time counts
+	// toward their statistics. Anonymous rooms never touch the database.
+	var owner models.UserID
+	if user := reqctx.User(r.Context()); user != nil && c.deps.Rooms != nil {
+		owner = user.ID
+		if err := c.deps.Rooms.Create(r.Context(), models.Room{ID: id, OwnerUserID: &owner, HostTokenHash: state.HostTokenHash}); err != nil {
+			c.deps.Log.Error("store room", "err", err)
+			http.Error(w, "could not create the room, please try again", http.StatusInternalServerError)
+			return
+		}
+	}
+	c.deps.Live.Register(state, owner)
 	http.Redirect(w, r, "/r/"+id.String()+"/host#token="+token, http.StatusSeeOther)
 }

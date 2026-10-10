@@ -30,3 +30,23 @@ func (t Timer) Remaining(now time.Time) time.Duration {
 		return 0
 	}
 }
+
+// FocusedTime returns how long the timer has been focusing at now, pauses not
+// counted, for a focus phase that is running or paused. The second result is
+// false for idle timers and for break phases.
+func FocusedTime(t Timer, now time.Time) (time.Duration, bool) {
+	var left time.Duration
+	switch {
+	case t.Phase == PhaseFocus:
+		left = t.Remaining(now)
+	case t.Phase == PhasePaused && t.PausedFrom == PhaseFocus:
+		left = t.PausedRemaining
+	default:
+		return 0, false
+	}
+	done := t.Duration - left
+	if done < 0 {
+		done = 0
+	}
+	return done, true
+}

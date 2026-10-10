@@ -26,7 +26,7 @@ func TestEncodeDecodeRoundTrip(t *testing.T) {
 
 func TestRoomHubBroadcast(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	rh := newRoomHub(room.State{ID: "abcd2345"}, log)
+	rh := newRoomHub(room.State{ID: "abcd2345"}, "", log, nil)
 
 	c := NewClient("c1", nil, 4)
 	if n := rh.Join(c); n != 1 {
@@ -49,7 +49,7 @@ func TestRoomHubBroadcast(t *testing.T) {
 func TestApplyRunsTheCoreAndBroadcastsState(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	now := time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)
-	rh := newRoomHub(room.New("abcd2345", "hash", now), log)
+	rh := newRoomHub(room.New("abcd2345", "hash", now), "", log, nil)
 
 	c := NewClient("c1", nil, 4)
 	rh.Join(c)
@@ -93,7 +93,7 @@ func TestApplyRunsTheCoreAndBroadcastsState(t *testing.T) {
 func TestReactBroadcastsATickWithTheCount(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	now := time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)
-	rh := newRoomHub(room.New("abcd2345", "hash", now), log)
+	rh := newRoomHub(room.New("abcd2345", "hash", now), "", log, nil)
 	c := NewClient("c1", nil, 4)
 	rh.Join(c)
 
@@ -125,12 +125,12 @@ func TestReactBroadcastsATickWithTheCount(t *testing.T) {
 }
 
 func TestHubRegistersLiveRooms(t *testing.T) {
-	h := NewHub(slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
+	h := NewHub(slog.New(slog.NewTextHandler(io.Discard, nil)), nil, nil)
 	id := room.ID("abcd2345")
 	if h.Has(id) {
 		t.Fatal("room should not exist yet")
 	}
-	h.Register(room.New(id, "hash", time.Now()))
+	h.Register(room.New(id, "hash", time.Now()), "")
 	if !h.Has(id) {
 		t.Fatal("registered room not found")
 	}

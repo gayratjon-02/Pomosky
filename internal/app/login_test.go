@@ -9,11 +9,13 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/auth"
 	"github.com/gayratjon-02/Pomosky/internal/config"
 	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
+	"github.com/gayratjon-02/Pomosky/internal/room"
 )
 
 // Needs a real database: set TEST_DATABASE_URL (the tables are emptied).
@@ -83,6 +85,38 @@ func TestLoginAccountStatsAndDeleteFlow(t *testing.T) {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 		return rec
+	}
+
+	// A logged-in host's room is stored with them as owner, and focus time counts.
+	rec = post("/r/new", url.Values{})
+	loc := rec.Header().Get("Location")
+	if rec.Code != http.StatusSeeOther || !strings.HasPrefix(loc, "/r/") {
+		t.Fatalf("create room = %d %q", rec.Code, loc)
+	}
+	roomID := room.ID(strings.SplitN(strings.TrimPrefix(loc, "/r/"), "/", 2)[0])
+	rh, ok := a.hub.Room(roomID)
+	if !ok {
+		t.Fatal("room is not live")
+	}
+	now := time.Now()
+	start := now.Add(-40 * time.Minute)
+	if err := rh.Apply(room.TimerStart{Phase: room.PhaseFocus, Duration: 60 * time.Minute}, start); err != nil {
+		t.Fatal(err)
+	}
+	if err := rh.Apply(room.TimerReset{}, now.Add(-10*time.Minute)); err != nil { // 30 min focused
+		t.Fatal(err)
+	}
+	a.recorder.Close() // flush the queue
+	rec = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", "/api/stats?month="+now.UTC().Format("2006-01")+"&tz=UTC", nil)
+	req.AddCookie(session)
+	h.ServeHTTP(rec, req)
+	var month struct {
+		TotalSeconds int64 `json:"totalSeconds"`
+		Sessions     int   `json:"sessions"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &month); err != nil || month.TotalSeconds != 1800 || month.Sessions != 1 {
+		t.Fatalf("stats after a focus session: %d %s", rec.Code, rec.Body.String())
 	}
 
 	if rec := post("/account/delete", url.Values{"confirm": {"nope"}}); rec.Code != http.StatusBadRequest {

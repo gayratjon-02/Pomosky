@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/config"
+	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/platform/clock"
 	"github.com/gayratjon-02/Pomosky/internal/room"
 	"github.com/gayratjon-02/Pomosky/internal/views"
@@ -59,7 +60,7 @@ func TestDevReloadScriptOnlyInDev(t *testing.T) {
 
 type fakeLive struct{ rooms map[room.ID]room.State }
 
-func (f *fakeLive) Register(s room.State) {
+func (f *fakeLive) Register(s room.State, _ models.UserID) {
 	if f.rooms == nil {
 		f.rooms = map[room.ID]room.State{}
 	}
@@ -124,7 +125,7 @@ func TestRoomCreateRegistersARoomAndRedirectsToTheHostPanel(t *testing.T) {
 
 func TestRoomCreateSkipsTakenIDs(t *testing.T) {
 	live := &fakeLive{}
-	live.Register(room.New("abcd2345", "x", time.Now()))
+	live.Register(room.New("abcd2345", "x", time.Now()), "")
 	c := newRoomControllers(t, live, "abcd2345", "efgh6723")
 
 	rec := httptest.NewRecorder()
@@ -145,7 +146,7 @@ func TestRoomCreateNeedsItsDependencies(t *testing.T) {
 
 func TestRoomPages(t *testing.T) {
 	live := &fakeLive{}
-	live.Register(room.New("abcd2345", "hash", time.Now()))
+	live.Register(room.New("abcd2345", "hash", time.Now()), "")
 	c := newRoomControllers(t, live)
 
 	cases := []struct {

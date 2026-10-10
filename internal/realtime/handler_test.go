@@ -63,8 +63,8 @@ func newTestServer(t *testing.T, tweak func(*HandlerConfig)) *testServer {
 	t.Helper()
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	clock := &fakeClock{t: time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)}
-	hub := NewHub(log, clock)
-	hub.Register(room.New(testRoomID, "hash", clock.Now()))
+	hub := NewHub(log, clock, nil)
+	hub.Register(room.New(testRoomID, "hash", clock.Now()), "")
 
 	cfg := HandlerConfig{Hosts: fakeHosts{}, Clock: clock, IDs: &seqIDs{}}
 	if tweak != nil {

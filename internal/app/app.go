@@ -25,11 +25,13 @@ import (
 
 // App is the assembled server.
 type App struct {
-	cfg     config.Config
-	log     *slog.Logger
-	handler http.Handler
-	dev     *devreload.Watcher // nil unless cfg.Dev
-	db      *postgres.DB       // nil when DATABASE_URL is not set
+	cfg      config.Config
+	log      *slog.Logger
+	handler  http.Handler
+	dev      *devreload.Watcher // nil unless cfg.Dev
+	db       *postgres.DB       // nil when DATABASE_URL is not set
+	hub      *realtime.Hub
+	recorder *stats.Recorder // nil without a database
 	// sessions resolves login cookies; nil means everyone is anonymous.
 	sessions middleware.SessionResolver
 }
@@ -60,7 +62,6 @@ func New(cfg config.Config) (*App, error) {
 	}
 
 	clk := clock.Real{}
-	hub := realtime.NewHub(log, clk)
 	ids := idgen.Generator{}
 
 	// Login, rooms of logged-in hosts and statistics need the database. Without
@@ -70,6 +71,7 @@ func New(cfg config.Config) (*App, error) {
 		accounts *auth.Service
 		statsSvc *stats.Service
 		rooms    ports.RoomRepository
+		recorder *stats.Recorder
 	)
 	if cfg.DatabaseURL != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -91,9 +93,17 @@ func New(cfg config.Config) (*App, error) {
 			IDs:       ids,
 			Providers: oauthProviders(cfg),
 		}, auth.Options{BaseURL: cfg.BaseURL})
-		statsSvc = stats.New(postgres.NewFocusSessionRepo(db), clk)
+		focusRepo := postgres.NewFocusSessionRepo(db)
+		statsSvc = stats.New(focusRepo, clk)
+		recorder = stats.NewRecorder(focusRepo, log)
 		rooms = postgres.NewRoomRepo(db)
 	}
+
+	var focusRecorder ports.FocusRecorder // stays a nil interface without a database
+	if recorder != nil {
+		focusRecorder = recorder
+	}
+	hub := realtime.NewHub(log, clk, focusRecorder)
 
 	deps := controllers.Deps{
 		Config: cfg,
@@ -122,7 +132,7 @@ func New(cfg config.Config) (*App, error) {
 		return nil, err
 	}
 
-	a := &App{cfg: cfg, log: log, dev: watcher, db: db}
+	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, recorder: recorder}
 	if accounts != nil {
 		a.sessions = accounts
 	}
@@ -132,6 +142,9 @@ func New(cfg config.Config) (*App, error) {
 
 // Close releases resources held by the app (the database pool).
 func (a *App) Close() error {
+	if a.recorder != nil {
+		a.recorder.Close() // write the queued focus sessions before the pool goes away
+	}
 	if a.db != nil {
 		return a.db.Close()
 	}
@@ -156,6 +169,9 @@ func (a *App) Run(ctx context.Context) error {
 		go a.dev.Run(ctx)
 		srv.RegisterOnShutdown(a.dev.Close) // open event streams would block a graceful shutdown
 	}
+
+	// Focus phases that run to their end are noticed by a sweep, not by an event.
+	go a.hub.RunSweeper(ctx, 5*time.Second)
 
 	errCh := make(chan error, 1)
 	go func() {
