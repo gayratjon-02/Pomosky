@@ -66,3 +66,15 @@ type LoginTokenRepository interface {
 	Consume(ctx context.Context, tokenHash string, now time.Time) (string, error)
 	DeleteExpired(ctx context.Context, now time.Time) (int64, error)
 }
+
+// AdminRepository serves the operator's admin page: totals, daily series and the user list.
+type AdminRepository interface {
+	Totals(ctx context.Context) (models.AdminTotals, error)
+	NewUsersSince(ctx context.Context, since time.Time) (int, error)
+	ActiveHostsSince(ctx context.Context, since time.Time) (int, error)
+	// Daily returns every day in [from, to) with the admin metrics, days taken in tz.
+	Daily(ctx context.Context, from, to time.Time, tz string) ([]models.AdminDay, error)
+	// Users lists users, newest first or most focused first, with the total count.
+	Users(ctx context.Context, mostFocused bool, limit, offset int) ([]models.AdminUser, int, error)
+	DatabaseSize(ctx context.Context) (int64, error)
+}

@@ -22,3 +22,8 @@ type LiveRooms interface {
 type FocusRecorder interface {
 	RecordFocus(s models.FocusSession)
 }
+
+// LiveInspector reports what is happening on the server right now (counts only).
+type LiveInspector interface {
+	LiveSummary() models.LiveSummary
+}

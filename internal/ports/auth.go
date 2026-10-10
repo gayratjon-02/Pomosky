@@ -41,3 +41,10 @@ type StatsReader interface {
 	// the time zone tz (IANA name; invalid names fall back to UTC).
 	Month(ctx context.Context, user models.UserID, month, tz string) (models.MonthStats, error)
 }
+
+// AdminReader serves the operator's admin page.
+type AdminReader interface {
+	Overview(ctx context.Context, tz string) (models.AdminOverview, error)
+	// Users lists users newest first, or most focused first, with the total count. page starts at 1.
+	Users(ctx context.Context, mostFocused bool, page, pageSize int) ([]models.AdminUser, int, error)
+}
