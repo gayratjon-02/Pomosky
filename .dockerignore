@@ -1,0 +1,7 @@
+.git
+.github
+**/node_modules
+web/dist
+bin
+deploy/.env
+.env
