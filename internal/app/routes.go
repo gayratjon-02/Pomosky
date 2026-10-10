@@ -37,6 +37,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	if a.dev != nil {
 		mux.Handle("GET /__dev/events", a.dev.EventsHandler())
 		mux.Handle("GET /__dev/reload.js", devreload.ScriptHandler())
+		mux.HandleFunc("GET /__dev/sky", c.SkyLab)
 	}
 
 	// Static assets built from web/.

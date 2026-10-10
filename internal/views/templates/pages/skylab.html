@@ -1,0 +1,90 @@
+{{define "bodyclass"}}skylab{{end}}
+{{define "content"}}
+<canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
+
+<aside class="lab glass" id="lab" aria-label="Sky controls">
+  <header class="lab-head">
+    <h1>Sky lab</h1>
+    <button type="button" class="btn btn-ghost btn-sm" id="lab-toggle" aria-expanded="true" aria-controls="lab-body">Hide</button>
+  </header>
+
+  <div class="lab-body" id="lab-body">
+    <fieldset class="lab-group">
+      <legend>Place and time</legend>
+      <div class="field">
+        <label for="place">Place</label>
+        <select class="select" id="place">
+          <option value="seoul">Seoul</option>
+          <option value="tashkent">Tashkent</option>
+          <option value="reykjavik">Reykjavik</option>
+          <option value="sydney">Sydney</option>
+          <option value="newyork">New York</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="date">Date</label>
+        <input class="input" type="date" id="date" value="2026-10-10">
+      </div>
+      <div class="field">
+        <label for="time">Local time <output id="time-out" class="lab-out"></output></label>
+        <input class="range" type="range" id="time" min="0" max="1439" step="1" value="720">
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="play">Play the day</button>
+    </fieldset>
+
+    <fieldset class="lab-group">
+      <legend>Weather</legend>
+      <div class="field">
+        <label for="cloud">Clouds <output class="lab-out" id="cloud-out"></output></label>
+        <input class="range" type="range" id="cloud" min="0" max="100" step="1" value="20">
+      </div>
+      <div class="field">
+        <label for="rain">Rain, mm/h <output class="lab-out" id="rain-out"></output></label>
+        <input class="range" type="range" id="rain" min="0" max="10" step="0.1" value="0">
+      </div>
+      <div class="field">
+        <label for="snow">Snow, cm/h <output class="lab-out" id="snow-out"></output></label>
+        <input class="range" type="range" id="snow" min="0" max="3" step="0.05" value="0">
+      </div>
+      <div class="field">
+        <label for="wind">Wind, km/h <output class="lab-out" id="wind-out"></output></label>
+        <input class="range" type="range" id="wind" min="0" max="80" step="1" value="10">
+      </div>
+      <div class="field">
+        <label for="winddir">Wind from, degrees <output class="lab-out" id="winddir-out"></output></label>
+        <input class="range" type="range" id="winddir" min="0" max="359" step="1" value="270">
+      </div>
+      <div class="field">
+        <label for="fog">Fog <output class="lab-out" id="fog-out"></output></label>
+        <input class="range" type="range" id="fog" min="0" max="1" step="0.05" value="0">
+      </div>
+      <label class="lab-check"><input type="checkbox" id="thunder"> Thunder</label>
+    </fieldset>
+
+    <fieldset class="lab-group">
+      <legend>Presets</legend>
+      <div class="row row-wrap" id="presets">
+        <button type="button" class="chip" data-preset="noon">Clear noon</button>
+        <button type="button" class="chip" data-preset="golden">Golden hour</button>
+        <button type="button" class="chip" data-preset="dusk">Dusk</button>
+        <button type="button" class="chip" data-preset="night">Starry night</button>
+        <button type="button" class="chip" data-preset="cloudy">Cloudy</button>
+        <button type="button" class="chip" data-preset="rain">Rain</button>
+        <button type="button" class="chip" data-preset="storm">Storm</button>
+        <button type="button" class="chip" data-preset="snow">Snow</button>
+        <button type="button" class="chip" data-preset="fog">Fog</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="lab-group">
+      <legend>Performance</legend>
+      <div class="field">
+        <label for="quality">Particle quality <output class="lab-out" id="quality-out"></output></label>
+        <input class="range" type="range" id="quality" min="0.3" max="1" step="0.05" value="1">
+      </div>
+    </fieldset>
+
+    <p class="lab-readout" id="readout"></p>
+  </div>
+</aside>
+{{end}}

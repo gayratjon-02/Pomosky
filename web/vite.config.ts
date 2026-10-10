@@ -11,6 +11,7 @@ export default defineConfig({
         room: "src/entries/room.ts",
         host: "src/entries/host.ts",
         record: "src/entries/record.ts",
+        skylab: "src/entries/skylab.ts",
         base: "src/styles/base.css",
       },
       output: {

@@ -1,0 +1,89 @@
+/* Sky lab (development only). */
+
+body.skylab .site-header,
+body.skylab .site-footer {
+  display: none;
+}
+
+.sky-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.lab {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 40;
+  width: min(340px, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - 2 * var(--space-4));
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.lab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.lab-head h1 {
+  font-size: var(--text-lg);
+}
+
+.lab-body {
+  display: grid;
+  gap: var(--space-4);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.lab-group {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.lab-group legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.lab-out {
+  float: right;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.lab-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.lab-readout {
+  font: 500 var(--text-xs) / 1.5 var(--font-mono);
+  color: var(--fg-muted);
+}
+
+.lab-body[hidden] {
+  display: none;
+}
