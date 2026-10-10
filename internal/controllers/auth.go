@@ -39,6 +39,7 @@ func (c *Controllers) loginPage(w http.ResponseWriter, r *http.Request, status i
 // startSession sets the session cookie and sends the user to their account.
 func (c *Controllers) startSession(w http.ResponseWriter, r *http.Request, login models.Login) {
 	http.SetCookie(w, httpx.NewSessionCookie(login.Token, c.secure(), login.Expires))
+	c.track(r, models.VisitLoginDone)
 	http.Redirect(w, r, "/account", http.StatusSeeOther)
 }
 
@@ -68,6 +69,7 @@ func (c *Controllers) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 			Name: oauthStateCookie, Value: state, Path: "/", MaxAge: int(oauthStateTTL.Seconds()),
 			HttpOnly: true, Secure: c.secure(), SameSite: http.SameSiteLaxMode,
 		})
+		c.track(r, models.VisitLoginStarted)
 		http.Redirect(w, r, url, http.StatusSeeOther)
 	case magicProvider:
 		err := c.deps.Accounts.SendMagicLink(r.Context(), r.PostFormValue("email"))
@@ -80,6 +82,7 @@ func (c *Controllers) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 			c.deps.Log.Error("send magic link", "err", err)
 			c.loginPage(w, r, http.StatusInternalServerError, "We could not send the email. Please try again later.", "")
 		default:
+			c.track(r, models.VisitLoginStarted)
 			// The same message whether or not the address has an account.
 			c.loginPage(w, r, http.StatusOK, "If that address is valid, a sign-in link is on its way. It works once and expires in 15 minutes.", "")
 		}
