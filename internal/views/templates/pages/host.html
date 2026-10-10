@@ -1,11 +1,64 @@
+{{define "bodyclass"}}host{{end}}
 {{define "content"}}
-<section class="host-panel">
-  <h1>Host panel</h1>
-  {{template "timer" .}}
-  <div class="host-controls">
-    <button type="button" id="btn-start">Start</button>
-    <button type="button" id="btn-pause">Pause</button>
-    <button type="button" id="btn-reset">Reset</button>
+<canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
+
+<section class="host-stage container">
+  <div class="host-main">
+    <div class="room-top">
+      <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">Connecting</span></span>
+      <span class="chip" id="host-badge" data-state="pending">Checking host access</span>
+      {{template "presence" .}}
+    </div>
+    {{template "timer" .}}
   </div>
+
+  <aside class="host-panel glass" aria-label="Host controls">
+    <h1 class="host-title">Host panel</h1>
+
+    <div class="stack">
+      <span class="label">Quick presets</span>
+      <div class="row row-wrap" id="presets">
+        <button type="button" class="chip" data-focus="25" data-break="5">25 / 5</button>
+        <button type="button" class="chip" data-focus="50" data-break="10">50 / 10</button>
+        <button type="button" class="chip" data-focus="90" data-break="15">90 / 15</button>
+      </div>
+    </div>
+
+    <div class="host-fields">
+      <div class="field">
+        <label for="focus-min">Focus, min</label>
+        <input class="input" id="focus-min" type="number" min="1" max="720" value="25" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="break-min">Break, min</label>
+        <input class="input" id="break-min" type="number" min="1" max="720" value="5" inputmode="numeric">
+      </div>
+    </div>
+    <div class="field">
+      <label for="label">What are you working on?</label>
+      <input class="input" id="label" maxlength="80" placeholder="Go backend, essay, revision...">
+    </div>
+
+    <div class="host-controls">
+      <button type="button" class="btn btn-primary" id="btn-focus">Start focus</button>
+      <button type="button" class="btn btn-warm" id="btn-break">Start break</button>
+      <button type="button" class="btn btn-ghost" id="btn-pause">Pause</button>
+      <button type="button" class="btn btn-danger" id="btn-reset">Reset</button>
+    </div>
+
+    <div class="stack">
+      <span class="label">Share with viewers</span>
+      <div class="share-row">
+        <input class="input" id="share-url" readonly value="{{.Data.ShareURL}}" aria-label="Viewer link">
+        <button type="button" class="btn btn-subtle" id="copy-link" data-url="{{.Data.ShareURL}}">Copy</button>
+      </div>
+      <div class="row row-wrap">
+        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}" target="_blank" rel="noopener">Open viewer page</a>
+        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}?mode=record" target="_blank" rel="noopener">Open record mode</a>
+      </div>
+    </div>
+
+    <p class="muted host-note">Keep this page bookmarked: your host key lives in this browser only.</p>
+  </aside>
 </section>
 {{end}}
