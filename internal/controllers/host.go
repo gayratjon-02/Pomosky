@@ -16,7 +16,7 @@ func (c *Controllers) HostPanel(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	c.render(w, http.StatusOK, "host", views.PageData{
+	c.render(w, r, http.StatusOK, "host", views.PageData{
 		Title:   "Host panel",
 		Scripts: []string{"/static/host.js"},
 		Data:    views.RoomPage{ID: id.String(), ShareURL: c.shareURL(id)},

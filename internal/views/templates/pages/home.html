@@ -6,7 +6,7 @@
   <p class="eyebrow chip"><span class="dot dot-live"></span> Live rooms, no sign-up</p>
   <h1 class="hero-title">Focus together<br><span class="grad">under a living sky.</span></h1>
   <p class="hero-sub">Start a pomodoro room in one click. Everyone who opens your link sees the same timer, the same sky and the same quiet company, with the real sun, moon and weather of the host's place.</p>
-  <form class="hero-cta" method="post" action="/r/new">
+  <form class="hero-cta" method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}">
     <button class="btn btn-primary btn-lg" type="submit">Start a room</button>
     <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
   </form>
@@ -84,7 +84,7 @@
       <p>Keep the host page open or bookmarked. The token is stored in that browser so you can come back.</p>
     </details>
   </div>
-  <form class="center" method="post" action="/r/new">
+  <form class="center" method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}">
     <button class="btn btn-primary btn-lg" type="submit">Start your room</button>
   </form>
 </section>

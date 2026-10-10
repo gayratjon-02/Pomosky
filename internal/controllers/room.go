@@ -18,7 +18,7 @@ func (c *Controllers) shareURL(id room.ID) string {
 func (c *Controllers) liveRoom(w http.ResponseWriter, r *http.Request) (room.ID, bool) {
 	id := room.ID(r.PathValue("id"))
 	if !id.Valid() || c.deps.Live == nil || !c.deps.Live.Has(id) {
-		c.render(w, http.StatusNotFound, "error", views.PageData{
+		c.render(w, r, http.StatusNotFound, "error", views.PageData{
 			Title:   "This room is not live",
 			Scripts: []string{"/static/ambient.js"},
 			Data:    "The host may have ended the session. Ask for a new link, or start your own room.",
@@ -40,7 +40,7 @@ func (c *Controllers) RoomShow(w http.ResponseWriter, r *http.Request) {
 		page, script = "record", "/static/record.js"
 	}
 	link := c.shareURL(id)
-	c.render(w, http.StatusOK, page, views.PageData{
+	c.render(w, r, http.StatusOK, page, views.PageData{
 		Title:        "Work together",
 		Description:  "Join this pomodoro room and work together under a live sky.",
 		CanonicalURL: link,

@@ -8,5 +8,5 @@ import (
 
 // Privacy serves GET /privacy.
 func (c *Controllers) Privacy(w http.ResponseWriter, r *http.Request) {
-	c.render(w, http.StatusOK, "privacy", views.PageData{Title: "Privacy"})
+	c.render(w, r, http.StatusOK, "privacy", views.PageData{Title: "Privacy"})
 }

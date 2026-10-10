@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
+
+	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 )
 
 // RequestID assigns every request an ID (or keeps the one set by the proxy),
@@ -19,7 +20,7 @@ func RequestID() Middleware {
 				id = hex.EncodeToString(b)
 			}
 			w.Header().Set("X-Request-ID", id)
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), requestIDKey, id)))
+			next.ServeHTTP(w, r.WithContext(reqctx.WithRequestID(r.Context(), id)))
 		})
 	}
 }

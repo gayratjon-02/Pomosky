@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gayratjon-02/Pomosky/internal/models"
+	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 )
 
 func TestChainOrder(t *testing.T) {
@@ -60,5 +61,70 @@ func TestOptionalAuthNeverBlocks(t *testing.T) {
 	h.ServeHTTP(httptest.NewRecorder(), req)
 	if !reached {
 		t.Fatal("OptionalAuth blocked the request")
+	}
+}
+
+func csrfRoundTrip(t *testing.T, mutate func(r *http.Request, token string)) int {
+	t.Helper()
+	var seen string
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { seen = reqctx.CSRF(r.Context()) }), CSRF(false))
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest("GET", "/", nil))
+	cookies := rec.Result().Cookies()
+	if len(cookies) != 1 || cookies[0].Name != CSRFCookieName || seen != cookies[0].Value {
+		t.Fatalf("GET should set the csrf cookie and expose the token: %v %q", cookies, seen)
+	}
+
+	req := httptest.NewRequest("POST", "/", strings.NewReader(""))
+	req.Host = "example.com"
+	req.AddCookie(cookies[0])
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	mutate(req, cookies[0].Value)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code
+}
+
+func TestCSRFAcceptsMatchingFormToken(t *testing.T) {
+	code := csrfRoundTrip(t, func(r *http.Request, token string) {
+		r.Body = io.NopCloser(strings.NewReader("csrf=" + token))
+	})
+	if code != http.StatusOK {
+		t.Fatalf("status = %d", code)
+	}
+}
+
+func TestCSRFAcceptsHeaderToken(t *testing.T) {
+	code := csrfRoundTrip(t, func(r *http.Request, token string) { r.Header.Set(CSRFHeader, token) })
+	if code != http.StatusOK {
+		t.Fatalf("status = %d", code)
+	}
+}
+
+func TestCSRFRejectsMissingOrWrongToken(t *testing.T) {
+	if code := csrfRoundTrip(t, func(*http.Request, string) {}); code != http.StatusForbidden {
+		t.Fatalf("missing token: status = %d", code)
+	}
+	code := csrfRoundTrip(t, func(r *http.Request, _ string) { r.Header.Set(CSRFHeader, "wrong") })
+	if code != http.StatusForbidden {
+		t.Fatalf("wrong token: status = %d", code)
+	}
+}
+
+func TestCSRFRejectsForeignOrigin(t *testing.T) {
+	code := csrfRoundTrip(t, func(r *http.Request, token string) {
+		r.Header.Set(CSRFHeader, token)
+		r.Header.Set("Origin", "https://evil.example")
+	})
+	if code != http.StatusForbidden {
+		t.Fatalf("status = %d", code)
+	}
+	code = csrfRoundTrip(t, func(r *http.Request, token string) {
+		r.Header.Set(CSRFHeader, token)
+		r.Header.Set("Origin", "https://example.com")
+	})
+	if code != http.StatusOK {
+		t.Fatalf("same-origin status = %d", code)
 	}
 }

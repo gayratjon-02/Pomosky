@@ -8,7 +8,7 @@
     {{if .Data}}<p class="muted">{{.Data}}</p>{{end}}
     <div class="row row-wrap error-actions">
       <a class="btn btn-ghost" href="/">Back to the start</a>
-      <form method="post" action="/r/new"><button class="btn btn-primary" type="submit">Start a room</button></form>
+      <form method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}"><button class="btn btn-primary" type="submit">Start a room</button></form>
     </div>
   </div>
 </section>

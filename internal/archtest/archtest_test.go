@@ -27,6 +27,7 @@ var allowed = map[string][]string{
 	"platform/idgen":     {"room"},
 	"platform/httpx":     {"apperr"},
 	"platform/ratelimit": {},
+	"platform/reqctx":    {"models"},
 	"moderation":         {},
 	"devreload":          {},
 	"analytics":          {"room"},
@@ -36,8 +37,8 @@ var allowed = map[string][]string{
 	"auth/magiclink":     {"auth", "ports", "apperr"},
 	"store/postgres":     {"models", "ports", "room", "apperr", "store/postgres/sqlcgen"},
 	"realtime":           {"room", "ports", "moderation", "platform/ratelimit"},
-	"middleware":         {"models", "auth", "platform/httpx", "platform/ratelimit"},
-	"controllers":        {"models", "ports", "room", "views", "config", "weather", "platform/httpx", "apperr"},
+	"middleware":         {"models", "auth", "platform/httpx", "platform/ratelimit", "platform/reqctx"},
+	"controllers":        {"models", "ports", "room", "views", "config", "weather", "platform/httpx", "platform/reqctx", "apperr"},
 }
 
 // pure packages may not import any third-party module either.

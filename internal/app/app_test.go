@@ -91,7 +91,6 @@ func TestRoutesSmoke(t *testing.T) {
 		{"GET", "/nope", http.StatusNotFound},
 		{"GET", "/r/INVALID", http.StatusNotFound},
 		{"GET", "/r/abcd2345", http.StatusNotFound}, // no such live room
-		{"POST", "/r/new", http.StatusSeeOther},
 		{"GET", "/ws/abcd2345", http.StatusNotFound}, // no such live room
 	}
 	for _, tc := range cases {
@@ -103,5 +102,36 @@ func TestRoutesSmoke(t *testing.T) {
 		if rec.Header().Get("X-Content-Type-Options") != "nosniff" {
 			t.Errorf("%s %s: security headers missing", tc.method, tc.path)
 		}
+	}
+}
+
+func TestCreateRoomNeedsCSRFToken(t *testing.T) {
+	a, err := New(config.Config{Env: "development", StaticDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := a.Handler()
+
+	// Without the token the request is refused.
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest("POST", "/r/new", nil))
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("POST without token = %d, want 403", rec.Code)
+	}
+
+	// A page visit hands out the cookie; the same value in the form is accepted.
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest("GET", "/", nil))
+	cookies := rec.Result().Cookies()
+	if len(cookies) == 0 {
+		t.Fatal("no csrf cookie on the landing page")
+	}
+	req := httptest.NewRequest("POST", "/r/new", strings.NewReader("csrf="+cookies[0].Value))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(cookies[0])
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("POST with token = %d, want 303", rec.Code)
 	}
 }

@@ -55,5 +55,6 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 		middleware.Logging(a.log),
 		middleware.SecurityHeaders(middleware.DefaultCSP),
 		middleware.OptionalAuth(nil), // TODO(stage 4): pass auth.Service
+		middleware.CSRF(a.cfg.IsProduction()),
 	)
 }

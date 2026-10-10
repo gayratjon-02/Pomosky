@@ -4,28 +4,14 @@ import (
 	"context"
 
 	"github.com/gayratjon-02/Pomosky/internal/models"
-)
-
-type ctxKey int
-
-const (
-	userKey ctxKey = iota
-	requestIDKey
+	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 )
 
 // WithUser stores the logged-in user in the context.
-func WithUser(ctx context.Context, u *models.User) context.Context {
-	return context.WithValue(ctx, userKey, u)
-}
+func WithUser(ctx context.Context, u *models.User) context.Context { return reqctx.WithUser(ctx, u) }
 
 // UserFromContext returns the logged-in user, or nil for anonymous visitors.
-func UserFromContext(ctx context.Context) *models.User {
-	u, _ := ctx.Value(userKey).(*models.User)
-	return u
-}
+func UserFromContext(ctx context.Context) *models.User { return reqctx.User(ctx) }
 
 // RequestIDFromContext returns the request ID set by RequestID.
-func RequestIDFromContext(ctx context.Context) string {
-	id, _ := ctx.Value(requestIDKey).(string)
-	return id
-}
+func RequestIDFromContext(ctx context.Context) string { return reqctx.RequestID(ctx) }

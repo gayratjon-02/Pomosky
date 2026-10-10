@@ -14,7 +14,7 @@ import (
 // fixture statistics, so the design can be built before login exists.
 func (c *Controllers) DevAccount(w http.ResponseWriter, r *http.Request) {
 	email := "ayla@example.com"
-	c.render(w, http.StatusOK, "account", views.PageData{
+	c.render(w, r, http.StatusOK, "account", views.PageData{
 		Title:   "Your account",
 		Scripts: []string{"/static/account.js"},
 		User:    &models.User{ID: "dev", Email: &email, Nickname: "Ayla", Provider: "google", CreatedAt: time.Now().AddDate(0, -3, 0)},

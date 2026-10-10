@@ -9,7 +9,7 @@ import (
 
 // Login serves GET /login.
 func (c *Controllers) Login(w http.ResponseWriter, r *http.Request) {
-	c.render(w, http.StatusOK, "login", views.PageData{
+	c.render(w, r, http.StatusOK, "login", views.PageData{
 		Title:   "Log in",
 		Scripts: []string{"/static/ambient.js"},
 	})
