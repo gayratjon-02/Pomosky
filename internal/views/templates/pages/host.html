@@ -11,10 +11,20 @@
       {{template "weather" .}}
     </div>
     {{template "timer" .}}
+
+    <div class="host-run">
+      <div class="host-controls">
+        <button type="button" class="btn btn-primary" id="btn-focus">Start focus</button>
+        <button type="button" class="btn btn-warm" id="btn-break">Start break</button>
+        <button type="button" class="btn btn-ghost" id="btn-pause">Pause</button>
+        <button type="button" class="btn btn-danger" id="btn-reset">Reset</button>
+      </div>
+      <p class="plan-line" id="plan-line" aria-live="polite"></p>
+    </div>
   </div>
 
-  <aside class="host-panel glass" aria-label="Host controls">
-    <h1 class="host-title">Host panel</h1>
+  <aside class="host-panel glass" aria-label="Session settings">
+    <h1 class="host-title">Session settings</h1>
 
     <div class="stack">
       <span class="label">Quick presets</span>
@@ -50,13 +60,6 @@
         <input class="input" id="place-q" type="search" placeholder="Search any city" autocomplete="off" maxlength="60" aria-label="Search for a city">
         <ul class="place-results glass" id="place-results" hidden></ul>
       </div>
-    </div>
-
-    <div class="host-controls">
-      <button type="button" class="btn btn-primary" id="btn-focus">Start focus</button>
-      <button type="button" class="btn btn-warm" id="btn-break">Start break</button>
-      <button type="button" class="btn btn-ghost" id="btn-pause">Pause</button>
-      <button type="button" class="btn btn-danger" id="btn-reset">Reset</button>
     </div>
 
     <div class="stack">
