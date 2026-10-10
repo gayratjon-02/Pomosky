@@ -6,6 +6,13 @@ type Client struct {
 	Nickname string
 	IsHost   bool
 
+	// Account is set when the browser is signed in and allows being shown to
+	// others: a stable key (to count one person once across tabs), the public
+	// name and the profile picture.
+	Account       string
+	AccountName   string
+	AccountAvatar string
+
 	conn Conn
 	send chan []byte
 }
