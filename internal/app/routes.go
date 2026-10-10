@@ -2,8 +2,10 @@ package app
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/gayratjon-02/Pomosky/internal/assets"
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
 	"github.com/gayratjon-02/Pomosky/internal/devreload"
 	"github.com/gayratjon-02/Pomosky/internal/middleware"
@@ -60,16 +62,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	}
 
 	// Static assets built from web/.
-	static := http.StripPrefix("/static/", http.FileServer(http.Dir(a.cfg.StaticDir)))
-	if a.dev != nil {
-		// Development: never reuse an old build of the frontend (the browser would
-		// otherwise keep stale CSS and JS by heuristic caching).
-		inner := static
-		static = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Cache-Control", "no-cache")
-			inner.ServeHTTP(w, r)
-		})
-	}
+	static := a.staticHandler()
 	mux.Handle("GET /static/", static)
 
 	// Everything else.
@@ -92,4 +85,31 @@ func (a *App) securityHeaders() middleware.Middleware {
 		return middleware.SecurityHeaders(middleware.DevCSP, true)
 	}
 	return middleware.SecurityHeaders(middleware.DefaultCSP)
+}
+
+// staticHandler serves the built frontend. Files with a content hash in their
+// name never change, so browsers may keep them for a year. Everything else
+// (favicon, share image) is revalidated. Dot files such as the Vite manifest
+// are not served. In development nothing is cached.
+func (a *App) staticHandler() http.Handler {
+	files := http.StripPrefix("/static/", http.FileServer(http.Dir(a.cfg.StaticDir)))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rel := strings.TrimPrefix(r.URL.Path, "/static/")
+		for _, part := range strings.Split(rel, "/") {
+			if strings.HasPrefix(part, ".") {
+				http.NotFound(w, r)
+				return
+			}
+		}
+		switch {
+		case a.dev != nil:
+			// Development: never reuse an old build of the frontend.
+			w.Header().Set("Cache-Control", "no-cache")
+		case assets.Hashed(rel):
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		default:
+			w.Header().Set("Cache-Control", "no-cache")
+		}
+		files.ServeHTTP(w, r)
+	})
 }

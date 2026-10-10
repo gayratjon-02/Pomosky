@@ -5,6 +5,8 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -136,5 +138,42 @@ func TestCreateRoomNeedsCSRFToken(t *testing.T) {
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("POST with token = %d, want 303", rec.Code)
+	}
+}
+
+func TestStaticFilesGetTheRightCacheHeaders(t *testing.T) {
+	dir := t.TempDir()
+	for name, body := range map[string]string{
+		"landing.CWdZvdpn.js": "console.log(1)",
+		"favicon.svg":         "<svg/>",
+		".vite/manifest.json": "{}",
+	} {
+		full := filepath.Join(dir, name)
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	a, err := New(config.Config{Env: "development", StaticDir: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := a.Handler()
+	get := func(path string) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest("GET", path, nil))
+		return rec
+	}
+	// Dev is not set here, so this is the production behaviour: hashed files are immutable.
+	if rec := get("/static/landing.CWdZvdpn.js"); rec.Code != 200 || !strings.Contains(rec.Header().Get("Cache-Control"), "immutable") {
+		t.Errorf("hashed file: %d %q", rec.Code, rec.Header().Get("Cache-Control"))
+	}
+	if rec := get("/static/favicon.svg"); rec.Code != 200 || rec.Header().Get("Cache-Control") != "no-cache" {
+		t.Errorf("plain file: %d %q", rec.Code, rec.Header().Get("Cache-Control"))
+	}
+	if rec := get("/static/.vite/manifest.json"); rec.Code != http.StatusNotFound {
+		t.Errorf("the manifest must not be served: %d", rec.Code)
 	}
 }
