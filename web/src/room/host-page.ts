@@ -5,6 +5,7 @@ import { startLiveSky } from "../sky/live-sky";
 import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { controlsFor } from "../ui/host-controls";
+import { initSounds } from "../ui/sound-events";
 import { initShare } from "../ui/share";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
@@ -152,6 +153,8 @@ export function initHostPage(): void {
       { maximumAge: 600_000, timeout: 10_000 },
     );
   });
+
+  initSounds(client);
 
   client.connect();
 }
