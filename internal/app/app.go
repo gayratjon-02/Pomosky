@@ -156,6 +156,7 @@ func New(cfg config.Config) (*App, error) {
 		IDs:   idgen.Generator{},
 
 		ClientIP: func(r *http.Request) string { return httpx.ClientIP(r, cfg.TrustProxy) },
+		Identify: roomIdentity,
 	})
 	if err != nil {
 		return nil, err
@@ -223,4 +224,15 @@ func (a *App) Run(ctx context.Context) error {
 		defer cancel()
 		return srv.Shutdown(shutdownCtx)
 	}
+}
+
+// roomIdentity is what the room may show of a signed-in browser: the public
+// nickname and picture, only for people who allow being listed (the same
+// switch as the leaderboard). The session user was resolved by the middleware.
+func roomIdentity(r *http.Request) (key, name, avatarURL string, ok bool) {
+	u := middleware.UserFromContext(r.Context())
+	if u == nil || !u.ShowOnLeaderboard || u.Nickname == "" {
+		return "", "", "", false
+	}
+	return string(u.ID), u.Nickname, u.AvatarURL, true
 }
