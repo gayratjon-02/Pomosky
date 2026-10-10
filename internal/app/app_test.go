@@ -87,6 +87,7 @@ func TestRoutesSmoke(t *testing.T) {
 	}{
 		{"GET", "/", http.StatusOK},
 		{"GET", "/healthz", http.StatusOK},
+		{"GET", "/robots.txt", http.StatusOK},
 		{"GET", "/privacy", http.StatusOK},
 		{"GET", "/account", http.StatusOK}, // example statistics for visitors
 		{"GET", "/api/stats/demo", http.StatusOK},

@@ -49,6 +49,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /api/admin/users", c.AdminUsersAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
+	mux.HandleFunc("GET /robots.txt", c.Robots)
 
 	// Development only: browser auto-reload (never registered in production).
 	if a.dev != nil {
