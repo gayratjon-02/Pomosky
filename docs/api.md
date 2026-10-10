@@ -1,0 +1,17 @@
+# HTTP routes
+
+| Method | Path | Purpose | Status |
+|---|---|---|---|
+| GET | `/` | Landing | implemented |
+| GET | `/privacy` | Privacy page | implemented |
+| GET | `/healthz` | Health check | implemented |
+| GET | `/r/{id}` | Room (viewer); `?mode=record` for record mode | stub |
+| GET | `/r/{id}/host` | Host panel | stub |
+| POST | `/r/new` | Create a room, show host token once | stub |
+| GET | `/ws/{id}` | WebSocket | stub |
+| GET | `/api/weather?room={id}` | Cached weather snapshot | stub |
+| GET/POST | `/login`, `/auth/callback`, `/logout` | Optional login | stub |
+| GET | `/account` | Profile and statistics | stub |
+| GET | `/static/*` | Built frontend assets | implemented |
+
+State-changing forms use CSRF tokens (TODO stage 4).
