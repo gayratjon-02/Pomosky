@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -32,6 +33,8 @@ type Service struct {
 	ttl       time.Duration
 	now       func() time.Time
 	maxPerMin int
+
+	calls, hits, errs, busy atomic.Int64 // counters for the admin page
 
 	mu       sync.Mutex
 	cache    map[cacheKey]cacheEntry
@@ -72,6 +75,7 @@ func (s *Service) Current(ctx context.Context, lat, lon float64) (Snapshot, erro
 	entry, cached := s.cache[key]
 	if cached && now.Sub(entry.at) < s.ttl {
 		s.mu.Unlock()
+		s.hits.Add(1)
 		return entry.snap, nil
 	}
 	if c, ok := s.inflight[key]; ok { // someone is already asking for this place
@@ -80,6 +84,7 @@ func (s *Service) Current(ctx context.Context, lat, lon float64) (Snapshot, erro
 	}
 	if !s.allowFetchLocked(now) {
 		s.mu.Unlock()
+		s.busy.Add(1)
 		if cached {
 			return entry.snap, nil
 		}
@@ -93,7 +98,11 @@ func (s *Service) Current(ctx context.Context, lat, lon float64) (Snapshot, erro
 	// waiters would fail together with it.
 	fctx, cancel := context.WithTimeout(context.Background(), upstreamTimeout)
 	defer cancel()
+	s.calls.Add(1)
 	snap, err := s.provider.Current(fctx, key.lat, key.lon)
+	if err != nil {
+		s.errs.Add(1)
+	}
 	if err == nil {
 		snap.FetchedAt = now
 	}
@@ -149,3 +158,16 @@ func (s *Service) allowFetchLocked(now time.Time) bool {
 }
 
 func round2(v float64) float64 { return math.Round(v*100) / 100 }
+
+// ServiceStats are counters since the server started.
+type ServiceStats struct {
+	Calls  int64 // upstream requests made
+	Hits   int64 // answered from the cache
+	Errors int64 // upstream requests that failed
+	Busy   int64 // refused because the per-minute budget was used up
+}
+
+// Stats returns the counters.
+func (s *Service) Stats() ServiceStats {
+	return ServiceStats{Calls: s.calls.Load(), Hits: s.hits.Load(), Errors: s.errs.Load(), Busy: s.busy.Load()}
+}
