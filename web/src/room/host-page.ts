@@ -6,6 +6,7 @@ import { createConnectionChip } from "../ui/connection";
 import { setPeople } from "../ui/people";
 import { setViewers } from "../ui/presence";
 import { controlsFor } from "../ui/host-controls";
+import { initMusic } from "../ui/music-events";
 import { initNotifyToggle, notifyEnd } from "../ui/notify";
 import { initSounds } from "../ui/sound-events";
 import { shortcutFor } from "../ui/shortcuts";
@@ -187,6 +188,7 @@ export function initHostPage(): void {
   initSounds(client);
   renderer.onEnd = notifyEnd;
   initNotifyToggle();
+  initMusic();
   initWakeLock(client);
 
   client.connect();

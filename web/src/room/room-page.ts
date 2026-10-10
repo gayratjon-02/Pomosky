@@ -6,6 +6,7 @@ import { setPeople } from "../ui/people";
 import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
+import { initMusic } from "../ui/music-events";
 import { initNotifyToggle, notifyEnd } from "../ui/notify";
 import { initSounds } from "../ui/sound-events";
 import { initWakeLock } from "../ui/wake-lock";
@@ -62,6 +63,7 @@ export function initRoomPage(): void {
   initSounds(client);
   renderer.onEnd = notifyEnd;
   initNotifyToggle();
+  initMusic();
   initWakeLock(client);
 
   client.connect();
