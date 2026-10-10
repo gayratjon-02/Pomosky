@@ -149,6 +149,7 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
     raf = requestAnimationFrame(loop);
   };
 
+  resize(); // size the layers now, so update() before start() can already draw
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
   const stopWatching = onVisibilityChange((visible) => {
