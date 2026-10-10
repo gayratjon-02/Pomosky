@@ -8,7 +8,7 @@ import "time"
 // modified (the returned State may share nothing mutable with s). now is the
 // server time of the event. On error the original state is returned unchanged.
 //
-// TODO(stage 2): viewer, reaction, location and recovery events.
+// TODO(stage 2): location and recovery events.
 func Reduce(s State, ev Event, now time.Time) (State, error) {
 	var (
 		next State
@@ -23,7 +23,13 @@ func Reduce(s State, ev Event, now time.Time) (State, error) {
 		next, err = resumeTimer(s, now)
 	case TimerReset:
 		next, err = resetTimer(s)
-	case ViewerJoined, ViewerLeft, ReactionSent, LocationSet, HostRecovered:
+	case ViewerJoined:
+		next, err = viewerJoined(s)
+	case ViewerLeft:
+		next, err = viewerLeft(s)
+	case ReactionSent:
+		next, err = reactionSent(s, e)
+	case LocationSet, HostRecovered:
 		return s, ErrNotImplemented
 	default:
 		return s, ErrUnknownEvent
