@@ -24,7 +24,7 @@ func TestPeopleListsAccountsOnceAndNicknames(t *testing.T) {
 	a1 := NewClient("s1", nil, 8)
 	a1.Account, a1.AccountName, a1.AccountAvatar = "u1", "Ayla", "https://x/a.png"
 	a2 := NewClient("s2", nil, 8) // the same person in a second tab
-	a2.Account, a2.AccountName = "u1", "Ayla"
+	a2.Account, a2.AccountName, a2.AccountAvatar = "u1", "Ayla", "https://x/a.png"
 	n := NewClient("s3", nil, 8)
 	n.Nickname = "Bek"
 	anon := NewClient("s4", nil, 8) // nameless viewers are not listed
