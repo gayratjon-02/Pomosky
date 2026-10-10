@@ -5,6 +5,7 @@ import { startLiveSky } from "../sky/live-sky";
 import { setViewers } from "../ui/presence";
 import { initReactions, setReactionCounts } from "../ui/reactions";
 import { initShare } from "../ui/share";
+import { initNotifyToggle, notifyEnd } from "../ui/notify";
 import { initSounds } from "../ui/sound-events";
 import { initWakeLock } from "../ui/wake-lock";
 import { TimerRenderer } from "../ui/timer-view";
@@ -57,6 +58,8 @@ export function initRoomPage(): void {
   });
 
   initSounds(client);
+  renderer.onEnd = notifyEnd;
+  initNotifyToggle();
   initWakeLock(client);
 
   client.connect();

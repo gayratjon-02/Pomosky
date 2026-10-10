@@ -5,6 +5,7 @@ import { startLiveSky } from "../sky/live-sky";
 import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { controlsFor } from "../ui/host-controls";
+import { initNotifyToggle, notifyEnd } from "../ui/notify";
 import { initSounds } from "../ui/sound-events";
 import { shortcutFor } from "../ui/shortcuts";
 import { initShare } from "../ui/share";
@@ -182,6 +183,8 @@ export function initHostPage(): void {
   });
 
   initSounds(client);
+  renderer.onEnd = notifyEnd;
+  initNotifyToggle();
   initWakeLock(client);
 
   client.connect();
