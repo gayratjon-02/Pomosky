@@ -256,3 +256,7 @@ body { overflow-x: clip; }
 
 /* The hidden attribute must win over component display rules such as .btn { display: inline-flex }. */
 [hidden] { display: none !important; }
+
+/* The theme switch is only offered where the light theme applies. */
+.theme-toggle { display: none; }
+body:is(.plain, .admin, .error) .theme-toggle { display: inline-flex; }
