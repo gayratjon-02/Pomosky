@@ -64,3 +64,23 @@
   --focus-ring: 0 0 0 3px rgba(138, 180, 255, 0.55);
   --header-h: 64px;
 }
+
+/* Light theme: only for the plain pages (privacy, admin, errors). */
+html[data-theme="light"] body:is(.plain, .admin, .error) {
+  color-scheme: light;
+  --bg: #f5f7fc;
+  --bg-raised: #ffffff;
+  --fg: #101733;
+  --fg-muted: rgba(16, 23, 51, 0.76);
+  --fg-dim: rgba(16, 23, 51, 0.55);
+  --accent: #2f5fd0;
+  --accent-strong: #1f4bb8;
+  --accent-contrast: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(16, 23, 51, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 10px 30px rgba(16, 23, 51, 0.1);
+  --focus-ring: 0 0 0 3px rgba(47, 95, 208, 0.45);
+}
+html[data-theme="light"] body.admin::before { background: radial-gradient(120% 80% at 50% 0%, #e4ebfb 0%, var(--bg) 60%); }
