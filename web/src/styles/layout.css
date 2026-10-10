@@ -253,3 +253,6 @@ body { overflow-x: clip; }
   .input, .select { min-height: 46px; }
   .chip, button.chip { min-height: 40px; }
 }
+
+/* The hidden attribute must win over component display rules such as .btn { display: inline-flex }. */
+[hidden] { display: none !important; }
