@@ -16,6 +16,7 @@ type Hub struct {
 	log      *slog.Logger
 	clock    ports.Clock
 	recorder ports.FocusRecorder // may be nil
+	idleTTL  time.Duration       // how long a room without any client is kept
 
 	mu    sync.RWMutex
 	rooms map[room.ID]*RoomHub
@@ -29,8 +30,15 @@ var (
 // NewHub creates an empty Hub. recorder receives the finished focus phases of
 // rooms that have an owner; it may be nil.
 func NewHub(log *slog.Logger, clock ports.Clock, recorder ports.FocusRecorder) *Hub {
-	return &Hub{log: log, clock: clock, recorder: recorder, rooms: map[room.ID]*RoomHub{}}
+	return &Hub{log: log, clock: clock, recorder: recorder, idleTTL: DefaultIdleTTL, rooms: map[room.ID]*RoomHub{}}
 }
+
+// DefaultIdleTTL is how long a room with no connected client stays alive. It
+// is long enough for the host to reload the page or lose the network.
+const DefaultIdleTTL = 10 * time.Minute
+
+// SetIdleTTL changes how long an empty room is kept (call before serving).
+func (h *Hub) SetIdleTTL(d time.Duration) { h.idleTTL = d }
 
 // Open returns the live RoomHub for state.ID, creating it from state if it
 // does not exist yet. owner is "" for anonymous rooms.
@@ -76,19 +84,30 @@ func (h *Hub) Publish(id room.ID, payload []byte) {
 	}
 }
 
-// Sweep records the focus phases that ran to their end in rooms with an owner.
-// Nothing else notices the end of a phase, because the timer is only a start
-// time and a duration. Call it every few seconds (see RunSweeper).
+// Sweep does the periodic work of the rooms: it records the focus phases that
+// ran to their end (nothing else notices that, because the timer is only a
+// start time and a duration) and removes rooms that nobody has been connected
+// to for the idle TTL. Call it every few seconds (see RunSweeper).
 func (h *Hub) Sweep(now time.Time) {
 	h.mu.RLock()
-	rooms := make([]*RoomHub, 0, len(h.rooms))
-	for _, rh := range h.rooms {
-		rooms = append(rooms, rh)
+	rooms := make(map[room.ID]*RoomHub, len(h.rooms))
+	for id, rh := range h.rooms {
+		rooms[id] = rh
 	}
 	h.mu.RUnlock()
-	for _, rh := range rooms {
-		rh.sweep(now)
+	for id, rh := range rooms {
+		if rh.sweep(now, h.idleTTL) {
+			h.Close(id)
+			h.log.Info("room closed after being empty", "room", id)
+		}
 	}
+}
+
+// Len returns the number of live rooms.
+func (h *Hub) Len() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.rooms)
 }
 
 // RunSweeper calls Sweep every interval until ctx is done.
@@ -120,6 +139,7 @@ type RoomHub struct {
 	clients  map[*Client]struct{}
 	peak     int       // most clients seen since the last recorded focus phase
 	credited time.Time // StartedAt of the focus phase already recorded at its natural end
+	emptyAt  time.Time // since when no client is connected; zero while someone is
 }
 
 func newRoomHub(state room.State, owner models.UserID, log *slog.Logger, recorder ports.FocusRecorder) *RoomHub {
@@ -148,16 +168,31 @@ func (r *RoomHub) recordLocked(t room.Timer, now time.Time) {
 	r.peak = len(r.clients)
 }
 
-func (r *RoomHub) sweep(now time.Time) {
+// sweep records a focus phase that ended on its own and reports whether the
+// room has been empty for longer than idleTTL and should be closed.
+func (r *RoomHub) sweep(now time.Time, idleTTL time.Duration) (expired bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	t := r.state.Timer
-	if r.owner == "" || t.Phase != room.PhaseFocus || t.Remaining(now) > 0 || t.StartedAt.Equal(r.credited) {
-		return
+	if r.owner != "" && t.Phase == room.PhaseFocus && t.Remaining(now) == 0 && !t.StartedAt.Equal(r.credited) {
+		r.recordLocked(t, t.StartedAt.Add(t.Duration)) // at its end, the whole phase has been focused
+		r.credited = t.StartedAt
 	}
-	end := t.StartedAt.Add(t.Duration)
-	r.recordLocked(t, end) // at its end, the whole phase has been focused
-	r.credited = t.StartedAt
+
+	if len(r.clients) > 0 {
+		r.emptyAt = time.Time{}
+		return false
+	}
+	if r.emptyAt.IsZero() {
+		r.emptyAt = now
+		return false
+	}
+	if now.Sub(r.emptyAt) < idleTTL {
+		return false
+	}
+	r.recordLocked(t, now) // a phase still running when the room closes counts up to now
+	return true
 }
 
 // State returns a copy of the current room state.

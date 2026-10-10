@@ -181,3 +181,36 @@ func TestRoomsAndFocusTotals(t *testing.T) {
 		t.Fatalf("focus sessions left: %d %v", n, err)
 	}
 }
+
+func TestCleanupQueries(t *testing.T) {
+	db := testDB(t)
+	ctx := context.Background()
+	u := newUser(t, db, "u1", "a@example.com")
+	now := time.Now().UTC()
+
+	tokens := NewLoginTokenRepo(db)
+	_ = tokens.Create(ctx, "old", "a@example.com", now.Add(-time.Hour))
+	_ = tokens.Create(ctx, "fresh", "a@example.com", now.Add(time.Hour))
+	if n, err := tokens.DeleteExpired(ctx, now); err != nil || n != 1 {
+		t.Fatalf("DeleteExpired tokens: %d %v", n, err)
+	}
+
+	rooms := NewRoomRepo(db)
+	owner := u.ID
+	for _, id := range []room.ID{"aaaaaaaa", "bbbbbbbb"} {
+		if err := rooms.Create(ctx, models.Room{ID: id, OwnerUserID: &owner, HostTokenHash: "x"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// "bbbbbbbb" has focus history and must survive; "aaaaaaaa" is stale and empty.
+	err := NewFocusSessionRepo(db).Create(ctx, models.FocusSession{RoomID: "bbbbbbbb", StartedAt: now, EndedAt: now, Focused: time.Minute})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n, err := rooms.DeleteStale(ctx, now.Add(time.Hour)); err != nil || n != 1 {
+		t.Fatalf("DeleteStale: %d %v", n, err)
+	}
+	if _, err := rooms.ByID(ctx, "bbbbbbbb"); err != nil {
+		t.Fatalf("room with history was deleted: %v", err)
+	}
+}

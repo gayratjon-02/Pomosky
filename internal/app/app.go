@@ -14,6 +14,7 @@ import (
 	"github.com/gayratjon-02/Pomosky/internal/devreload"
 	"github.com/gayratjon-02/Pomosky/internal/middleware"
 	"github.com/gayratjon-02/Pomosky/internal/platform/clock"
+	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
 	"github.com/gayratjon-02/Pomosky/internal/platform/idgen"
 	"github.com/gayratjon-02/Pomosky/internal/platform/logger"
 	"github.com/gayratjon-02/Pomosky/internal/ports"
@@ -31,6 +32,7 @@ type App struct {
 	dev      *devreload.Watcher // nil unless cfg.Dev
 	db       *postgres.DB       // nil when DATABASE_URL is not set
 	hub      *realtime.Hub
+	janitor  *janitor        // nil without a database
 	recorder *stats.Recorder // nil without a database
 	// sessions resolves login cookies; nil means everyone is anonymous.
 	sessions middleware.SessionResolver
@@ -72,6 +74,7 @@ func New(cfg config.Config) (*App, error) {
 		statsSvc *stats.Service
 		rooms    ports.RoomRepository
 		recorder *stats.Recorder
+		jan      *janitor
 	)
 	if cfg.DatabaseURL != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -96,7 +99,9 @@ func New(cfg config.Config) (*App, error) {
 		focusRepo := postgres.NewFocusSessionRepo(db)
 		statsSvc = stats.New(focusRepo, clk)
 		recorder = stats.NewRecorder(focusRepo, log)
-		rooms = postgres.NewRoomRepo(db)
+		roomRepo := postgres.NewRoomRepo(db)
+		rooms = roomRepo
+		jan = &janitor{log: log, clock: clk, sessions: postgres.NewSessionRepo(db), tokens: postgres.NewLoginTokenRepo(db), rooms: roomRepo}
 	}
 
 	var focusRecorder ports.FocusRecorder // stays a nil interface without a database
@@ -104,6 +109,9 @@ func New(cfg config.Config) (*App, error) {
 		focusRecorder = recorder
 	}
 	hub := realtime.NewHub(log, clk, focusRecorder)
+	if cfg.RoomIdleTTL > 0 {
+		hub.SetIdleTTL(cfg.RoomIdleTTL)
+	}
 
 	deps := controllers.Deps{
 		Config: cfg,
@@ -127,12 +135,14 @@ func New(cfg config.Config) (*App, error) {
 		Hosts: auth.HostTokens{Salt: cfg.HostTokenSalt},
 		Clock: clk,
 		IDs:   idgen.Generator{},
+
+		ClientIP: func(r *http.Request) string { return httpx.ClientIP(r, cfg.TrustProxy) },
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, recorder: recorder}
+	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, recorder: recorder, janitor: jan}
 	if accounts != nil {
 		a.sessions = accounts
 	}
@@ -172,6 +182,9 @@ func (a *App) Run(ctx context.Context) error {
 
 	// Focus phases that run to their end are noticed by a sweep, not by an event.
 	go a.hub.RunSweeper(ctx, 5*time.Second)
+	if a.janitor != nil {
+		go a.janitor.run(ctx, time.Hour)
+	}
 
 	errCh := make(chan error, 1)
 	go func() {

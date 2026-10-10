@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/coder/websocket"
@@ -43,6 +44,12 @@ type HandlerConfig struct {
 	ReactRatePerSec float64       // reactions only, per connection (default 5)
 	ReactBurst      int           // default 10
 	MaxAuthFailures int           // wrong host tokens before the connection is closed (default 5)
+
+	// ClientIP identifies the client of a request (the app passes httpx.ClientIP
+	// with the proxy setting). MaxConnsPerIP limits open connections per client
+	// (default 40: many viewers may share one network). Without ClientIP there is no limit.
+	ClientIP      func(*http.Request) string
+	MaxConnsPerIP int
 }
 
 func (c HandlerConfig) withDefaults() HandlerConfig {
@@ -76,6 +83,9 @@ func (c HandlerConfig) withDefaults() HandlerConfig {
 	if c.MaxAuthFailures == 0 {
 		c.MaxAuthFailures = 5
 	}
+	if c.MaxConnsPerIP == 0 {
+		c.MaxConnsPerIP = 40
+	}
 	return c
 }
 
@@ -85,6 +95,30 @@ type Handler struct {
 	hub *Hub
 	log *slog.Logger
 	cfg HandlerConfig
+
+	mu    sync.Mutex
+	conns map[string]int // open connections per client address
+}
+
+// acquire counts a new connection of ip; it fails when the client has too many.
+func (h *Handler) acquire(ip string) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.conns[ip] >= h.cfg.MaxConnsPerIP {
+		return false
+	}
+	h.conns[ip]++
+	return true
+}
+
+func (h *Handler) release(ip string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.conns[ip] <= 1 {
+		delete(h.conns, ip)
+		return
+	}
+	h.conns[ip]--
 }
 
 // NewHandler creates the WebSocket handler.
@@ -92,7 +126,7 @@ func NewHandler(hub *Hub, log *slog.Logger, cfg HandlerConfig) (*Handler, error)
 	if cfg.Clock == nil || cfg.IDs == nil {
 		return nil, errors.New("realtime: HandlerConfig needs Clock and IDs")
 	}
-	return &Handler{hub: hub, log: log, cfg: cfg.withDefaults()}, nil
+	return &Handler{hub: hub, log: log, cfg: cfg.withDefaults(), conns: map[string]int{}}, nil
 }
 
 // ServeHTTP implements http.Handler. The browser's Origin must match the
@@ -103,6 +137,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !id.Valid() || !ok {
 		http.NotFound(w, r)
 		return
+	}
+
+	if h.cfg.ClientIP != nil {
+		ip := h.cfg.ClientIP(r)
+		if !h.acquire(ip) {
+			http.Error(w, "too many connections", http.StatusTooManyRequests)
+			return
+		}
+		defer h.release(ip)
 	}
 
 	c, err := websocket.Accept(w, r, nil)

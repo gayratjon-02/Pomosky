@@ -89,6 +89,8 @@ func (f *fakeTokens) Consume(_ context.Context, h string, now time.Time) (string
 	return t.email, nil
 }
 
+func (f *fakeTokens) DeleteExpired(context.Context, time.Time) (int64, error) { return 0, nil }
+
 type fakeMailer struct{ to, body string }
 
 func (m *fakeMailer) Send(_ context.Context, to, _, body string) error {

@@ -15,6 +15,8 @@ type RoomRepository interface {
 	ByID(ctx context.Context, id room.ID) (models.Room, error)
 	SetOwner(ctx context.Context, id room.ID, owner models.UserID) error
 	UpdateLocation(ctx context.Context, id room.ID, loc room.Location) error
+	// DeleteStale removes rooms created before the cutoff that have no focus history.
+	DeleteStale(ctx context.Context, before time.Time) (int64, error)
 }
 
 // UserRepository persists optional registered users.
@@ -51,4 +53,5 @@ type LoginTokenRepository interface {
 	// Consume deletes the token and returns its email. It returns
 	// apperr.ErrNotFound when the token is unknown, used or expired.
 	Consume(ctx context.Context, tokenHash string, now time.Time) (string, error)
+	DeleteExpired(ctx context.Context, now time.Time) (int64, error)
 }

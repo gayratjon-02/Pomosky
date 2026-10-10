@@ -20,6 +20,7 @@ type Config struct {
 	DatabaseURL   string
 	SessionSecret string
 	HostTokenSalt string
+	RoomIdleTTL   time.Duration // how long a room with nobody connected stays alive
 
 	// TrustProxy makes the server believe X-Forwarded-For. Enable it only when
 	// every request comes through a proxy you control (Caddy), otherwise clients
@@ -67,6 +68,7 @@ func Load() Config {
 		DatabaseURL:   os.Getenv("DATABASE_URL"),
 		SessionSecret: os.Getenv("SESSION_SECRET"),
 		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
+		RoomIdleTTL:   getenvDuration("ROOM_IDLE_TTL", 10*time.Minute),
 		TrustProxy:    getenvBool("TRUST_PROXY", false),
 		Dev:           getenvBool("DEV_RELOAD", false),
 		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),

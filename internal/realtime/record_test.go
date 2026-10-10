@@ -47,12 +47,12 @@ func TestNaturalEndIsRecordedOnceBySweep(t *testing.T) {
 	rh, rec := ownedRoom("u1")
 	startFocus(t, rh, t0, 25*time.Minute)
 
-	rh.sweep(t0.Add(24 * time.Minute)) // not over yet
+	rh.sweep(t0.Add(24*time.Minute), time.Hour) // not over yet
 	if len(rec.got) != 0 {
 		t.Fatalf("recorded too early: %+v", rec.got)
 	}
-	rh.sweep(t0.Add(26 * time.Minute))
-	rh.sweep(t0.Add(27 * time.Minute)) // a second sweep must not record it again
+	rh.sweep(t0.Add(26*time.Minute), time.Hour)
+	rh.sweep(t0.Add(27*time.Minute), time.Hour) // a second sweep must not record it again
 	if len(rec.got) != 1 || rec.got[0].Focused != 25*time.Minute || !rec.got[0].StartedAt.Equal(t0) {
 		t.Fatalf("recorded %+v", rec.got)
 	}
@@ -92,7 +92,7 @@ func TestNothingIsRecordedForAnonymousBreaksOrBlips(t *testing.T) {
 	anon, anonRec := ownedRoom("")
 	startFocus(t, anon, t0, 25*time.Minute)
 	_ = anon.Apply(room.TimerReset{}, t0.Add(10*time.Minute))
-	anon.sweep(t0.Add(time.Hour))
+	anon.sweep(t0.Add(time.Hour), 24*time.Hour)
 	if len(anonRec.got) != 0 {
 		t.Fatalf("anonymous room recorded %+v", anonRec.got)
 	}
@@ -119,5 +119,43 @@ func TestPeakViewersIsRecorded(t *testing.T) {
 	_ = rh.Apply(room.TimerReset{}, t0.Add(5*time.Minute))
 	if len(rec.got) != 1 || rec.got[0].PeakViewers != 2 {
 		t.Fatalf("recorded %+v", rec.got)
+	}
+}
+
+func TestEmptyRoomsExpireAndRecordTheRunningPhase(t *testing.T) {
+	rh, rec := ownedRoom("u1")
+	c := &Client{ID: "a"}
+	rh.Join(c)
+	startFocus(t, rh, t0, 60*time.Minute)
+
+	if rh.sweep(t0.Add(time.Minute), 10*time.Minute) {
+		t.Fatal("a room with a client expired")
+	}
+	rh.Leave(c)
+	if rh.sweep(t0.Add(2*time.Minute), 10*time.Minute) {
+		t.Fatal("expired as soon as it became empty")
+	}
+	if rh.sweep(t0.Add(11*time.Minute), 10*time.Minute) {
+		t.Fatal("expired before the idle time passed")
+	}
+	if !rh.sweep(t0.Add(13*time.Minute), 10*time.Minute) {
+		t.Fatal("did not expire after the idle time")
+	}
+	if len(rec.got) != 1 || rec.got[0].Focused != 13*time.Minute {
+		t.Fatalf("recorded %+v", rec.got)
+	}
+}
+
+func TestReconnectingClientKeepsTheRoomAlive(t *testing.T) {
+	rh, _ := ownedRoom("")
+	c := &Client{ID: "a"}
+	rh.Join(c)
+	rh.Leave(c)
+	rh.sweep(t0, 10*time.Minute) // starts the empty timer
+	rh.Join(c)                   // the host reloaded the page
+	rh.sweep(t0.Add(5*time.Minute), 10*time.Minute)
+	rh.Leave(c)
+	if rh.sweep(t0.Add(12*time.Minute), 10*time.Minute) {
+		t.Fatal("the empty timer was not reset by the reconnect")
 	}
 }

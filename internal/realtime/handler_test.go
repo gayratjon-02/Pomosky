@@ -490,3 +490,36 @@ func TestBadLocationsAreRejected(t *testing.T) {
 		}
 	}
 }
+
+func TestConnectionsPerClientAreLimited(t *testing.T) {
+	s := newTestServer(t, func(c *HandlerConfig) {
+		c.MaxConnsPerIP = 2
+		c.ClientIP = func(*http.Request) string { return "1.2.3.4" }
+	})
+	a := s.dial(t)
+	b := s.dial(t)
+	a.waitState(viewersIs(1))
+	b.waitState(viewersIs(2))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, resp, err := websocket.Dial(ctx, s.url+"/ws/"+testRoomID, nil)
+	if err == nil || resp == nil || resp.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("third connection: err=%v resp=%v", err, resp)
+	}
+
+	// Closing one frees a slot.
+	a.c.Close(websocket.StatusNormalClosure, "bye")
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		c, _, err := websocket.Dial(ctx, s.url+"/ws/"+testRoomID, nil)
+		if err == nil {
+			c.CloseNow()
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("slot was not released: %v", err)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}

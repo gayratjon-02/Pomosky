@@ -24,3 +24,8 @@ func (r *LoginTokenRepo) Consume(ctx context.Context, tokenHash string, now time
 	email, err := r.db.q.ConsumeLoginToken(ctx, sqlcgen.ConsumeLoginTokenParams{TokenHash: tokenHash, ExpiresAt: now})
 	return email, mapErr(err)
 }
+
+func (r *LoginTokenRepo) DeleteExpired(ctx context.Context, now time.Time) (int64, error) {
+	n, err := r.db.q.DeleteExpiredLoginTokens(ctx, now)
+	return n, mapErr(err)
+}
