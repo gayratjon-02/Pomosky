@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { busiest, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
+import { busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
 
 describe("formatDuration", () => {
   it("formats minutes and hours", () => {
@@ -54,5 +54,25 @@ describe("compareText and busiest", () => {
       { date: "2026-10-03", seconds: 900, sessions: 2 },
     ];
     expect(busiest(days)?.date).toBe("2026-10-03");
+  });
+});
+
+describe("dayShare and defaultDay", () => {
+  it("computes the share of the month", () => {
+    expect(dayShare(300, 1200)).toBe(25);
+    expect(dayShare(0, 1200)).toBe(0);
+    expect(dayShare(5, 0)).toBe(0);
+  });
+
+  it("selects today, else the busiest day, else the first", () => {
+    const days = [
+      { date: "2026-09-01", seconds: 0, sessions: 0 },
+      { date: "2026-09-02", seconds: 900, sessions: 1 },
+      { date: "2026-09-03", seconds: 300, sessions: 1 },
+    ];
+    expect(defaultDay(days, "2026-09-03")).toBe("2026-09-03");
+    expect(defaultDay(days, "2026-10-10")).toBe("2026-09-02");
+    expect(defaultDay([{ date: "2026-09-01", seconds: 0, sessions: 0 }], "2026-10-10")).toBe("2026-09-01");
+    expect(defaultDay([], "2026-10-10")).toBe("");
   });
 });

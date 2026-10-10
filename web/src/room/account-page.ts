@@ -2,6 +2,8 @@ import { byId, maybeById } from "../core/dom";
 import {
   busiest,
   compareText,
+  dayShare,
+  defaultDay,
   currentMonth,
   dayLabel,
   formatDuration,
@@ -9,6 +11,7 @@ import {
   leadingBlanks,
   monthLabel,
   shiftMonth,
+  type DayStat,
   type MonthStats,
 } from "../stats/format";
 import { initAmbientSky } from "./ambient-sky";
@@ -62,6 +65,8 @@ function timeZone(): string {
   }
 }
 
+let selectedDate = "";
+
 function render(stats: MonthStats, isCurrent: boolean): void {
   byId("s-total").textContent = formatDuration(stats.totalSeconds);
   byId("s-compare").textContent = compareText(stats.totalSeconds, stats.prevTotalSeconds);
@@ -75,12 +80,17 @@ function render(stats: MonthStats, isCurrent: boolean): void {
   const max = Math.max(0, ...stats.days.map((d) => d.seconds));
   const today = new Date();
   const todayKey = `${currentMonth(today)}-${String(today.getDate()).padStart(2, "0")}`;
-  const detail = byId("day-detail");
-  const show = (d: MonthStats["days"][number]) => {
-    detail.textContent =
-      d.seconds > 0
-        ? `${dayLabel(d.date)}: ${formatDuration(d.seconds)} in ${d.sessions} session${d.sessions === 1 ? "" : "s"}`
-        : `${dayLabel(d.date)}: no focus time`;
+  selectedDate = defaultDay(stats.days, isCurrent ? todayKey : "");
+
+  const cells = new Map<string, HTMLElement>();
+  const bars = new Map<string, HTMLElement>();
+
+  // One place paints the selection: both charts and the day card follow it.
+  const select = (d: DayStat) => {
+    selectedDate = d.date;
+    for (const [date, el] of cells) el.classList.toggle("selected", date === d.date);
+    for (const [date, el] of bars) el.classList.toggle("selected", date === d.date);
+    showDay(d, stats.totalSeconds);
   };
 
   // Calendar heatmap, weeks start on Monday.
@@ -99,14 +109,14 @@ function render(stats: MonthStats, isCurrent: boolean): void {
     cell.className = `heat h${heatLevel(d.seconds, max)}${future ? " future" : ""}${d.date === todayKey ? " today" : ""}`;
     cell.textContent = String(Number(d.date.slice(8)));
     cell.setAttribute("aria-label", `${dayLabel(d.date)}: ${formatDuration(d.seconds)}`);
-    cell.addEventListener("click", () => show(d));
-    cell.addEventListener("mouseenter", () => show(d));
+    cell.addEventListener("click", () => select(d));
+    cells.set(d.date, cell);
     heat.appendChild(cell);
   }
 
   // Daily bars.
-  const bars = byId("bars");
-  bars.replaceChildren();
+  const barsEl = byId("bars");
+  barsEl.replaceChildren();
   for (const d of stats.days) {
     const bar = document.createElement("button");
     bar.type = "button";
@@ -115,10 +125,20 @@ function render(stats: MonthStats, isCurrent: boolean): void {
     const fill = document.createElement("span");
     fill.style.height = max > 0 ? `${Math.max(2, (d.seconds / max) * 100)}%` : "2%";
     bar.appendChild(fill);
-    bar.addEventListener("mouseenter", () => show(d));
-    bar.addEventListener("focus", () => show(d));
-    bar.addEventListener("click", () => show(d));
-    bars.appendChild(bar);
+    bar.addEventListener("click", () => select(d));
+    bar.addEventListener("focus", () => select(d));
+    bars.set(d.date, bar);
+    barsEl.appendChild(bar);
   }
-  maybeById("day-detail")!.textContent = "Hover or tap a day to see its focus time.";
+
+  const initial = stats.days.find((d) => d.date === selectedDate);
+  if (initial) select(initial);
+}
+
+function showDay(d: DayStat, monthSeconds: number): void {
+  byId("day-title").textContent = dayLabel(d.date);
+  byId("day-time").textContent = formatDuration(d.seconds);
+  byId("day-sessions").textContent =
+    d.seconds > 0 ? `${d.sessions} session${d.sessions === 1 ? "" : "s"}` : "No focus time this day";
+  byId("day-share").textContent = d.seconds > 0 ? `${dayShare(d.seconds, monthSeconds)}% of the month` : "";
 }

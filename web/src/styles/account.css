@@ -47,7 +47,6 @@ body.account::before { content: ""; position: fixed; inset: 0; z-index: -1; back
 .bar:hover span, .bar:focus-visible span { filter: brightness(1.35); }
 .bar:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
 @keyframes grow { from { transform: scaleY(0); } }
-.day-detail { min-height: 1.5em; font-size: var(--text-sm); color: var(--fg-muted); }
 
 .danger-zone { padding: var(--space-5); border-radius: var(--radius-l); }
 .danger-zone h2 { font-size: var(--text-lg); }
@@ -75,3 +74,11 @@ body.account::before { content: ""; position: fixed; inset: 0; z-index: -1; back
 }
 .preview-gate strong { font-size: var(--text-lg); }
 .preview-gate p { color: var(--fg-muted); }
+
+/* Selected day: highlighted in both charts and summarised in its own card. */
+.heat.selected { outline-color: #fff; background-clip: padding-box; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25); transform: scale(1.08); }
+.bar.selected span { filter: brightness(1.5); box-shadow: 0 0 12px rgba(138, 180, 255, 0.7); }
+.day-card { display: grid; gap: 2px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-m); background: rgba(255, 255, 255, 0.06); border: 1px solid var(--glass-border); }
+.day-title { font-size: var(--text-sm); font-weight: 700; color: var(--fg-muted); }
+.day-time { font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.day-meta { font-size: var(--text-sm); color: var(--fg-muted); }

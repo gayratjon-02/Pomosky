@@ -79,7 +79,11 @@
       <article class="glass chart-card">
         <h3>Day by day</h3>
         <div class="bars" id="bars" role="img" aria-label="Focus time per day"></div>
-        <p class="day-detail" id="day-detail" aria-live="polite">Hover or tap a day to see its focus time.</p>
+        <div class="day-card" aria-live="polite">
+          <span class="day-title" id="day-title">Pick a day</span>
+          <strong class="day-time" id="day-time">-</strong>
+          <span class="day-meta"><span id="day-sessions"></span> <span id="day-share"></span></span>
+        </div>
       </article>
     </div>
     <p class="muted fine" id="stats-error" hidden>Could not load your statistics. Please try again.</p>

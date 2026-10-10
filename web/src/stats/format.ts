@@ -85,3 +85,15 @@ export function dayLabel(date: string): string {
   const wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.getDay()];
   return `${wd} ${d} ${MONTHS[m - 1]?.slice(0, 3)}`;
 }
+
+/** Share of the month's focus time that one day makes up, as a whole percent. */
+export function dayShare(daySeconds: number, monthSeconds: number): number {
+  if (monthSeconds <= 0 || daySeconds <= 0) return 0;
+  return Math.round((daySeconds / monthSeconds) * 100);
+}
+
+/** The day to select when a month is shown: today in the current month, otherwise the busiest day (or the 1st). */
+export function defaultDay(days: DayStat[], todayKey: string): string {
+  if (days.some((d) => d.date === todayKey)) return todayKey;
+  return busiest(days)?.date ?? days[0]?.date ?? "";
+}
