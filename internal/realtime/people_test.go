@@ -62,17 +62,14 @@ func TestAnnounceOnlySendsWhenTheListChanges(t *testing.T) {
 	rh, _ := ownedRoom("")
 	watcher := NewClient("w", nil, 8)
 	rh.Join(watcher)
-	rh.Announce() // empty list was never sent: first announce goes out
-	if len(watcher.Outbox()) != 1 {
-		t.Fatalf("first announce queued %d", len(watcher.Outbox()))
-	}
-	rh.Announce() // nothing changed
-	if len(watcher.Outbox()) != 1 {
-		t.Fatalf("an identical list was sent again")
+	rh.Announce() // still nobody named: nothing to say
+	if len(watcher.Outbox()) != 0 {
+		t.Fatalf("an unchanged list was sent")
 	}
 	watcher.Nickname = "Dana"
 	rh.Announce()
-	if len(watcher.Outbox()) != 2 {
+	rh.Announce() // identical to the last one
+	if len(watcher.Outbox()) != 1 {
 		t.Fatalf("a changed list was not sent")
 	}
 }

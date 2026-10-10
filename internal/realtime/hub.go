@@ -186,7 +186,9 @@ type RoomHub struct {
 }
 
 func newRoomHub(state room.State, owner models.UserID, log *slog.Logger, recorder ports.FocusRecorder) *RoomHub {
-	return &RoomHub{log: log, owner: owner, recorder: recorder, state: state, clients: map[*Client]struct{}{}}
+	r := &RoomHub{log: log, owner: owner, recorder: recorder, state: state, clients: map[*Client]struct{}{}}
+	r.people, _ = Encode(TypePeople, r.peopleLocked()) // an empty room has an empty list: no news
+	return r
 }
 
 // recordLocked writes the focus time of a timer that is ending to the recorder.
