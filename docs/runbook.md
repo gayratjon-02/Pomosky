@@ -9,6 +9,13 @@
 5. Check `https://<domain>/healthz`.
 6. The server applies the database migrations itself on start. Login works only when Google credentials or SMTP settings are set (see `.env.example`); everything else works without them.
 
+## First deploy without Docker (small or free servers, e.g. Oracle Always Free)
+
+1. On the server: `sudo ./install.sh <domain>` (PostgreSQL, Caddy, systemd service, secrets in `/etc/pomosky/pomosky.env`).
+2. On your computer: `deploy/bare/release.sh <user>@<server-ip> [arm64|amd64]` builds and installs; run it again for every update.
+3. Check `https://<domain>/healthz`. Logs: `journalctl -u pomosky -f`.
+4. Backups: `sudo deploy/bare/backup.sh` from cron, and copy the file off the server.
+
 ## Update
 
 `deploy/scripts/deploy.sh` (pull, rebuild, restart).
