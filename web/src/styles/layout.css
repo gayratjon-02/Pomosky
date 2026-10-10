@@ -260,3 +260,10 @@ body { overflow-x: clip; }
 /* The theme switch is only offered where the light theme applies. */
 .theme-toggle { display: none; }
 body:is(.plain, .admin, .error) .theme-toggle { display: inline-flex; }
+
+/* Menu rows, FAQ rows and the delete toggle are tapped with a thumb: at least 44px tall. */
+@media (max-width: 640px), (pointer: coarse) {
+  .user-menu-panel a, .user-menu-panel button { min-height: 44px; display: flex; align-items: center; }
+  .faq summary, .delete-box summary { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .faq summary::after { float: none; }
+}
