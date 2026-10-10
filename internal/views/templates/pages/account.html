@@ -1,6 +1,75 @@
+{{define "bodyclass"}}account{{end}}
 {{define "content"}}
-<section class="account">
-  <h1>Your account</h1>
+<canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
+
+<div class="container acct" data-stats-url="{{.Data.StatsURL}}">
+  <header class="acct-head glass">
+    <div class="avatar" aria-hidden="true">{{if .User}}{{printf "%.1s" .User.Nickname}}{{end}}</div>
+    <div class="acct-who">
+      <h1>{{if .User}}{{.User.Nickname}}{{end}}</h1>
+      <p class="muted">{{if .User}}{{if .User.Email}}{{.User.Email}}{{end}}{{end}}</p>
+    </div>
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf" value="{{.CSRFToken}}">
+      <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
+    </form>
+  </header>
+
   {{template "flash" .}}
-</section>
+
+  <section class="acct-section" aria-labelledby="stats-title">
+    <div class="month-nav">
+      <h2 id="stats-title">Focus time</h2>
+      <div class="month-switch glass">
+        <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-prev" aria-label="Previous month">&#8249;</button>
+        <span id="month-label" class="month-label" aria-live="polite">Loading</span>
+        <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-next" aria-label="Next month">&#8250;</button>
+      </div>
+    </div>
+
+    <div class="cards">
+      <article class="glass card-stat">
+        <span class="card-k">Total focus</span>
+        <strong class="card-v" id="s-total">-</strong>
+        <span class="card-sub" id="s-compare"></span>
+      </article>
+      <article class="glass card-stat">
+        <span class="card-k">Sessions</span>
+        <strong class="card-v" id="s-sessions">-</strong>
+        <span class="card-sub" id="s-avg"></span>
+      </article>
+      <article class="glass card-stat">
+        <span class="card-k">Active days</span>
+        <strong class="card-v" id="s-days">-</strong>
+        <span class="card-sub" id="s-best"></span>
+      </article>
+      <article class="glass card-stat">
+        <span class="card-k">Current streak</span>
+        <strong class="card-v" id="s-streak">-</strong>
+        <span class="card-sub">days in a row</span>
+      </article>
+    </div>
+
+    <div class="charts">
+      <article class="glass chart-card">
+        <h3>Calendar</h3>
+        <div class="weekdays" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div class="heatmap" id="heatmap" role="list"></div>
+        <div class="legend" aria-hidden="true"><span>Less</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>More</span></div>
+      </article>
+      <article class="glass chart-card">
+        <h3>Day by day</h3>
+        <div class="bars" id="bars" role="img" aria-label="Focus time per day"></div>
+        <p class="day-detail" id="day-detail" aria-live="polite">Hover or tap a day to see its focus time.</p>
+      </article>
+    </div>
+    <p class="muted fine" id="stats-error" hidden>Could not load your statistics. Please try again.</p>
+  </section>
+
+  <section class="acct-section glass danger-zone">
+    <h2>Your data</h2>
+    <p class="muted">Your account stores your sign-in identity, nickname and focus sessions. You can delete all of it at any time.</p>
+    <button class="btn btn-danger btn-sm" type="button" disabled title="Available once accounts are live">Delete my account</button>
+  </section>
+</div>
 {{end}}
