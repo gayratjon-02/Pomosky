@@ -42,7 +42,3 @@ func TestIDValid(t *testing.T) {
 		}
 	}
 }
-
-func TestReduce(t *testing.T) {
-	t.Skip("TODO(stage 2): table tests for Reduce")
-}
