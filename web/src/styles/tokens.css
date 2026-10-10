@@ -1,0 +1,66 @@
+/* Design tokens. Everything visual (colours, spacing, radii, motion) comes from here. */
+:root {
+  color-scheme: dark;
+
+  /* Type */
+  --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  --text-hero: clamp(2.6rem, 1.2rem + 6vw, 5.6rem);
+
+  /* Colour */
+  --bg: #060a18;
+  --bg-raised: #0c1330;
+  --fg: #f4f6ff;
+  --fg-muted: rgba(244, 246, 255, 0.74);
+  --fg-dim: rgba(244, 246, 255, 0.5);
+  --accent: #8ab4ff;
+  --accent-strong: #6a9bff;
+  --accent-contrast: #051029;
+  --warm: #ffb36b;
+  --warm-strong: #ff9440;
+  --danger: #ff7a8a;
+  --success: #7be0b0;
+
+  --glass-bg: rgba(12, 18, 42, 0.42);
+  --glass-bg-strong: rgba(10, 15, 36, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-highlight: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 12px 44px rgba(0, 0, 0, 0.34);
+  --blur: 18px;
+
+  /* Shape */
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  /* Space */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 72px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 140ms;
+  --dur: 260ms;
+  --dur-slow: 520ms;
+
+  --focus-ring: 0 0 0 3px rgba(138, 180, 255, 0.55);
+  --header-h: 64px;
+}
