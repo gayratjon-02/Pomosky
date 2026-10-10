@@ -5,6 +5,7 @@ import { createConnectionChip } from "../ui/connection";
 import { setViewers } from "../ui/presence";
 import { initReactions } from "../ui/reactions";
 import { renderQr } from "../ui/qr";
+import { initWakeLock } from "../ui/wake-lock";
 import { TimerRenderer } from "../ui/timer-view";
 
 
@@ -35,5 +36,6 @@ export function initRecordPage(): void {
   window.setInterval(() => {
     if (client.state) renderer.render(client.state.timer, client.clock.serverNow());
   }, 250);
+  initWakeLock(client);
   client.connect();
 }
