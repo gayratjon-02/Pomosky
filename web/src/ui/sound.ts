@@ -113,10 +113,29 @@ function playToggleOn(): void {
   play([{ freq: 660, at: 0, dur: 0.12, gain: 0.1 }, { freq: 880, at: 0.07, dur: 0.18, gain: 0.1 }]);
 }
 
-/** A soft two-note chime when a phase ends. */
+/** How long the end-of-phase signal rings, in seconds. */
+export const SIGNAL_SECONDS = 6;
+
+/**
+ * The signal when a phase ends: a bright two-note bell, repeated every two
+ * seconds so it is hard to miss, plus a short vibration on phones.
+ */
 export function chime(): void {
-  play([
-    { freq: 660, at: 0, dur: 1.1, gain: 0.18 },
-    { freq: 880, at: 0.22, dur: 1.1, gain: 0.18 },
-  ]);
+  const notes: Note[] = [];
+  for (let i = 0; i < 3; i++) {
+    const at = i * 2;
+    notes.push(
+      { freq: 784, at, dur: 1.4, gain: 0.3 },
+      { freq: 1046.5, at: at + 0.25, dur: 1.5, gain: 0.3 },
+      { freq: 1568, at: at + 0.25, dur: 0.9, gain: 0.08, type: "triangle" },
+    );
+  }
+  play(notes);
+  if (enabled) {
+    try {
+      navigator.vibrate?.([300, 150, 300, 150, 300]);
+    } catch {
+      // vibration is optional
+    }
+  }
 }
