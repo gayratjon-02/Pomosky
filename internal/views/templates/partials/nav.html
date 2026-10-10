@@ -1,7 +1,20 @@
 {{define "nav"}}
 <header class="site-header">
-  <a class="brand" href="/">Pomosky</a>
-  <nav>
+  <a class="brand" href="/" aria-label="Pomosky home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <defs>
+        <linearGradient id="bm-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#6a9bff"/>
+          <stop offset="1" stop-color="#ffb36b"/>
+        </linearGradient>
+      </defs>
+      <circle cx="16" cy="16" r="14" fill="url(#bm-sky)"/>
+      <circle cx="16" cy="20" r="5.5" fill="#fff6e3" opacity=".95"/>
+      <path d="M4 22c4-3 7-3 12 0s9 3 12 0v3c-3 3-8 3-12 0s-8-3-12 0z" fill="#0b1020" opacity=".55"/>
+    </svg>
+    <span>Pomosky</span>
+  </a>
+  <nav class="site-nav" aria-label="Main">
     {{if .User}}<a href="/account">Account</a>{{else}}<a href="/login">Log in</a>{{end}}
   </nav>
 </header>

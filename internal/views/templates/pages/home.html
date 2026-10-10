@@ -1,6 +1,91 @@
+{{define "bodyclass"}}landing{{end}}
 {{define "content"}}
-<section class="hero">
-  <h1>Pomosky</h1>
-  <p>Work together under a live sky.</p>
+<canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
+
+<section class="hero container">
+  <p class="eyebrow chip"><span class="dot dot-live"></span> Live rooms, no sign-up</p>
+  <h1 class="hero-title">Focus together<br><span class="grad">under a living sky.</span></h1>
+  <p class="hero-sub">Start a pomodoro room in one click. Everyone who opens your link sees the same timer, the same sky and the same quiet company, with the real sun, moon and weather of the host's place.</p>
+  <form class="hero-cta" method="post" action="/r/new">
+    <button class="btn btn-primary btn-lg" type="submit">Start a room</button>
+    <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
+  </form>
+  <p class="hero-note muted">Free. No account needed. Viewers are never asked for their location.</p>
+</section>
+
+<section class="section container" id="how">
+  <h2 class="section-title">Three steps, no friction</h2>
+  <ol class="steps">
+    <li class="glass step">
+      <span class="step-n">1</span>
+      <h3>Start a room</h3>
+      <p>One click creates a private link. You get host controls; nobody else does.</p>
+    </li>
+    <li class="glass step">
+      <span class="step-n">2</span>
+      <h3>Share the link</h3>
+      <p>Friends, a study group, your livestream. Viewers join instantly, with no login.</p>
+    </li>
+    <li class="glass step">
+      <span class="step-n">3</span>
+      <h3>Work in sync</h3>
+      <p>25 minutes of focus, 5 of rest. Everyone sees the same second ticking away.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="section container">
+  <h2 class="section-title">Made for calm, shared focus</h2>
+  <div class="features">
+    <article class="glass feature">
+      <h3>A sky that is really there</h3>
+      <p>The sun and moon follow true astronomy for the host's place. The light shifts from dawn to dusk while you work.</p>
+    </article>
+    <article class="glass feature">
+      <h3>Truly in sync</h3>
+      <p>The server owns the clock, so every device shows the same remaining time, even after a reconnect.</p>
+    </article>
+    <article class="glass feature">
+      <h3>Silent cheering</h3>
+      <p>Send a clap, a coffee or a flame. No chat, no noise, nothing to moderate.</p>
+    </article>
+    <article class="glass feature">
+      <h3>Record mode</h3>
+      <p>A clean vertical view for streams and short videos, with a QR code so people can join.</p>
+    </article>
+    <article class="glass feature">
+      <h3>Monthly statistics</h3>
+      <p>Log in if you like, and see how many hours you focused this month. Login is always optional.</p>
+    </article>
+    <article class="glass feature">
+      <h3>Private by default</h3>
+      <p>No chat, no tracking of viewers, and the host's place is rounded to about one kilometre.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section container-narrow" id="faq">
+  <h2 class="section-title">Questions</h2>
+  <div class="faq">
+    <details class="glass">
+      <summary>Do I need an account?</summary>
+      <p>No. Hosting and joining work without one. An account only adds your personal focus statistics.</p>
+    </details>
+    <details class="glass">
+      <summary>Who controls the timer?</summary>
+      <p>Only the host, through a secret token that stays in their browser. Viewers just watch and react.</p>
+    </details>
+    <details class="glass">
+      <summary>Where does the weather come from?</summary>
+      <p>From the host's rounded location. Viewers are never asked where they are.</p>
+    </details>
+    <details class="glass">
+      <summary>What if the host loses the link?</summary>
+      <p>Keep the host page open or bookmarked. The token is stored in that browser so you can come back.</p>
+    </details>
+  </div>
+  <form class="center" method="post" action="/r/new">
+    <button class="btn btn-primary btn-lg" type="submit">Start your room</button>
+  </form>
 </section>
 {{end}}
