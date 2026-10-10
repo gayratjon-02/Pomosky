@@ -6,6 +6,7 @@ tmp_dir = "tmp"
   cmd = "go build -o ./tmp/server ./cmd/server"
   bin = "./tmp/server"
   include_ext = ["go"]
+  include_file = [".env"] # the server reads .env at start, so a change restarts it
   exclude_dir = ["tmp", "web", "node_modules", "docs", "deploy", "migrations", "test", ".git"]
   exclude_regex = ["_test\\.go$"]
   delay = 300
