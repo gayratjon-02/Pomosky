@@ -24,6 +24,7 @@ const (
 
 	// server -> client
 	TypeState        = "state"
+	TypePeople       = "people"
 	TypeHostOK       = "host.ok"
 	TypeReactionTick = "reaction.tick"
 	TypeWeather      = "weather" // reserved for stage 6
@@ -104,6 +105,20 @@ type StateData struct {
 	City        string         `json:"city"`
 	Location    *LocationView  `json:"location,omitempty"` // the host's rounded place; absent until the host sets it
 	ServerNowMS int64          `json:"serverNowMs"`
+}
+
+// PersonView is one named person in the room: a logged-in user who allows it,
+// or a viewer who chose a nickname. No ids or emails are sent.
+type PersonView struct {
+	Name      string `json:"name"`
+	AvatarURL string `json:"avatarUrl,omitempty"`
+}
+
+// PeopleData lists the named people in the room, at most MaxPeople of them;
+// More counts the ones that did not fit.
+type PeopleData struct {
+	People []PersonView `json:"people"`
+	More   int          `json:"more"`
 }
 
 // LocationView is the host's place, rounded to about 1 km by the core.
