@@ -49,3 +49,7 @@
 .host-run .host-controls { gap: var(--space-3); }
 .host-run .host-controls .btn { min-height: 54px; font-size: var(--text-md); border-radius: var(--radius-l); }
 .plan-line { margin: 0; text-align: center; font-size: var(--text-sm); color: var(--fg-muted); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5); min-height: 1.4em; }
+
+/* The key hint only makes sense with a keyboard. */
+.key-hint { margin: 0; text-align: center; font-size: var(--text-xs); color: var(--fg-dim); display: none; }
+@media (hover: hover) and (pointer: fine) { .key-hint { display: block; } }
