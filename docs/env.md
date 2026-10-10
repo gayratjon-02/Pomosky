@@ -24,6 +24,12 @@ Neither file is ever committed. A test fails if the code reads a variable that i
 | `POSTGRES_PASSWORD` | Compose only: password of the database container |
 | `DOMAIN` | Compose only: the domain Caddy gets a certificate for |
 
+## Admin
+
+| Variable | Meaning |
+|---|---|
+| `ADMIN_EMAILS` | Comma separated emails of the operators. A logged-in user whose verified email is in the list can open `/admin`; everyone else gets a normal 404 |
+
 ## Rooms
 
 | Variable | Default | Meaning |
