@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/admin"
+	"github.com/gayratjon-02/Pomosky/internal/analytics"
 	"github.com/gayratjon-02/Pomosky/internal/assets"
 	"github.com/gayratjon-02/Pomosky/internal/auth"
 	"github.com/gayratjon-02/Pomosky/internal/config"
@@ -36,8 +37,10 @@ type App struct {
 	dev      *devreload.Watcher // nil unless cfg.Dev
 	db       *postgres.DB       // nil when DATABASE_URL is not set
 	hub      *realtime.Hub
-	janitor  *janitor        // nil without a database
-	recorder *stats.Recorder // nil without a database
+	janitor  *janitor                // nil without a database
+	recorder *stats.Recorder         // nil without a database
+	visits   *analytics.Collector    // nil without a database
+	tracker  middleware.VisitTracker // the same collector as an interface, nil when off
 	// sessions resolves login cookies; nil means everyone is anonymous.
 	sessions middleware.SessionResolver
 }
@@ -82,6 +85,8 @@ func New(cfg config.Config) (*App, error) {
 		rooms    ports.RoomRepository
 		recorder *stats.Recorder
 		jan      *janitor
+		visits   *analytics.Collector
+		traffic  *analytics.Reader
 	)
 	if cfg.DatabaseURL != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -106,6 +111,9 @@ func New(cfg config.Config) (*App, error) {
 		focusRepo := postgres.NewFocusSessionRepo(db)
 		statsSvc = stats.New(focusRepo, clk)
 		recorder = stats.NewRecorder(focusRepo, log)
+		visitRepo := postgres.NewVisitRepo(db)
+		visits = analytics.NewCollector(visitRepo, log, clk, cfg.HostTokenSalt, cfg.TrustProxy)
+		traffic = analytics.NewReader(visitRepo, clk)
 		roomRepo := postgres.NewRoomRepo(db)
 		rooms = roomRepo
 		jan = &janitor{log: log, clock: clk, sessions: postgres.NewSessionRepo(db), tokens: postgres.NewLoginTokenRepo(db), rooms: roomRepo}
@@ -135,6 +143,8 @@ func New(cfg config.Config) (*App, error) {
 	if accounts != nil {
 		deps.Accounts = accounts
 		deps.Stats = statsSvc
+		deps.Visits = visits
+		deps.Traffic = traffic
 	}
 	if cfg.Weather.BaseURL != "" {
 		provider := openmeteo.New(cfg.Weather.BaseURL, nil)
@@ -162,7 +172,10 @@ func New(cfg config.Config) (*App, error) {
 		return nil, err
 	}
 
-	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, recorder: recorder, janitor: jan}
+	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, recorder: recorder, janitor: jan, visits: visits}
+	if visits != nil {
+		a.tracker = visits // an interface holding a nil pointer would not be nil
+	}
 	if accounts != nil {
 		a.sessions = accounts
 	}
@@ -174,6 +187,9 @@ func New(cfg config.Config) (*App, error) {
 func (a *App) Close() error {
 	if a.recorder != nil {
 		a.recorder.Close() // write the queued focus sessions before the pool goes away
+	}
+	if a.visits != nil {
+		a.visits.Close()
 	}
 	if a.db != nil {
 		return a.db.Close()
