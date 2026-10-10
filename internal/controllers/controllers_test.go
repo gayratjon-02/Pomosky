@@ -211,3 +211,18 @@ func TestPagesDefaultToTheShareImage(t *testing.T) {
 		t.Fatalf("no default share image in:\n%s", rec.Body.String())
 	}
 }
+
+func TestRobotsKeepsPrivatePathsOut(t *testing.T) {
+	c := newTestControllers(t)
+	rec := httptest.NewRecorder()
+	c.Robots(rec, httptest.NewRequest("GET", "/robots.txt", nil))
+	body := rec.Body.String()
+	if rec.Code != 200 || !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/plain") {
+		t.Fatalf("status %d, type %q", rec.Code, rec.Header().Get("Content-Type"))
+	}
+	for _, want := range []string{"Allow: /$", "Disallow: /r/", "Disallow: /admin", "Disallow: /api/", "Disallow: /account"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("robots.txt lacks %q:\n%s", want, body)
+		}
+	}
+}
