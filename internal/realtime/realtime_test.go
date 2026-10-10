@@ -11,7 +11,7 @@ import (
 )
 
 func TestEncodeDecodeRoundTrip(t *testing.T) {
-	b, err := Encode(TypePresence, PresenceData{Viewers: 7})
+	b, err := Encode(TypePong, PongData{ServerNowMS: 7})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,7 +19,7 @@ func TestEncodeDecodeRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if env.Type != TypePresence {
+	if env.Type != TypePong {
 		t.Fatalf("type = %q", env.Type)
 	}
 }

@@ -9,6 +9,7 @@ export interface Envelope<T = unknown> {
 
 export interface TimerView {
   phase: Phase;
+  pausedFrom?: Phase;
   startedAtMs: number;
   durationMs: number;
   pausedRemainingMs: number;
@@ -24,18 +25,24 @@ export interface StateData {
   serverNowMs: number;
 }
 
-export interface PresenceData {
-  viewers: number;
-}
-
 export interface ReactionTickData {
   kind: string;
   count: number;
 }
 
+export interface PongData {
+  serverNowMs: number;
+}
+
 export interface ErrorData {
   code: string;
   message: string;
+}
+
+export interface TimerStartData {
+  phase: "focus" | "break";
+  durationMs: number;
+  label: string;
 }
 
 export const ClientMsg = {
@@ -45,16 +52,24 @@ export const ClientMsg = {
   TimerPause: "timer.pause",
   TimerResume: "timer.resume",
   TimerReset: "timer.reset",
+  TimerRecover: "timer.recover",
   Reaction: "reaction",
   Ping: "ping",
 } as const;
 
 export const ServerMsg = {
   State: "state",
-  TimerUpdated: "timer.updated",
-  Presence: "presence",
+  HostOk: "host.ok",
   ReactionTick: "reaction.tick",
-  Weather: "weather",
+  Weather: "weather", // reserved for stage 6
   Pong: "pong",
   Error: "error",
+} as const;
+
+export const ErrorCode = {
+  BadRequest: "bad_request",
+  Forbidden: "forbidden",
+  Invalid: "invalid",
+  InvalidTransition: "invalid_transition",
+  RateLimited: "rate_limited",
 } as const;

@@ -2,32 +2,50 @@ package realtime
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/room"
 )
 
-// Message types. See docs/ws-protocol.md.
+// Message types. See docs/ws-protocol.md and keep web/src/core/protocol.ts in sync.
 const (
 	// client -> server
-	TypeJoin        = "join"
-	TypeHostAuth    = "host.auth"
-	TypeTimerStart  = "timer.start"
-	TypeTimerPause  = "timer.pause"
-	TypeTimerResume = "timer.resume"
-	TypeTimerReset  = "timer.reset"
-	TypeReaction    = "reaction"
-	TypePing        = "ping"
+	TypeJoin         = "join"
+	TypeHostAuth     = "host.auth"
+	TypeTimerStart   = "timer.start"
+	TypeTimerPause   = "timer.pause"
+	TypeTimerResume  = "timer.resume"
+	TypeTimerReset   = "timer.reset"
+	TypeTimerRecover = "timer.recover"
+	TypeReaction     = "reaction"
+	TypePing         = "ping"
 
 	// server -> client
 	TypeState        = "state"
-	TypeTimerUpdated = "timer.updated"
-	TypePresence     = "presence"
+	TypeHostOK       = "host.ok"
 	TypeReactionTick = "reaction.tick"
-	TypeWeather      = "weather"
+	TypeWeather      = "weather" // reserved for stage 6
 	TypePong         = "pong"
 	TypeError        = "error"
 )
+
+// Error codes sent in ErrorData.Code.
+const (
+	CodeBadRequest        = "bad_request"
+	CodeForbidden         = "forbidden"
+	CodeInvalid           = "invalid"
+	CodeInvalidTransition = "invalid_transition"
+	CodeRateLimited       = "rate_limited"
+)
+
+// maxPhaseMS bounds client-supplied durations before they are converted to
+// time.Duration, so a huge value cannot overflow. The core applies the real
+// limits (room.MaxPhaseDuration).
+const maxPhaseMS = int64(100 * time.Hour / time.Millisecond)
+
+// ErrBadTimer is returned for a timer that cannot be converted.
+var ErrBadTimer = errors.New("realtime: invalid timer")
 
 // Envelope is the frame of every message.
 type Envelope struct {
@@ -51,6 +69,10 @@ type TimerStartData struct {
 	Label      string `json:"label"`
 }
 
+type TimerRecoverData struct {
+	Timer TimerView `json:"timer"`
+}
+
 type ReactionData struct {
 	Kind string `json:"kind"`
 }
@@ -59,6 +81,7 @@ type ReactionData struct {
 
 type TimerView struct {
 	Phase             string `json:"phase"`
+	PausedFrom        string `json:"pausedFrom,omitempty"`
 	StartedAtMS       int64  `json:"startedAtMs"`
 	DurationMS        int64  `json:"durationMs"`
 	PausedRemainingMS int64  `json:"pausedRemainingMs"`
@@ -74,13 +97,13 @@ type StateData struct {
 	ServerNowMS int64          `json:"serverNowMs"`
 }
 
-type PresenceData struct {
-	Viewers int `json:"viewers"`
-}
-
 type ReactionTickData struct {
 	Kind  string `json:"kind"`
 	Count int    `json:"count"`
+}
+
+type PongData struct {
+	ServerNowMS int64 `json:"serverNowMs"`
 }
 
 type ErrorData struct {
@@ -116,6 +139,7 @@ func ToTimerView(t room.Timer) TimerView {
 	}
 	return TimerView{
 		Phase:             string(t.Phase),
+		PausedFrom:        string(t.PausedFrom),
 		StartedAtMS:       started,
 		DurationMS:        t.Duration.Milliseconds(),
 		PausedRemainingMS: t.PausedRemaining.Milliseconds(),
@@ -123,7 +147,39 @@ func ToTimerView(t room.Timer) TimerView {
 	}
 }
 
-// ToStateData converts the core state to the snapshot sent on join.
+// FromTimerView converts a client-supplied timer to the core form. It only
+// rejects values that cannot be represented; the core validates the semantics.
+func FromTimerView(v TimerView) (room.Timer, error) {
+	if v.DurationMS < 0 || v.DurationMS > maxPhaseMS ||
+		v.PausedRemainingMS < 0 || v.PausedRemainingMS > maxPhaseMS {
+		return room.Timer{}, ErrBadTimer
+	}
+	t := room.Timer{
+		Phase:           room.Phase(v.Phase),
+		PausedFrom:      room.Phase(v.PausedFrom),
+		Duration:        time.Duration(v.DurationMS) * time.Millisecond,
+		PausedRemaining: time.Duration(v.PausedRemainingMS) * time.Millisecond,
+		Label:           v.Label,
+	}
+	if v.StartedAtMS != 0 {
+		t.StartedAt = time.UnixMilli(v.StartedAtMS).UTC()
+	}
+	return t, nil
+}
+
+// ToTimerStart converts a client request to the core event.
+func ToTimerStart(d TimerStartData) (room.TimerStart, error) {
+	if d.DurationMS < 0 || d.DurationMS > maxPhaseMS {
+		return room.TimerStart{}, ErrBadTimer
+	}
+	return room.TimerStart{
+		Phase:    room.Phase(d.Phase),
+		Duration: time.Duration(d.DurationMS) * time.Millisecond,
+		Label:    d.Label,
+	}, nil
+}
+
+// ToStateData converts the core state to the snapshot sent to clients.
 func ToStateData(s room.State, now time.Time) StateData {
 	reactions := make(map[string]int, len(s.Reactions))
 	for k, v := range s.Reactions {
