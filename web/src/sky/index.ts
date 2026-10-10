@@ -1,3 +1,4 @@
+import { css } from "./color";
 import { skyGradient } from "./palette";
 import { onVisibilityChange, prefersReducedMotion } from "./perf";
 import type { SkyController, SkyInputs } from "./types";
@@ -34,8 +35,8 @@ export function createSky(canvas: HTMLCanvasElement): SkyController {
     if (!ctx) return;
     const { top, bottom } = skyGradient(inputs.sunElevationDeg);
     const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    g.addColorStop(0, top);
-    g.addColorStop(1, bottom);
+    g.addColorStop(0, css(top));
+    g.addColorStop(1, css(bottom));
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // TODO(stage 6): stars, sun/moon, clouds, rain, snow, fog, lightning.
