@@ -1,10 +1,10 @@
 package controllers
 
-import (
-	"net/http"
+import "net/http"
 
-	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
-)
-
-// Account serves GET /account: profile and statistics. TODO(stage 4).
-func (c *Controllers) Account(w http.ResponseWriter, r *http.Request) { httpx.NotImplemented(w) }
+// Account serves GET /account: profile and statistics. Anonymous visitors are
+// sent to the login page. TODO(stage 4): render the page for the logged-in user
+// (see DevAccount for the template data).
+func (c *Controllers) Account(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}

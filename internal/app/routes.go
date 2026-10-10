@@ -30,6 +30,7 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 
 	// API and realtime.
 	mux.HandleFunc("GET /api/weather", c.WeatherAPI)
+	mux.HandleFunc("GET /api/stats", c.StatsAPI)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
 
@@ -38,6 +39,8 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 		mux.Handle("GET /__dev/events", a.dev.EventsHandler())
 		mux.Handle("GET /__dev/reload.js", devreload.ScriptHandler())
 		mux.HandleFunc("GET /__dev/sky", c.SkyLab)
+		mux.HandleFunc("GET /__dev/account", c.DevAccount)
+		mux.HandleFunc("GET /__dev/api/stats", c.DevStats)
 	}
 
 	// Static assets built from web/.
