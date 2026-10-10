@@ -29,6 +29,8 @@ var allowed = map[string][]string{
 	"platform/ratelimit": {},
 	"platform/reqctx":    {"models"},
 	"moderation":         {},
+	"mail":               {"ports"},
+	"stats":              {"models", "ports", "apperr"},
 	"devreload":          {},
 	"analytics":          {"room"},
 	"views":              {"models"},
