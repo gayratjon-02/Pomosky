@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gayratjon-02/Pomosky/internal/auth"
 	"github.com/gayratjon-02/Pomosky/internal/models"
+	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
 )
 
 // SessionResolver turns a session cookie value into a user.
@@ -21,7 +21,7 @@ func OptionalAuth(resolver SessionResolver) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if resolver != nil {
-				if c, err := r.Cookie(auth.SessionCookieName); err == nil && c.Value != "" {
+				if c, err := r.Cookie(httpx.SessionCookieName); err == nil && c.Value != "" {
 					if u, err := resolver.UserFromSession(r.Context(), c.Value); err == nil && u != nil {
 						r = r.WithContext(WithUser(r.Context(), u))
 					}

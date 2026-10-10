@@ -1,18 +1,16 @@
 package auth
 
-import "context"
+import (
+	"context"
 
-// Identity is who a login provider says the user is.
-type Identity struct {
-	Provider string
-	Subject  string
-	Email    string
-	Name     string
-}
+	"github.com/gayratjon-02/Pomosky/internal/models"
+)
 
 // Provider is an OAuth-style login provider (Google, ...).
 type Provider interface {
 	Name() string
+	// AuthURL is where the browser is sent to sign in; state comes back unchanged.
 	AuthURL(state string) string
-	Exchange(ctx context.Context, code string) (Identity, error)
+	// Exchange trades the callback code for the identity of the user.
+	Exchange(ctx context.Context, code string) (models.Identity, error)
 }

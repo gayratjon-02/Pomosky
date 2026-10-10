@@ -1,4 +1,4 @@
-package auth
+package httpx
 
 import (
 	"net/http"
