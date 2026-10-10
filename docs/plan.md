@@ -241,8 +241,8 @@ Internet → (ixtiyoriy Cloudflare) → Azure VM
 - **Tugash mezoni:** `go test ./...` o'tadi, yadroda tashqi paket yo'q.
 
 ### 3-bosqich: Sinxron taymer va WebSocket (3 kun)
-- [ ] `ws` Hub: xona boshiga bitta, ulanganda to'liq holat.
-- [ ] Server vaqti va mijoz offset hisobi (`timer.ts`, `ws.ts`).
+- [x] `ws` Hub: xona boshiga bitta, ulanganda to'liq holat.
+- [x] Server vaqti va mijoz offset hisobi (`room-client.ts`, `clock-sync.ts`).
 - [ ] Ulanganlar soni, qayta ulanish, ping/pong, `HostRecover`.
 - [ ] Host token bilan boshqarish, rate limit, orqaga bosim.
 - **Tugash mezoni:** 3 brauzer oynasida taymer bir xil (farq < 0.5 soniya), host yangilasa tiklanadi.
@@ -255,9 +255,9 @@ Internet → (ixtiyoriy Cloudflare) → Azure VM
 - **Tugash mezoni:** anonim foydalanuvchi to'liq kira oladi, login qilgan statistikasi saqlanadi, zaxiradan tiklash ishlaydi.
 
 ### 5-bosqich: Sahifalar (SSR) va interaktiv qism (4 kun)
-- [ ] Shablonlar: layout, landing, xona, host panel, login/profil, maxfiylik.
-- [ ] TypeScript modullar va ularni yig'ish (Vite/esbuild), hash'li nomlar, `embed` yoki Caddy orqali berish.
-- [ ] Taxallus, reaksiyalar, "N kishi ishlayapti", havola va QR.
+- [x] Shablonlar: layout, landing, xona, host panel, login/profil (statistika UI bilan), maxfiylik, xato sahifasi.
+- [ ] TypeScript modullar va ularni yig'ish (Vite), hash'li nomlar (Vite stabil nomlar ishlatadi; hash keyin).
+- [x] Taxallus, reaksiyalar, "N kishi ishlayapti", havola va QR (lokal generatsiya).
 - [ ] Open Graph teglar, ulanish holatlari (uzildi, qayta ulanmoqda).
 - **Tugash mezoni:** host va tomoshabin to'liq oqim bilan ishlaydi (osmonsiz ham).
 
