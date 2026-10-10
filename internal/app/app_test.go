@@ -90,8 +90,8 @@ func TestRoutesSmoke(t *testing.T) {
 		{"GET", "/privacy", http.StatusOK},
 		{"GET", "/nope", http.StatusNotFound},
 		{"GET", "/r/INVALID", http.StatusNotFound},
-		{"GET", "/r/abcd2345", http.StatusNotImplemented},
-		{"POST", "/r/new", http.StatusNotImplemented},
+		{"GET", "/r/abcd2345", http.StatusNotFound}, // no such live room
+		{"POST", "/r/new", http.StatusSeeOther},
 		{"GET", "/ws/abcd2345", http.StatusNotFound}, // no such live room
 	}
 	for _, tc := range cases {

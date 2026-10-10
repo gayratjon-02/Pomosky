@@ -2,10 +2,12 @@ package app
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
 	"github.com/gayratjon-02/Pomosky/internal/devreload"
 	"github.com/gayratjon-02/Pomosky/internal/middleware"
+	"github.com/gayratjon-02/Pomosky/internal/platform/ratelimit"
 )
 
 // routes registers every route and wraps the mux with the middleware stack.
@@ -16,7 +18,9 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /{$}", c.Home)
 	mux.HandleFunc("GET /r/{id}", c.RoomShow)
 	mux.HandleFunc("GET /r/{id}/host", c.HostPanel)
-	mux.HandleFunc("POST /r/new", c.RoomCreate)
+	// Creating a room is limited per client: 3 at once, then one every 10 seconds.
+	createRoom := middleware.RateLimit(ratelimit.New(0.1, 3, time.Now), a.cfg.TrustProxy)
+	mux.Handle("POST /r/new", createRoom(http.HandlerFunc(c.RoomCreate)))
 	mux.HandleFunc("GET /login", c.Login)
 	mux.HandleFunc("POST /login", c.LoginSubmit)
 	mux.HandleFunc("GET /auth/callback", c.AuthCallback)

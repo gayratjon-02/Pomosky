@@ -16,16 +16,24 @@ type WeatherSource interface {
 	Current(ctx context.Context, lat, lon float64) (weather.Snapshot, error)
 }
 
+// HostHasher turns a raw host token into the value stored for a room.
+// auth.HostTokens implements it.
+type HostHasher interface {
+	Hash(token string) string
+}
+
 // Deps are the collaborators of the controllers, wired in internal/app.
 // Fields may be nil until the corresponding stage is implemented.
 type Deps struct {
-	Config  config.Config
-	Log     *slog.Logger
-	Views   *views.Renderer
-	Rooms   ports.RoomRepository
-	Clock   ports.Clock
-	IDs     ports.IDGenerator
-	Weather WeatherSource
+	Config     config.Config
+	Log        *slog.Logger
+	Views      *views.Renderer
+	Rooms      ports.RoomRepository
+	Live       ports.LiveRooms
+	HostTokens HostHasher
+	Clock      ports.Clock
+	IDs        ports.IDGenerator
+	Weather    WeatherSource
 }
 
 // Controllers groups all handlers; methods are split over files per area.

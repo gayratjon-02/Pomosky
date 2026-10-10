@@ -61,6 +61,9 @@ func New(cfg config.Config) (*App, error) {
 		Views:  renderer,
 		Clock:  clk,
 		IDs:    idgen.Generator{},
+
+		Live:       hub,
+		HostTokens: auth.HostTokens{Salt: cfg.HostTokenSalt},
 	})
 
 	wsHandler, err := realtime.NewHandler(hub, log, realtime.HandlerConfig{

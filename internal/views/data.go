@@ -2,6 +2,12 @@ package views
 
 import "github.com/gayratjon-02/Pomosky/internal/models"
 
+// RoomPage is the Data of the room, host and record pages.
+type RoomPage struct {
+	ID       string
+	ShareURL string
+}
+
 // PageData is what every page template receives.
 type PageData struct {
 	Title        string
