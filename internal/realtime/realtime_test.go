@@ -90,6 +90,56 @@ func TestApplyRunsTheCoreAndBroadcastsState(t *testing.T) {
 	}
 }
 
+func TestReactBroadcastsATickWithTheCount(t *testing.T) {
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	now := time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)
+	rh := newRoomHub(room.New("abcd2345", "hash", now), log)
+	c := NewClient("c1", nil, 4)
+	rh.Join(c)
+
+	for i := 1; i <= 2; i++ {
+		if err := rh.React(room.ReactionFire, now); err != nil {
+			t.Fatal(err)
+		}
+		env, err := Decode(<-c.Outbox())
+		if err != nil || env.Type != TypeReactionTick {
+			t.Fatalf("unexpected frame: %v, %+v", err, env)
+		}
+		var tick ReactionTickData
+		if err := json.Unmarshal(env.Data, &tick); err != nil {
+			t.Fatal(err)
+		}
+		if tick.Kind != "fire" || tick.Count != i {
+			t.Fatalf("tick = %+v, want fire x%d", tick, i)
+		}
+	}
+
+	if err := rh.React("angry", now); err == nil {
+		t.Fatal("an unknown reaction must be rejected")
+	}
+	select {
+	case <-c.Outbox():
+		t.Fatal("a rejected reaction must not broadcast")
+	default:
+	}
+}
+
+func TestHubRegistersLiveRooms(t *testing.T) {
+	h := NewHub(slog.New(slog.NewTextHandler(io.Discard, nil)), nil)
+	id := room.ID("abcd2345")
+	if h.Has(id) {
+		t.Fatal("room should not exist yet")
+	}
+	h.Register(room.New(id, "hash", time.Now()))
+	if !h.Has(id) {
+		t.Fatal("registered room not found")
+	}
+	h.Close(id)
+	if h.Has(id) {
+		t.Fatal("closed room still present")
+	}
+}
+
 func TestSlowClientDoesNotBlock(t *testing.T) {
 	c := NewClient("slow", nil, 1)
 	if !c.Send([]byte("1")) {

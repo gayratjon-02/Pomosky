@@ -18,7 +18,10 @@ type Hub struct {
 	rooms map[room.ID]*RoomHub
 }
 
-var _ ports.Broadcaster = (*Hub)(nil)
+var (
+	_ ports.Broadcaster = (*Hub)(nil)
+	_ ports.LiveRooms   = (*Hub)(nil)
+)
 
 // NewHub creates an empty Hub.
 func NewHub(log *slog.Logger, clock ports.Clock) *Hub {
@@ -44,6 +47,15 @@ func (h *Hub) Room(id room.ID) (*RoomHub, bool) {
 	defer h.mu.RUnlock()
 	rh, ok := h.rooms[id]
 	return rh, ok
+}
+
+// Register implements ports.LiveRooms. An already registered room is kept as is.
+func (h *Hub) Register(state room.State) { h.Open(state) }
+
+// Has implements ports.LiveRooms.
+func (h *Hub) Has(id room.ID) bool {
+	_, ok := h.Room(id)
+	return ok
 }
 
 // Close removes a room from the hub.
@@ -115,6 +127,26 @@ func (r *RoomHub) Apply(ev room.Event, now time.Time) error {
 	r.state = next
 
 	payload, err := Encode(TypeState, ToStateData(next, now))
+	if err != nil {
+		return err
+	}
+	r.broadcastLocked(payload)
+	return nil
+}
+
+// React counts a reaction and broadcasts only a small tick, not the whole
+// state, so a burst of reactions stays cheap.
+func (r *RoomHub) React(kind room.ReactionKind, now time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	next, err := room.Reduce(r.state, room.ReactionSent{Kind: kind}, now)
+	if err != nil {
+		return err
+	}
+	r.state = next
+
+	payload, err := Encode(TypeReactionTick, ReactionTickData{Kind: string(kind), Count: next.Reactions[kind]})
 	if err != nil {
 		return err
 	}
