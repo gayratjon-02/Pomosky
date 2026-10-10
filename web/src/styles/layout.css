@@ -259,7 +259,7 @@ body { overflow-x: clip; }
 
 /* The theme switch is only offered where the light theme applies. */
 .theme-toggle { display: none; }
-body:is(.plain, .admin, .error) .theme-toggle { display: inline-flex; }
+body.plain .theme-toggle { display: inline-flex; }
 
 /* Menu rows, FAQ rows and the delete toggle are tapped with a thumb: at least 44px tall. */
 @media (max-width: 640px), (pointer: coarse) {

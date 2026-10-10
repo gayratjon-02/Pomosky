@@ -65,8 +65,8 @@
   --header-h: 64px;
 }
 
-/* Light theme: only for the plain pages (privacy, admin, errors). */
-html[data-theme="light"] body:is(.plain, .admin, .error) {
+/* Light theme: only for pages without the live sky (privacy). */
+html[data-theme="light"] body.plain {
   color-scheme: light;
   --bg: #f5f7fc;
   --bg-raised: #ffffff;
@@ -83,7 +83,6 @@ html[data-theme="light"] body:is(.plain, .admin, .error) {
   --glass-shadow: 0 10px 30px rgba(16, 23, 51, 0.1);
   --focus-ring: 0 0 0 3px rgba(47, 95, 208, 0.45);
 }
-html[data-theme="light"] body.admin::before { background: radial-gradient(120% 80% at 50% 0%, #e4ebfb 0%, var(--bg) 60%); }
-html[data-theme="light"] body:is(.plain, .admin, .error) .site-header { background: rgba(255, 255, 255, 0.82); border-bottom-color: var(--glass-border); }
-html[data-theme="light"] body:is(.plain, .admin, .error) .site-footer { background: rgba(255, 255, 255, 0.82); border-top-color: var(--glass-border); }
-html[data-theme="light"] body:is(.plain, .admin, .error) .site-nav a:not(.btn):hover { background: rgba(16, 23, 51, 0.07); }
+html[data-theme="light"] body.plain .site-header { background: rgba(255, 255, 255, 0.82); border-bottom-color: var(--glass-border); }
+html[data-theme="light"] body.plain .site-footer { background: rgba(255, 255, 255, 0.82); border-top-color: var(--glass-border); }
+html[data-theme="light"] body.plain .site-nav a:not(.btn):hover { background: rgba(16, 23, 51, 0.07); }
