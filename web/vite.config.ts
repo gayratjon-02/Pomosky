@@ -15,6 +15,7 @@ export default defineConfig({
         ambient: "src/entries/ambient.ts",
         account: "src/entries/account.ts",
         site: "src/entries/site.ts",
+        admin: "src/entries/admin.ts",
         base: "src/styles/base.css",
       },
       output: {
