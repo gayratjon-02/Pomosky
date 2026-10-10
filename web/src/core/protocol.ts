@@ -39,6 +39,16 @@ export interface StateData {
   serverNowMs: number;
 }
 
+export interface PersonView {
+  name: string;
+  avatarUrl?: string;
+}
+
+export interface PeopleData {
+  people: PersonView[];
+  more: number;
+}
+
 export interface ReactionTickData {
   kind: string;
   count: number;
@@ -74,6 +84,7 @@ export const ClientMsg = {
 
 export const ServerMsg = {
   State: "state",
+  People: "people",
   HostOk: "host.ok",
   ReactionTick: "reaction.tick",
   Weather: "weather", // reserved for stage 6
