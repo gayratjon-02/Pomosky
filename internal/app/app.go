@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gayratjon-02/Pomosky/internal/admin"
+	"github.com/gayratjon-02/Pomosky/internal/assets"
 	"github.com/gayratjon-02/Pomosky/internal/auth"
 	"github.com/gayratjon-02/Pomosky/internal/config"
 	"github.com/gayratjon-02/Pomosky/internal/controllers"
@@ -65,6 +66,9 @@ func New(cfg config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Built frontend files carry a content hash; the manifest says which is current.
+	renderer.SetAssetResolver(assets.Load(cfg.StaticDir, cfg.Dev).Resolve)
 
 	clk := clock.Real{}
 	ids := idgen.Generator{}
