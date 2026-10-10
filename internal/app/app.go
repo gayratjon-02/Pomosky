@@ -22,6 +22,8 @@ import (
 	"github.com/gayratjon-02/Pomosky/internal/stats"
 	"github.com/gayratjon-02/Pomosky/internal/store/postgres"
 	"github.com/gayratjon-02/Pomosky/internal/views"
+	"github.com/gayratjon-02/Pomosky/internal/weather"
+	"github.com/gayratjon-02/Pomosky/internal/weather/openmeteo"
 )
 
 // App is the assembled server.
@@ -128,6 +130,10 @@ func New(cfg config.Config) (*App, error) {
 	if accounts != nil {
 		deps.Accounts = accounts
 		deps.Stats = statsSvc
+	}
+	if cfg.Weather.BaseURL != "" {
+		provider := openmeteo.New(cfg.Weather.BaseURL, nil)
+		deps.Weather = weather.NewService(provider, cfg.Weather.CacheTTL, clk.Now)
 	}
 	ctrl := controllers.New(deps)
 

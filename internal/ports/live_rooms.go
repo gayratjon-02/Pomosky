@@ -13,6 +13,8 @@ type LiveRooms interface {
 	// room's focus time counts for, or "" for an anonymous host.
 	Register(state room.State, owner models.UserID)
 	Has(id room.ID) bool
+	// Location returns the host's rounded place of a live room.
+	Location(id room.ID) (room.Location, bool)
 }
 
 // FocusRecorder receives every finished focus phase of a room with an owner.

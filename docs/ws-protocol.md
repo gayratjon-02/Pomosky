@@ -28,7 +28,7 @@ Keep `internal/realtime/protocol.go` and `web/src/core/protocol.ts` in sync.
 | `state` | `{ roomId, timer, viewers, reactions, city, location?, serverNowMs }`: sent on join and after every change; carries the viewer count. `location` is `{ lat, lon, tz }` (rounded) and is absent until the host sets it |
 | `host.ok` | none |
 | `reaction.tick` | `{ kind, count }` |
-| `weather` | reserved for stage 6 |
+| `weather` | not used: clients fetch `GET /api/weather?room={id}` instead (see api.md) |
 | `pong` | `{ serverNowMs }` |
 | `error` | `{ code, message }` |
 

@@ -70,6 +70,15 @@ func (h *Hub) Has(id room.ID) bool {
 	return ok
 }
 
+// Location implements ports.LiveRooms.
+func (h *Hub) Location(id room.ID) (room.Location, bool) {
+	rh, ok := h.Room(id)
+	if !ok {
+		return room.Location{}, false
+	}
+	return rh.State().Location, true
+}
+
 // Close removes a room from the hub.
 func (h *Hub) Close(id room.ID) {
 	h.mu.Lock()

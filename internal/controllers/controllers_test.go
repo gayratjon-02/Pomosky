@@ -69,6 +69,11 @@ func (f *fakeLive) Register(s room.State, _ models.UserID) {
 
 func (f *fakeLive) Has(id room.ID) bool { _, ok := f.rooms[id]; return ok }
 
+func (f *fakeLive) Location(id room.ID) (room.Location, bool) {
+	s, ok := f.rooms[id]
+	return s.Location, ok
+}
+
 type fakeIDs struct{ roomIDs []room.ID }
 
 func (f *fakeIDs) NewRoomID() room.ID {
