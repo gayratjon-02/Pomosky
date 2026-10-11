@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gayratjon-02/Pomosky/internal/apperr"
-	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
 	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 	"github.com/gayratjon-02/Pomosky/internal/views"
 )
@@ -44,7 +43,7 @@ func (c *Controllers) AccountDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not delete the account", http.StatusInternalServerError)
 		return
 	}
-	http.SetCookie(w, httpx.ExpiredSessionCookie(c.secure()))
+	c.clearSessionCookie(w)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

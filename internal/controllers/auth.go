@@ -22,6 +22,28 @@ const (
 
 func (c *Controllers) secure() bool { return c.deps.Config.IsProduction() }
 
+// setSessionCookie sends the login cookie. With COOKIE_DOMAIN it is shared with
+// the subdomains (the admin host), and a leftover host-only cookie of the same
+// name is removed so the two cannot disagree.
+func (c *Controllers) setSessionCookie(w http.ResponseWriter, token string, expires time.Time) {
+	if c.deps.Config.CookieDomain != "" {
+		http.SetCookie(w, httpx.ExpiredSessionCookie(c.secure()))
+	}
+	cookie := httpx.NewSessionCookie(token, c.secure(), expires)
+	cookie.Domain = c.deps.Config.CookieDomain
+	http.SetCookie(w, cookie)
+}
+
+// clearSessionCookie removes the login cookie, shared and host-only.
+func (c *Controllers) clearSessionCookie(w http.ResponseWriter) {
+	http.SetCookie(w, httpx.ExpiredSessionCookie(c.secure()))
+	if c.deps.Config.CookieDomain != "" {
+		cookie := httpx.ExpiredSessionCookie(c.secure())
+		cookie.Domain = c.deps.Config.CookieDomain
+		http.SetCookie(w, cookie)
+	}
+}
+
 func (c *Controllers) loginPage(w http.ResponseWriter, r *http.Request, status int, flash, confirmToken string) {
 	page := views.LoginPage{ConfirmToken: confirmToken}
 	if c.deps.Accounts != nil {
@@ -38,7 +60,7 @@ func (c *Controllers) loginPage(w http.ResponseWriter, r *http.Request, status i
 
 // startSession sets the session cookie and sends the user to their account.
 func (c *Controllers) startSession(w http.ResponseWriter, r *http.Request, login models.Login) {
-	http.SetCookie(w, httpx.NewSessionCookie(login.Token, c.secure(), login.Expires))
+	c.setSessionCookie(w, login.Token, login.Expires)
 	c.track(r, models.VisitLoginDone)
 	http.Redirect(w, r, "/account", http.StatusSeeOther)
 }
@@ -152,6 +174,6 @@ func (c *Controllers) Logout(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	http.SetCookie(w, httpx.ExpiredSessionCookie(c.secure()))
+	c.clearSessionCookie(w)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
