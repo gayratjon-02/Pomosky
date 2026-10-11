@@ -93,3 +93,46 @@ func TestAdminResponsesAreNotCachedOrIndexed(t *testing.T) {
 		t.Fatalf("body: %s", rec.Body.String())
 	}
 }
+
+func TestAdminOnlyOpensOnTheAdminHost(t *testing.T) {
+	c, _ := adminSetup(t, "boss@example.com")
+	c.deps.Config.AdminHost = "dash.example.com"
+	for _, tc := range []struct {
+		host string
+		want int
+	}{
+		{"dash.example.com", http.StatusOK},
+		{"DASH.example.com:443", http.StatusOK},
+		{"example.com", http.StatusNotFound},
+		{"www.example.com", http.StatusNotFound},
+	} {
+		req := asUser("/admin", "boss@example.com")
+		req.Host = tc.host
+		rec, api := httptest.NewRecorder(), httptest.NewRecorder()
+		c.Admin(rec, req)
+		apiReq := asUser("/api/admin/overview", "boss@example.com")
+		apiReq.Host = tc.host
+		c.AdminOverviewAPI(api, apiReq)
+		if rec.Code != tc.want || api.Code != tc.want {
+			t.Errorf("host %q: page %d, api %d, want %d", tc.host, rec.Code, api.Code, tc.want)
+		}
+	}
+}
+
+func TestAdminHostRootGoesToTheAdminPage(t *testing.T) {
+	c, _ := adminSetup(t, "boss@example.com")
+	c.deps.Config.AdminHost = "dash.example.com"
+	req := httptest.NewRequest("GET", "/", nil)
+	req.Host = "dash.example.com"
+	rec := httptest.NewRecorder()
+	c.Home(rec, req)
+	if rec.Code != http.StatusFound || rec.Header().Get("Location") != "/admin" {
+		t.Fatalf("got %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	req.Host = "example.com"
+	rec = httptest.NewRecorder()
+	c.Home(rec, req)
+	if rec.Code == http.StatusFound {
+		t.Fatal("the normal host must keep its landing page")
+	}
+}

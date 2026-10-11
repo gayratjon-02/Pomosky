@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,10 +33,29 @@ func (c *Controllers) adminUser(r *http.Request) *models.User {
 	return nil
 }
 
+// isAdminHost reports whether the request came in on ADMIN_HOST (port ignored).
+func (c *Controllers) isAdminHost(r *http.Request) bool {
+	want := c.deps.Config.AdminHost
+	if want == "" {
+		return false
+	}
+	host := strings.ToLower(r.Host)
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	return host == want
+}
+
+// onAdminHost is true when the admin may be served for this request: always
+// when ADMIN_HOST is not configured, otherwise only on that host.
+func (c *Controllers) onAdminHost(r *http.Request) bool {
+	return c.deps.Config.AdminHost == "" || c.isAdminHost(r)
+}
+
 // adminGate answers 404 for everybody who is not an operator, so the page does
 // not reveal that it exists. It returns false when the request was answered.
 func (c *Controllers) adminGate(w http.ResponseWriter, r *http.Request, json bool) bool {
-	if u := c.adminUser(r); u != nil {
+	if u := c.adminUser(r); u != nil && c.onAdminHost(r) {
 		c.deps.Log.Info("admin access", "user", u.ID, "path", r.URL.Path)
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("X-Robots-Tag", "noindex, nofollow")
