@@ -22,6 +22,11 @@ type Config struct {
 	HostTokenSalt string
 	RoomIdleTTL   time.Duration // how long a room with nobody connected stays alive
 	AdminEmails   []string      // logged-in users with these (verified) emails may open /admin
+	// AdminHost, when set, is the only host that serves /admin and /api/admin/*
+	// (everywhere else they answer 404). CookieDomain, e.g. ".example.com", lets the
+	// login session cookie reach that host as well.
+	AdminHost    string
+	CookieDomain string
 
 	// TrustProxy makes the server believe X-Forwarded-For. Enable it only when
 	// every request comes through a proxy you control (Caddy), otherwise clients
@@ -71,6 +76,8 @@ func Load() Config {
 		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
 		RoomIdleTTL:   getenvDuration("ROOM_IDLE_TTL", 10*time.Minute),
 		AdminEmails:   splitEmails(os.Getenv("ADMIN_EMAILS")),
+		AdminHost:     strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_HOST"))),
+		CookieDomain:  strings.ToLower(strings.TrimSpace(os.Getenv("COOKIE_DOMAIN"))),
 		TrustProxy:    getenvBool("TRUST_PROXY", false),
 		Dev:           getenvBool("DEV_RELOAD", false),
 		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),
