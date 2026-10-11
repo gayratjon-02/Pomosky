@@ -31,6 +31,7 @@ Neither file is ever committed. A test fails if the code reads a variable that i
 | `ADMIN_EMAILS` | Comma separated emails of the operators. A logged-in user whose verified email is in the list can open `/admin`; everyone else gets a normal 404 |
 | `ADMIN_HOST` | Host that serves `/admin` and `/api/admin/*`, for example `dash.example.com`. When set, everywhere else answers 404 and the root of that host redirects to `/admin`. Empty: `/admin` works on every host. It needs its own DNS record and Caddy block |
 | `COOKIE_DOMAIN` | Domain of the login cookie, for example `.example.com`, so one login also works on `ADMIN_HOST`. Empty: the cookie belongs to the one host that set it |
+| `GEOIP_FILE` | Path of the DB-IP "IP to Country Lite" CSV (plain or `.gz`), for example `/opt/pomosky/geoip/dbip-country-lite.csv.gz`. Fills in the country of visits when no `CF-IPCountry` header exists. Empty: countries need a proxy. Refresh monthly with `deploy/bare/update-geoip.sh`. Data by DB-IP.com, CC BY 4.0 |
 
 ## Rooms
 
