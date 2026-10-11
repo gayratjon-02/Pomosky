@@ -29,6 +29,8 @@ Neither file is ever committed. A test fails if the code reads a variable that i
 | Variable | Meaning |
 |---|---|
 | `ADMIN_EMAILS` | Comma separated emails of the operators. A logged-in user whose verified email is in the list can open `/admin`; everyone else gets a normal 404 |
+| `ADMIN_HOST` | Host that serves `/admin` and `/api/admin/*`, for example `dash.example.com`. When set, everywhere else answers 404 and the root of that host redirects to `/admin`. Empty: `/admin` works on every host. It needs its own DNS record and Caddy block |
+| `COOKIE_DOMAIN` | Domain of the login cookie, for example `.example.com`, so one login also works on `ADMIN_HOST`. Empty: the cookie belongs to the one host that set it |
 
 ## Rooms
 
