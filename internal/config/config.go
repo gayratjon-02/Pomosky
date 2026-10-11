@@ -27,6 +27,9 @@ type Config struct {
 	// login session cookie reach that host as well.
 	AdminHost    string
 	CookieDomain string
+	// GeoIPFile is the DB-IP "IP to Country Lite" CSV (plain or .gz). When set, the
+	// country of a visit is looked up from the address if no proxy header gives it.
+	GeoIPFile string
 
 	// TrustProxy makes the server believe X-Forwarded-For. Enable it only when
 	// every request comes through a proxy you control (Caddy), otherwise clients
@@ -78,6 +81,7 @@ func Load() Config {
 		AdminEmails:   splitEmails(os.Getenv("ADMIN_EMAILS")),
 		AdminHost:     strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_HOST"))),
 		CookieDomain:  strings.ToLower(strings.TrimSpace(os.Getenv("COOKIE_DOMAIN"))),
+		GeoIPFile:     strings.TrimSpace(os.Getenv("GEOIP_FILE")),
 		TrustProxy:    getenvBool("TRUST_PROXY", false),
 		Dev:           getenvBool("DEV_RELOAD", false),
 		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),

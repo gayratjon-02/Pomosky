@@ -113,6 +113,13 @@ func New(cfg config.Config) (*App, error) {
 		recorder = stats.NewRecorder(focusRepo, log)
 		visitRepo := postgres.NewVisitRepo(db)
 		visits = analytics.NewCollector(visitRepo, log, clk, cfg.HostTokenSalt, cfg.TrustProxy)
+		if cfg.GeoIPFile != "" {
+			if geo, err := analytics.LoadCountryDB(cfg.GeoIPFile); err != nil {
+				log.Error("country table not loaded, visit countries need a proxy header", "file", cfg.GeoIPFile, "err", err)
+			} else {
+				visits.SetCountryLookup(geo)
+			}
+		}
 		traffic = analytics.NewReader(visitRepo, clk)
 		roomRepo := postgres.NewRoomRepo(db)
 		rooms = roomRepo
