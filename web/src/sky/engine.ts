@@ -103,7 +103,10 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
     frame.dpr = dpr;
     frame.horizonY = h * 0.8;
     for (const layer of layers) layer.resize?.(w, h, dpr);
-    if (!running) render(performance.now(), 0);
+    // Resizing clears the canvas. Repaint at once, also while running: resize observers
+    // fire after the animation frame, so waiting for the next one would show the page
+    // background for a frame (a night flash when the mobile address bar moves).
+    render(performance.now(), 0);
   };
 
   const step = (dt: number) => {
