@@ -20,7 +20,8 @@ import (
 // Collector implements ports.VisitTracker. Track only queues the event; a
 // background worker writes it, so a slow database never slows a page.
 //
-// Privacy: no cookie, no IP address and no room id is stored. The visitor is an
+// Privacy: no cookie, no IP address and no room id is stored (the country is
+// looked up from the address and only its two-letter code is kept). The visitor is an
 // HMAC of the UTC day, the client address and the browser, so it cannot be
 // linked from one day to the next. Visitors who send Do Not Track or Global
 // Privacy Control, and bots, are not counted at all.
@@ -30,6 +31,7 @@ type Collector struct {
 	clock      ports.Clock
 	key        []byte
 	trustProxy bool
+	geo        CountryLookup // optional: the country of an address when no proxy header says
 
 	ch   chan models.Visit
 	done chan struct{}
@@ -37,6 +39,15 @@ type Collector struct {
 }
 
 var _ ports.VisitTracker = (*Collector)(nil)
+
+// CountryLookup finds the two-letter country of an IP address ("" when unknown).
+type CountryLookup interface {
+	Country(ip string) string
+}
+
+// SetCountryLookup makes the collector fill in the country itself when the
+// request carries no proxy header such as CF-IPCountry. Call it before traffic starts.
+func (c *Collector) SetCountryLookup(l CountryLookup) { c.geo = l }
 
 // NewCollector starts the worker. key is a server secret (it keeps the daily
 // hashes from being guessed). Call Close to flush and stop.
@@ -59,13 +70,18 @@ func (c *Collector) Track(r *http.Request, kind string) {
 		return
 	}
 	now := c.clock.Now().UTC()
+	ip := httpx.ClientIP(r, c.trustProxy)
+	cc := country(r)
+	if cc == "" && c.geo != nil {
+		cc = c.geo.Country(ip)
+	}
 	source, medium, campaign := Source(r.URL.Query(), r.Referer(), hostOnly(r.Host), client)
 	v := models.Visit{
 		At: now, Kind: kind, Path: NormalizePath(r.URL.Path),
-		Visitor: c.visitor(now, httpx.ClientIP(r, c.trustProxy), r.UserAgent()),
+		Visitor: c.visitor(now, ip, r.UserAgent()),
 		Source:  source, Medium: medium, Campaign: campaign,
 		Device: client.Device, OS: client.OS, Browser: client.Browser,
-		Country: country(r),
+		Country: cc,
 	}
 	select {
 	case c.ch <- v:

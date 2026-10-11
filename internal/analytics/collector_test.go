@@ -114,3 +114,34 @@ func TestReaderFillsEveryDay(t *testing.T) {
 		t.Fatalf("today %+v", got.Today)
 	}
 }
+
+type fakeGeo map[string]string
+
+func (g fakeGeo) Country(ip string) string { return g[ip] }
+
+func TestCollectorLooksUpTheCountryWhenNoProxyHeaderSaysSo(t *testing.T) {
+	repo := &memRepo{}
+	c := newTestCollector(repo, &fakeClock{t: time.Date(2026, 10, 10, 9, 0, 0, 0, time.UTC)})
+	c.SetCountryLookup(fakeGeo{"203.0.113.7": "KR"})
+	for _, tc := range []struct{ ip, header string }{
+		{"203.0.113.7:1", ""},   // looked up
+		{"203.0.113.7:1", "uz"}, // the proxy header wins
+		{"198.51.100.1:1", ""},  // unknown address
+	} {
+		r := httptest.NewRequest("GET", "http://pomosky.test/", nil)
+		r.RemoteAddr = tc.ip
+		r.Header.Set("User-Agent", uaIPhoneSafari)
+		if tc.header != "" {
+			r.Header.Set("CF-IPCountry", tc.header)
+		}
+		c.Track(r, models.VisitPageview)
+	}
+	c.Close()
+	got := []string{}
+	for _, v := range repo.got {
+		got = append(got, v.Country)
+	}
+	if len(got) != 3 || got[0] != "KR" || got[1] != "UZ" || got[2] != "" {
+		t.Fatalf("countries %q", got)
+	}
+}
