@@ -1,5 +1,5 @@
 /* Account page and monthly statistics. */
-body.account .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+body.account .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; }
 body.account::before { content: ""; position: fixed; inset: 0; z-index: -1; background: rgba(6, 10, 24, 0.55); }
 
 .acct { display: grid; gap: var(--space-4); padding-block: var(--space-4) var(--space-7); }

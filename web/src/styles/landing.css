@@ -1,14 +1,16 @@
 /* Landing page. */
-body.landing .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+body.landing .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; }
 
 .hero {
   display: grid;
   justify-items: center;
   gap: var(--space-5);
-  min-height: calc(100dvh - var(--header-h) - 40px);
+  min-height: calc(100vh - var(--header-h) - 40px);
+  min-height: calc(100svh - var(--header-h) - 40px);
   align-content: center;
   padding-block: var(--space-7);
-  padding-bottom: max(var(--space-7), 14dvh); /* keep the text above the hills */
+  padding-bottom: max(var(--space-7), 14vh);
+  padding-bottom: max(var(--space-7), 14svh); /* keep the text above the hills */
   text-align: center;
 }
 

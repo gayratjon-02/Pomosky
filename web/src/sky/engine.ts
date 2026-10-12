@@ -98,7 +98,9 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
   let destroyed = false;
 
   const resize = () => {
-    let dpr = Math.min(window.devicePixelRatio || 1, options.maxDpr ?? 2);
+    // Phones draw the sky at a lower density: the soft shapes look the same and scrolling stays smooth.
+    const touch = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+    let dpr = Math.min(window.devicePixelRatio || 1, options.maxDpr ?? (touch ? 1.5 : 2));
     const cssW = Math.max(1, canvas.clientWidth);
     const cssH = Math.max(1, canvas.clientHeight);
     while (cssW * cssH * dpr * dpr > MAX_PIXELS && dpr > 1) dpr -= 0.25;

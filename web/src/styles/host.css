@@ -4,7 +4,8 @@
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   align-items: start;
-  min-height: calc(100dvh - var(--header-h) - 40px);
+  min-height: calc(100vh - var(--header-h) - 40px);
+  min-height: calc(100svh - var(--header-h) - 40px);
   padding-block: var(--space-5);
 }
 
@@ -33,7 +34,7 @@
 @media (min-width: 901px) {
   .host-stage { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; }
   .host-main { align-self: center; position: sticky; top: calc(var(--header-h) + 24px); }
-  .host-panel { max-height: calc(100dvh - var(--header-h) - 32px); overflow-y: auto; }
+  .host-panel { max-height: calc(100vh - var(--header-h) - 32px); max-height: calc(100svh - var(--header-h) - 32px); overflow-y: auto; }
 }
 
 .host-panel .input, .host-panel .select, .host-panel .field { min-width: 0; }
@@ -124,7 +125,8 @@
 
   .host-panel {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
-    max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain;
+    max-height: 88vh;
+    max-height: 88svh; overflow-y: auto; overscroll-behavior: contain;
     gap: var(--space-3);
     padding: var(--space-4) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
     border-radius: 28px 28px 0 0; border-bottom: 0;
