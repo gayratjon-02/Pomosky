@@ -15,6 +15,9 @@ func (c *Controllers) render(w http.ResponseWriter, r *http.Request, status int,
 	if data.OGImage == "" {
 		data.OGImage = strings.TrimRight(c.deps.Config.BaseURL, "/") + "/static/og.png"
 	}
+	if cookie, err := r.Cookie(views.MoodCookie); err == nil && views.ValidMood(cookie.Value) {
+		data.Mood = cookie.Value // so the page is painted in the chosen mood from the first frame
+	}
 	if data.User == nil {
 		data.User = reqctx.User(r.Context())
 	}

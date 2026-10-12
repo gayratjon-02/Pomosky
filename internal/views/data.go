@@ -35,6 +35,7 @@ type PageData struct {
 	OGImage      string
 	Flash        string
 	CSRFToken    string
+	Mood         string       // the visitor's chosen mood (a valid id from moods.go), "" for the live sky
 	User         *models.User // nil for anonymous visitors
 	Scripts      []string     // page-specific frontend bundles
 	DevReload    bool         // development only: include the browser auto-reload script
