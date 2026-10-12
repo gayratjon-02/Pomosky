@@ -85,9 +85,25 @@ export function cloudShade(sunElevationDeg: number, overcast: number): RGB {
   return mix(mix(lit, dark, 0.45), mix(dark, hex("#0e1426"), 0.35), overcast);
 }
 
-/** Colour of the horizon silhouette (hills), tinted by the sky above it. */
+/** How much daylight there is, 0 at night and in twilight, 1 once the sun is well up. */
+export const dayAmount = (sunElevationDeg: number): number => smoothstep(0, 20, sunElevationDeg);
+
+// By day the hills are seen through air: the far ridge is pale and blue, the near one deep green.
+const DAY_HILLS = [hex("#9dbce0"), hex("#5f93b4"), hex("#2f6f68")];
+
+/**
+ * Colour of the horizon silhouette (hills), tinted by the sky above it. At night
+ * they are almost black; by day they are hazy blue far away and green up close.
+ */
 export function horizonColor(sunElevationDeg: number, depth: number): RGB {
   const sky = skyGradient(sunElevationDeg).bottom;
-  const base = mix(sky, hex("#05070f"), 0.6 + 0.3 * depth);
-  return base;
+  const night = mix(sky, hex("#05070f"), 0.6 + 0.3 * depth);
+  const day = dayAmount(sunElevationDeg);
+  if (day <= 0) return night;
+  const i = Math.min(DAY_HILLS.length - 2, Math.floor(depth * (DAY_HILLS.length - 1)));
+  const local = depth * (DAY_HILLS.length - 1) - i;
+  const lit = mix(DAY_HILLS[i]!, DAY_HILLS[i + 1]!, local);
+  // Low sun: let the warm horizon light stain the hills a little.
+  const warm = 0.18 * (1 - smoothstep(8, 30, sunElevationDeg));
+  return mix(night, mix(lit, sky, warm), day);
 }

@@ -1,5 +1,5 @@
-import { css, mix, hex } from "../color";
-import { horizonColor, skyGradient } from "../palette";
+import { css, desaturate, mix, hex } from "../color";
+import { dayAmount, horizonColor, skyGradient } from "../palette";
 import { createRandom } from "../random";
 import type { Layer } from "../types";
 
@@ -40,9 +40,12 @@ export function horizonLayer(seed = 3): Layer {
     draw({ ctx, w, h, horizonY, inputs, overcast }) {
       const e = inputs.sunElevationDeg;
       const step = Math.max(6, Math.round(w / 140));
+      const day = dayAmount(e);
+      const mist = skyGradient(e, overcast).bottom;
       ridges.forEach((ridge, i) => {
         const depth = i / (ridges.length - 1);
-        const color = horizonColor(e, depth);
+        // Cloud cover greys the land as well.
+        const color = desaturate(horizonColor(e, depth), 0.45 * overcast, 1 - 0.1 * overcast);
         // Hills pick up a little of the sky's colour, less so in the front.
         const tinted = mix(color, skyGradient(e, overcast).bottom, 0.22 * (1 - depth));
         const baseY = horizonY + ridge.base * h;
@@ -58,8 +61,12 @@ export function horizonLayer(seed = 3): Layer {
 
         const top = baseY - ridge.amp * h;
         const g = ctx.createLinearGradient(0, top, 0, h);
-        g.addColorStop(0, css(tinted));
-        g.addColorStop(1, css(mix(tinted, hex("#02030a"), 0.55)));
+        // By day each ridge fades into mist at its crest and deepens towards the bottom.
+        const crest = mix(tinted, mist, 0.28 * day * (1 - 0.5 * depth));
+        const foot = mix(tinted, hex("#02030a"), 0.55 - 0.3 * day);
+        g.addColorStop(0, css(crest));
+        g.addColorStop(0.35, css(tinted));
+        g.addColorStop(1, css(foot));
         ctx.fillStyle = g;
         ctx.fill();
       });
