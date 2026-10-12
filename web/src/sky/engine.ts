@@ -11,6 +11,7 @@ import { snowLayer } from "./layers/snow";
 import { starsLayer } from "./layers/stars";
 import { sunLayer } from "./layers/sun";
 import { vignetteLayer } from "./layers/vignette";
+import { moodSky, onMoodChange } from "./moods";
 import { onVisibilityChange, prefersReducedMotion } from "./perf";
 import { DEFAULT_INPUTS, type Frame, type Layer, type SkyController, type SkyInputs } from "./types";
 
@@ -62,7 +63,12 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
     vignetteLayer(),
   ];
 
+  // `live` holds what the page asks for (real time and weather); the mood of the
+  // visitor, if any, is laid over it to make `target`. Switching the mood back to live
+  // therefore never has to wait for the page to send its values again.
+  const live: SkyInputs = { ...DEFAULT_INPUTS };
   const target: SkyInputs = { ...DEFAULT_INPUTS };
+  const retarget = () => Object.assign(target, live, moodSky() ?? {});
   const current: SkyInputs = { ...DEFAULT_INPUTS };
   const frame: Frame = {
     ctx: ctx as CanvasRenderingContext2D,
@@ -168,6 +174,13 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
   resize(); // size the layers now, so update() before start() can already draw
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
+  const stopMood = onMoodChange(() => {
+    retarget();
+    if (!running) {
+      Object.assign(current, target);
+      render(performance.now(), 0);
+    }
+  });
   const stopWatching = onVisibilityChange((visible) => {
     if (visible) controller.start();
     else pause();
@@ -193,7 +206,8 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
     },
     stop: pause,
     update(next) {
-      Object.assign(target, next);
+      Object.assign(live, next);
+      retarget();
       if (!running) {
         Object.assign(current, target);
         render(performance.now(), 0);
@@ -209,6 +223,7 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
       pause();
       observer.disconnect();
       stopWatching();
+      stopMood();
     },
   };
   return controller;
