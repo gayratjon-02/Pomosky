@@ -7,4 +7,5 @@ type PushSubscription struct {
 	Endpoint string
 	P256dh   string // the browser's public key, base64url
 	Auth     string // the shared secret, base64url
+	Lang     string // language of the browser's page, for the text of the alert
 }

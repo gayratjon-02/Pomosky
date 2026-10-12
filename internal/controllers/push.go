@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gayratjon-02/Pomosky/internal/apperr"
+	"github.com/gayratjon-02/Pomosky/internal/i18n"
 	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/platform/httpx"
 	"github.com/gayratjon-02/Pomosky/internal/room"
@@ -26,6 +27,7 @@ func (c *Controllers) PushKey(w http.ResponseWriter, r *http.Request) {
 
 type pushSubscribeBody struct {
 	Room         string `json:"room"`
+	Lang         string `json:"lang"`
 	Subscription struct {
 		Endpoint string `json:"endpoint"`
 		Keys     struct {
@@ -60,6 +62,7 @@ func (c *Controllers) PushSubscribe(w http.ResponseWriter, r *http.Request) {
 		Endpoint: body.Subscription.Endpoint,
 		P256dh:   body.Subscription.Keys.P256dh,
 		Auth:     body.Subscription.Keys.Auth,
+		Lang:     string(i18n.Parse(body.Lang)),
 	})
 	if err != nil {
 		httpx.WriteError(w, err)

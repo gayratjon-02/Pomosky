@@ -56,7 +56,7 @@ export async function subscribePush(roomId: string): Promise<boolean> {
       if (!key) return false;
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
     }
-    active = await post("/api/push/subscribe", { room: roomId, subscription: sub.toJSON() });
+    active = await post("/api/push/subscribe", { room: roomId, lang: document.documentElement.lang, subscription: sub.toJSON() });
     return active;
   } catch {
     active = false;

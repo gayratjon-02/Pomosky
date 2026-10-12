@@ -17,6 +17,7 @@ import (
 	webpush "github.com/SherClockHolmes/webpush-go"
 
 	"github.com/gayratjon-02/Pomosky/internal/apperr"
+	"github.com/gayratjon-02/Pomosky/internal/i18n"
 	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/room"
 )
@@ -132,10 +133,10 @@ func TestPhaseEndSendsAnEncryptedMessageAndForgetsGoneBrowsers(t *testing.T) {
 }
 
 func TestEndMessage(t *testing.T) {
-	if title, body := EndMessage(room.PhaseFocus, " essay "); title != "Focus session finished" || body != "essay. Time for a break." {
+	if title, body := EndMessage(i18n.EN, room.PhaseFocus, " essay "); title != "Focus session finished" || body != "essay. Time for a break." {
 		t.Errorf("focus: %q / %q", title, body)
 	}
-	if title, _ := EndMessage(room.PhaseBreak, "x"); title != "Break is over" {
+	if title, _ := EndMessage(i18n.EN, room.PhaseBreak, "x"); title != "Break is over" {
 		t.Errorf("break: %q", title)
 	}
 }

@@ -15,6 +15,7 @@ import (
 	webpush "github.com/SherClockHolmes/webpush-go"
 
 	"github.com/gayratjon-02/Pomosky/internal/apperr"
+	"github.com/gayratjon-02/Pomosky/internal/i18n"
 	"github.com/gayratjon-02/Pomosky/internal/models"
 	"github.com/gayratjon-02/Pomosky/internal/ports"
 	"github.com/gayratjon-02/Pomosky/internal/room"
@@ -154,16 +155,16 @@ type message struct {
 	Room  string `json:"room"`
 }
 
-// EndMessage is the text of the "phase ended" alert (the page shows the same one).
-func EndMessage(phase room.Phase, label string) (title, body string) {
+// EndMessage is the text of the "phase ended" alert in a language (the page shows the same one).
+func EndMessage(lang i18n.Lang, phase room.Phase, label string) (title, body string) {
 	label = strings.TrimSpace(label)
 	if phase == room.PhaseBreak {
-		return "Break is over", "Ready for the next focus session?"
+		return i18n.T(lang, "Break is over"), i18n.T(lang, "Ready for the next focus session?")
 	}
 	if label != "" {
-		return "Focus session finished", label + ". Time for a break."
+		return i18n.T(lang, "Focus session finished"), strings.ReplaceAll(i18n.T(lang, "{label}. Time for a break."), "{label}", label)
 	}
-	return "Focus session finished", "Time for a break."
+	return i18n.T(lang, "Focus session finished"), i18n.T(lang, "Time for a break.")
 }
 
 // PhaseEnded implements ports.PhaseNotifier. It returns at once; the messages
@@ -178,12 +179,12 @@ func (s *Service) PhaseEnded(id room.ID, phase room.Phase, label string) {
 	if len(subs) == 0 {
 		return
 	}
-	title, body := EndMessage(phase, label)
-	payload, err := json.Marshal(message{Title: title, Body: body, Room: string(id)})
-	if err != nil {
-		return
-	}
 	for _, sub := range subs {
+		title, body := EndMessage(i18n.Parse(sub.Lang), phase, label)
+		payload, err := json.Marshal(message{Title: title, Body: body, Room: string(id)})
+		if err != nil {
+			continue
+		}
 		go s.send(id, sub, payload)
 	}
 }
