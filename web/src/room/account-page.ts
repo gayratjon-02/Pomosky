@@ -18,6 +18,7 @@ import { initCommunity } from "../stats/community";
 import { initLeaderboard } from "../stats/leaderboard";
 import { initAmbientSky } from "./ambient-sky";
 import { t, tn } from "../core/i18n";
+import { GOAL_CHOICES_MIN, goalProgress, loadGoal, saveGoal } from "../stats/goal";
 import { monthContent, shareCard } from "../ui/share-card";
 
 /** Account page: monthly focus statistics with a calendar heatmap and daily bars. */
@@ -79,6 +80,42 @@ function timeZone(): string {
 }
 
 let selectedDate = "";
+let todaySeconds = 0;
+let goalMinutes = loadGoal();
+
+function todayKeyNow(): string {
+  const d = new Date();
+  return `${currentMonth(d)}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** The daily goal card: a ring with today's progress and the goal choices. */
+function showGoal(seconds: number): void {
+  todaySeconds = seconds;
+  const share = goalProgress(seconds, goalMinutes);
+  const left = goalMinutes * 60 - seconds;
+  byId("goal-fill").style.strokeDashoffset = String(100 - share * 100);
+  byId("goal-pct").textContent = `${Math.floor(share * 100)}%`;
+  byId("goal-line").textContent = `${formatDuration(seconds)} / ${formatDuration(goalMinutes * 60)}`;
+  byId("goal-sub").textContent = left > 0 ? t("{time} to go", { time: formatDuration(left) }) : t("Goal reached! Well done.");
+  byId("goal-card").classList.toggle("done", left <= 0);
+  const box = byId("goal-choices");
+  if (box.childElementCount === 0) {
+    for (const m of GOAL_CHOICES_MIN) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "goal-chip";
+      b.dataset["min"] = String(m);
+      b.textContent = formatDuration(m * 60);
+      b.addEventListener("click", () => {
+        goalMinutes = m;
+        saveGoal(m);
+        showGoal(todaySeconds);
+      });
+      box.appendChild(b);
+    }
+  }
+  for (const b of box.children) b.setAttribute("aria-pressed", String((b as HTMLElement).dataset["min"] === String(goalMinutes)));
+}
 
 function render(stats: MonthStats, isCurrent: boolean): void {
   byId("s-total").textContent = formatDuration(stats.totalSeconds);
@@ -89,6 +126,7 @@ function render(stats: MonthStats, isCurrent: boolean): void {
   const best = busiest(stats.days);
   byId("s-best").textContent = best ? t("Best: {day}, {time}", { day: dayLabel(best.date), time: formatDuration(best.seconds) }) : "";
   byId("s-streak").textContent = String(stats.streakDays);
+  if (isCurrent) showGoal(stats.days.find((d) => d.date === todayKeyNow())?.seconds ?? 0);
 
   const max = Math.max(0, ...stats.days.map((d) => d.seconds));
   const today = new Date();

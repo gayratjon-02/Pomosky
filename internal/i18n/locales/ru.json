@@ -333,5 +333,8 @@
  "{pct}% of the month": "{pct}% от месяца",
  "{pct}% vs last month": "{pct}% к прошлому месяцу",
  "{s}s": "{s} с",
- "{time} on average": "в среднем {time}"
+ "{time} on average": "в среднем {time}",
+ "Daily goal": "Цель на день",
+ "{time} to go": "Осталось {time}",
+ "Goal reached! Well done.": "Цель достигнута! Отлично."
 }

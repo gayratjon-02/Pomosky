@@ -333,5 +333,8 @@
  "{pct}% of the month": "이달의 {pct}%",
  "{pct}% vs last month": "지난달 대비 {pct}%",
  "{s}s": "{s}초",
- "{time} on average": "평균 {time}"
+ "{time} on average": "평균 {time}",
+ "Daily goal": "오늘의 목표",
+ "{time} to go": "{time} 남음",
+ "Goal reached! Well done.": "목표 달성! 잘했어요."
 }

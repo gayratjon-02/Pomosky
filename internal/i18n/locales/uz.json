@@ -333,5 +333,8 @@
  "{pct}% of the month": "oyning {pct}%",
  "{pct}% vs last month": "oʻtgan oyga nisbatan {pct}%",
  "{s}s": "{s} sek",
- "{time} on average": "oʻrtacha {time}"
+ "{time} on average": "oʻrtacha {time}",
+ "Daily goal": "Kunlik maqsad",
+ "{time} to go": "Yana {time} qoldi",
+ "Goal reached! Well done.": "Maqsadga erishdingiz! Barakalla."
 }
