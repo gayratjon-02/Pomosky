@@ -8,6 +8,9 @@ body { animation: page-in 380ms var(--ease) both; }
 
 /* Content settles in with a gentle rise, one block after another. */
 main > :not(canvas):not(.reaction-layer) { animation: fade-up 560ms var(--ease) both; }
+/* A finished animation that holds `transform: none` still makes the block the reference box of
+   fixed children, which would shrink the host's bottom sheet to the page content. */
+main > section.host-stage:not(canvas):not(.reaction-layer) { animation-fill-mode: backwards; }
 main > :not(canvas):nth-child(3) { animation-delay: 60ms; }
 main > :not(canvas):nth-child(4) { animation-delay: 120ms; }
 main > :not(canvas):nth-child(5) { animation-delay: 180ms; }
