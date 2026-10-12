@@ -23,6 +23,10 @@
 | GET | `/api/stats/community?tz=` | Focus time of everyone: today, last 7 days, this month, all time and the last 30 days (JSON), public and cached for a minute | implemented |
 | GET | `/api/stats?month=YYYY-MM&tz=Area/City` | Monthly focus statistics of the logged-in user (JSON, see below) | implemented |
 | GET | `/api/admin/traffic` | Anonymous traffic of the last 30 UTC days for operators: visitors and page views per day, rooms created, logins, sources, pages, devices, browsers, countries and the funnel (JSON, 404 for everyone else) | implemented |
+| GET | `/api/push/key` | Public VAPID key a browser subscribes to Web Push with (JSON `{publicKey}`); 404 when the server has no push keys | implemented |
+| POST | `/api/push/subscribe` | `{room, subscription:{endpoint, keys:{p256dh, auth}}}`: ask for a push alert when a phase of a live room ends. Only known push services are accepted (https, Google, Mozilla, Apple, Windows); in memory only; rate limited; 204 | implemented |
+| POST | `/api/push/unsubscribe` | `{endpoint}`: forget a subscription; 204 | implemented |
+| GET | `/sw.js` | Service worker that shows push alerts (served from the root so it covers the whole site) | implemented |
 | GET | `/static/*` | Built frontend assets | implemented |
 | GET | `/__dev/events` | Reload event stream (SSE); only with `DEV_RELOAD=true` | implemented |
 | GET | `/__dev/reload.js` | Browser auto-reload script; only with `DEV_RELOAD=true` | implemented |
