@@ -32,6 +32,29 @@ export function t(key: string, vars?: Record<string, string | number>): string {
   return fill(text, vars);
 }
 
+// Uzbek month and weekday names are missing from the browsers' Intl data (it prints "M10"), so they are listed here.
+const UZ_MONTHS = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
+const UZ_MONTHS_SHORT = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"];
+const UZ_WEEKDAYS_SHORT = ["Yak", "Dush", "Sesh", "Chor", "Pay", "Jum", "Shan"]; // Sunday first
+
+/** Name of a month (0 = January) in the language of the page. */
+export function monthName(month: number, form: "long" | "short" = "long"): string {
+  if (currentLang() === "uz") return (form === "long" ? UZ_MONTHS : UZ_MONTHS_SHORT)[month] ?? "";
+  return new Intl.DateTimeFormat(intlLocale(), { month: form }).format(new Date(2024, month, 1));
+}
+
+/** Short name of a weekday (0 = Sunday) in the language of the page. */
+export function weekdayName(day: number): string {
+  if (currentLang() === "uz") return UZ_WEEKDAYS_SHORT[day] ?? "";
+  return new Intl.DateTimeFormat(intlLocale(), { weekday: "short" }).format(new Date(2024, 0, 7 + day)); // 7 Jan 2024 was a Sunday
+}
+
+/** "12 October 2026" in the language of the page. */
+export function longDate(date: Date): string {
+  if (currentLang() === "uz") return `${date.getDate()}-${monthName(date.getMonth())} ${date.getFullYear()}`;
+  return new Intl.DateTimeFormat(intlLocale(), { day: "numeric", month: "long", year: "numeric" }).format(date);
+}
+
 /** Which of the plural forms a language uses for n. */
 export function pluralIndex(lang: Lang, n: number, forms: number): number {
   let index: number;

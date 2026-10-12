@@ -1,4 +1,4 @@
-import { intlLocale, t } from "../core/i18n";
+import { monthName, t, weekdayName } from "../core/i18n";
 
 // Pure helpers for the monthly statistics view.
 
@@ -43,7 +43,7 @@ export function formatExact(seconds: number): string {
 /** "2026-10" -> "October 2026". */
 export function monthLabel(month: string): string {
   const [y, m] = month.split("-").map(Number) as [number, number];
-  return new Intl.DateTimeFormat(intlLocale(), { month: "long", year: "numeric" }).format(new Date(y, m - 1, 1));
+  return `${monthName(m - 1)} ${y}`;
 }
 
 /** Moves a YYYY-MM string by whole months. */
@@ -92,9 +92,7 @@ export function busiest(days: DayStat[]): DayStat | null {
 export function dayLabel(date: string): string {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   const dt = new Date(y, m - 1, d);
-  const parts = new Intl.DateTimeFormat(intlLocale(), { weekday: "short", month: "short" }).formatToParts(dt);
-  const pick = (type: string): string => parts.find((p) => p.type === type)?.value ?? "";
-  return `${pick("weekday")} ${d} ${pick("month")}`;
+  return `${weekdayName(dt.getDay())} ${d} ${monthName(m - 1, "short")}`;
 }
 
 /** Share of the month's focus time that one day makes up, as a whole percent. */
