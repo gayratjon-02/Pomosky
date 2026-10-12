@@ -10,9 +10,11 @@ import (
 )
 
 type fakeRepo struct {
-	since      map[string][]time.Time // calls by kind
-	days       []models.AdminDay
-	usersCalls [][3]int
+	since       map[string][]time.Time // calls by kind
+	days        []models.AdminDay
+	usersCalls  [][3]int
+	recent      []models.AnonymousSession
+	recentLimit int
 }
 
 func (f *fakeRepo) Totals(context.Context) (models.AdminTotals, error) {
@@ -38,6 +40,10 @@ func (f *fakeRepo) Users(_ context.Context, mostFocused bool, limit, offset int)
 	return nil, 0, nil
 }
 func (f *fakeRepo) DatabaseSize(context.Context) (int64, error) { return 4096, nil }
+func (f *fakeRepo) RecentAnonymous(_ context.Context, limit int) ([]models.AnonymousSession, error) {
+	f.recentLimit = limit
+	return f.recent, nil
+}
 
 type fixedLive struct{}
 
@@ -83,6 +89,19 @@ func TestOverviewWindowsAndThirtyDays(t *testing.T) {
 	}
 	if o.System.WeatherCalls != 3 || o.System.WeatherHits != 9 || o.System.WeatherErrors != 1 || o.System.WeatherBusy != 2 {
 		t.Fatalf("weather counters: %+v", o.System)
+	}
+}
+
+func TestOverviewListsTheLatestAnonymousFocus(t *testing.T) {
+	start := time.Date(2026, 10, 10, 9, 30, 0, 0, time.UTC)
+	repo := &fakeRepo{since: map[string][]time.Time{}, recent: []models.AnonymousSession{{StartedAt: start, Focused: 25 * time.Minute}}}
+	svc := New(repo, nil, nil, fixedClock{start.Add(time.Hour)})
+	o, err := svc.Overview(context.Background(), "UTC")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if repo.recentLimit != 40 || len(o.RecentAnonymous) != 1 || o.RecentAnonymous[0].Focused != 25*time.Minute || !o.RecentAnonymous[0].StartedAt.Equal(start) {
+		t.Fatalf("limit %d, recent %+v", repo.recentLimit, o.RecentAnonymous)
 	}
 }
 

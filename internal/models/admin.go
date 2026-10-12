@@ -24,6 +24,13 @@ type AdminDay struct {
 	ActiveHosts        int // distinct logged-in hosts who focused that day
 }
 
+// AnonymousSession is one focus phase of a room hosted without an account. Only when
+// it started and how long it lasted are kept: nobody can be identified from it.
+type AnonymousSession struct {
+	StartedAt time.Time
+	Focused   time.Duration
+}
+
 // AdminUser is a row of the user list. It exists only for the operator.
 type AdminUser struct {
 	Email             string
@@ -72,5 +79,7 @@ type AdminOverview struct {
 	HostsWeek     int
 	HostsMonth    int
 	Days          []AdminDay // the last 30 days
-	System        SystemInfo
+	// RecentAnonymous lists the latest focus phases of people without an account, newest first.
+	RecentAnonymous []AnonymousSession
+	System          SystemInfo
 }

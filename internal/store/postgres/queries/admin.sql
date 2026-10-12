@@ -68,3 +68,8 @@ LIMIT sqlc.arg(max_rows)::int OFFSET sqlc.arg(skip)::int;
 
 -- name: AdminDatabaseSize :one
 SELECT pg_database_size(current_database())::bigint;
+
+-- name: AdminRecentAnonymousFocus :many
+SELECT started_at, focused_ms FROM anonymous_focus
+ORDER BY started_at DESC
+LIMIT sqlc.arg(max_rows)::int;

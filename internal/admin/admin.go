@@ -16,6 +16,9 @@ type WeatherCounters interface {
 	Stats() weather.ServiceStats
 }
 
+// recentAnonymousLimit is how many of the latest anonymous focus phases the overview lists.
+const recentAnonymousLimit = 40
+
 // Service implements ports.AdminReader.
 type Service struct {
 	repo    ports.AdminRepository
@@ -81,6 +84,10 @@ func (s *Service) Overview(ctx context.Context, tz string) (models.AdminOverview
 			day = models.AdminDay{Date: date}
 		}
 		out.Days = append(out.Days, day)
+	}
+
+	if out.RecentAnonymous, err = s.repo.RecentAnonymous(ctx, recentAnonymousLimit); err != nil {
+		return out, err
 	}
 
 	if s.live != nil {

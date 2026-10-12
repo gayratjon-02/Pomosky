@@ -78,6 +78,8 @@ type AdminRepository interface {
 	// Users lists users, newest first or most focused first, with the total count.
 	Users(ctx context.Context, mostFocused bool, limit, offset int) ([]models.AdminUser, int, error)
 	DatabaseSize(ctx context.Context) (int64, error)
+	// RecentAnonymous returns the latest focus phases of hosts without an account, newest first.
+	RecentAnonymous(ctx context.Context, limit int) ([]models.AnonymousSession, error)
 }
 
 // VisitRepository stores anonymous usage events and reads them back for the admin page.

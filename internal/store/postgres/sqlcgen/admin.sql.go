@@ -193,6 +193,40 @@ func (q *Queries) AdminNewUsersSince(ctx context.Context, createdAt time.Time) (
 	return column_1, err
 }
 
+const adminRecentAnonymousFocus = `-- name: AdminRecentAnonymousFocus :many
+SELECT started_at, focused_ms FROM anonymous_focus
+ORDER BY started_at DESC
+LIMIT $1::int
+`
+
+type AdminRecentAnonymousFocusRow struct {
+	StartedAt time.Time
+	FocusedMs int64
+}
+
+func (q *Queries) AdminRecentAnonymousFocus(ctx context.Context, maxRows int32) ([]AdminRecentAnonymousFocusRow, error) {
+	rows, err := q.db.QueryContext(ctx, adminRecentAnonymousFocus, maxRows)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AdminRecentAnonymousFocusRow
+	for rows.Next() {
+		var i AdminRecentAnonymousFocusRow
+		if err := rows.Scan(&i.StartedAt, &i.FocusedMs); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const adminTotals = `-- name: AdminTotals :one
 
 SELECT

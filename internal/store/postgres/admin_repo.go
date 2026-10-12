@@ -121,6 +121,18 @@ func adminUser(email, provider, nickname, avatar string, joined time.Time, show 
 	return u
 }
 
+func (r *AdminRepo) RecentAnonymous(ctx context.Context, limit int) ([]models.AnonymousSession, error) {
+	rows, err := r.db.q.AdminRecentAnonymousFocus(ctx, int32(limit))
+	if err != nil {
+		return nil, mapErr(err)
+	}
+	out := make([]models.AnonymousSession, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, models.AnonymousSession{StartedAt: row.StartedAt, Focused: time.Duration(row.FocusedMs) * time.Millisecond})
+	}
+	return out, nil
+}
+
 func (r *AdminRepo) DatabaseSize(ctx context.Context) (int64, error) {
 	n, err := r.db.q.AdminDatabaseSize(ctx)
 	return n, mapErr(err)

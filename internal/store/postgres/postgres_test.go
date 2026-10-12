@@ -334,6 +334,15 @@ func TestAdminQueries(t *testing.T) {
 	_ = focus.Create(ctx, models.FocusSession{RoomID: "adminrmb", StartedAt: now.Add(-3 * time.Hour), EndedAt: now, Focused: 10 * time.Minute})
 	_ = focus.CreateAnonymous(ctx, now.Add(-time.Hour), 30*time.Minute)
 
+	_ = focus.CreateAnonymous(ctx, now.Add(-5*time.Minute), 7*time.Minute)
+	recent, err := admin.RecentAnonymous(ctx, 1)
+	if err != nil || len(recent) != 1 || recent[0].Focused != 7*time.Minute {
+		t.Fatalf("recent anonymous (newest first, limited): %+v %v", recent, err)
+	}
+	if _, err := db.SQL().Exec("DELETE FROM anonymous_focus WHERE focused_ms = $1", (7 * time.Minute).Milliseconds()); err != nil {
+		t.Fatal(err)
+	}
+
 	tot, err := admin.Totals(ctx)
 	if err != nil || tot.Users != 2 || tot.Rooms != 2 || tot.RegisteredSeconds != 4200 || tot.RegisteredSessions != 3 || tot.AnonymousSeconds != 1800 || tot.AnonymousSessions != 1 || tot.HiddenUsers != 1 {
 		t.Fatalf("totals: %+v %v", tot, err)
