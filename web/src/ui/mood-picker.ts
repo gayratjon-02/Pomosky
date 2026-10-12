@@ -59,10 +59,11 @@ export function initMoodPicker(): void {
     btn.append(swatch, text);
     btn.addEventListener("click", () => {
       setMood(mood.id);
+      menu.open = false; // the choice is made: close the panel
       // The first time someone picks a mood, its sound starts too (this click lets the browser play it).
       if (mood.id !== "live" && ambienceUnset()) {
         setAmbience(true);
-        toast(t("Mood sound is on. Switch it off at the top of this panel."));
+        toast(t("Mood sound is on. You can switch it off in the mood menu."));
       }
     });
     panel.appendChild(btn);
@@ -78,7 +79,8 @@ export function initMoodPicker(): void {
   onMoodChange(paint);
 
   document.addEventListener("click", (e) => {
-    if (menu.open && !menu.contains(e.target as Node)) menu.open = false;
+    // A tap outside the panel or on the dimmed backdrop (which belongs to the menu itself) closes it.
+    if (menu.open && (!menu.contains(e.target as Node) || e.target === menu)) menu.open = false;
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && menu.open) {

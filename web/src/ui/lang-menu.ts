@@ -26,7 +26,7 @@ export function initLangMenu(): void {
   });
 
   document.addEventListener("click", (e) => {
-    if (menu.open && !menu.contains(e.target as Node)) menu.open = false;
+    if (menu.open && (!menu.contains(e.target as Node) || e.target === menu)) menu.open = false;
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && menu.open) {
