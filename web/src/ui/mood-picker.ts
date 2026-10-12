@@ -1,4 +1,6 @@
 import { css } from "../sky/color";
+import { ambienceUnset, ambienceWanted, onAmbienceChange, setAmbience } from "./ambience";
+import { toast } from "./toast";
 import { overcastOf } from "../sky/engine";
 import { MOODS, currentMood, onMoodChange, setMood, type Mood } from "../sky/moods";
 import { skyGradient } from "../sky/palette";
@@ -22,6 +24,19 @@ export function initMoodPicker(): void {
   if (!menu || !panel) return;
   const label = document.getElementById("mood-btn-name");
 
+  // A switch for the mood's sound sits at the top of the panel.
+  const sound = document.createElement("button");
+  sound.type = "button";
+  sound.className = "mood-sound";
+  sound.addEventListener("click", () => setAmbience(!ambienceWanted()));
+  panel.appendChild(sound);
+  const paintSound = () => {
+    sound.textContent = ambienceWanted() ? "Mood sound: on" : "Mood sound: off";
+    sound.setAttribute("aria-pressed", String(ambienceWanted()));
+  };
+  paintSound();
+  onAmbienceChange(paintSound);
+
   const buttons = new Map<string, HTMLButtonElement>();
   for (const mood of MOODS) {
     const btn = document.createElement("button");
@@ -41,7 +56,14 @@ export function initMoodPicker(): void {
     text.append(name, hint);
 
     btn.append(swatch, text);
-    btn.addEventListener("click", () => setMood(mood.id));
+    btn.addEventListener("click", () => {
+      setMood(mood.id);
+      // The first time someone picks a mood, its sound starts too (this click lets the browser play it).
+      if (mood.id !== "live" && ambienceUnset()) {
+        setAmbience(true);
+        toast("Mood sound is on. Switch it off at the top of this panel.");
+      }
+    });
     panel.appendChild(btn);
     buttons.set(mood.id, btn);
   }
