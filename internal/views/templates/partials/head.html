@@ -12,6 +12,7 @@
 <meta name="twitter:card" content="{{if .OGImage}}summary_large_image{{else}}summary{{end}}">
 <meta name="twitter:title" content="{{if .Title}}{{.Title}}{{else}}Pomosky{{end}}">
 {{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">{{end}}
+{{if .CSRFToken}}<meta name="csrf-token" content="{{.CSRFToken}}">{{end}}
 <meta name="theme-color" content="#0b1020">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
