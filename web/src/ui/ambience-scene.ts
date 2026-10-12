@@ -35,11 +35,11 @@ export function sceneFor(i: SkyInputs): Scene {
   const windN = clamp01(i.windSpeedKmh / 45);
   const east = clamp01((200 - i.sunAzimuthDeg) / 60); // 1 in the morning sky, 0 in the evening one
 
-  const birdTime = smoothstep(-9, -3, e) * (1 - 0.5 * smoothstep(15, 45, e)) * (0.25 + 0.75 * east);
+  const birdTime = smoothstep(-9, -3, e) * (1 - 0.5 * smoothstep(15, 45, e)) * (0.5 + 0.5 * east);
   const moonUp = i.moonElevationDeg > 0 ? 1 : 0.4;
 
   return {
-    wind: clamp01((0.1 + 0.75 * windN + 0.1 * cover) * (1 - 0.55 * snowing)),
+    wind: clamp01((0.04 + 0.8 * windN + 0.08 * cover) * (1 - 0.55 * snowing)),
     rain: rainy * (0.3 + 0.7 * wet),
     drips: rainy * (0.55 - 0.3 * wet),
     hush: snowing * (0.4 + 0.6 * snowy),

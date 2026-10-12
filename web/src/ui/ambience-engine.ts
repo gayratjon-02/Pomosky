@@ -109,9 +109,9 @@ export class AmbienceEngine {
     const droneTone = this.filter("lowpass", 320);
     droneTone.connect(drone);
     for (const [hz, amp] of [
-      [55, 1],
-      [82.4, 0.6],
-      [110, 0.35],
+      [130.8, 1],
+      [196, 0.7],
+      [261.6, 0.4],
     ] as const) {
       const osc = c.createOscillator();
       const g = c.createGain();
@@ -134,10 +134,10 @@ export class AmbienceEngine {
   }
 
   private static readonly BED_GAIN: Partial<Record<keyof Scene, number>> = {
-    wind: 0.4,
+    wind: 0.3,
     rain: 0.06,
     hush: 0.22,
-    drone: 0.022,
+    drone: 0.03,
     thunder: 0.12,
   };
 
@@ -200,7 +200,7 @@ export class AmbienceEngine {
       osc.frequency.setValueAtTime(f0, at);
       osc.frequency.exponentialRampToValueAtTime(f0 * (rising ? 1.35 : 0.72), at + dur);
       g.gain.setValueAtTime(0.0001, at);
-      g.gain.exponentialRampToValueAtTime(0.07 * lv + 0.02, at + dur * 0.35);
+      g.gain.exponentialRampToValueAtTime(0.16 * lv + 0.04, at + dur * 0.35);
       g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
       osc.connect(g).connect(pan);
       osc.start(at);
@@ -216,7 +216,7 @@ export class AmbienceEngine {
     osc.frequency.value = 4200 + this.rand() * 1200;
     g.gain.value = 0.0001;
     const pulses = 3 + Math.floor(this.rand() * 3);
-    const peak = (0.012 + this.rand() * 0.01) * (0.4 + lv);
+    const peak = (0.03 + this.rand() * 0.02) * (0.4 + lv);
     for (let p = 0; p < pulses; p++) {
       const at = t + p * 0.075;
       g.gain.setValueAtTime(0.0001, at);
@@ -236,7 +236,7 @@ export class AmbienceEngine {
     osc.frequency.setValueAtTime(f, t);
     osc.frequency.exponentialRampToValueAtTime(f * 0.55, t + 0.1);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime((0.02 + this.rand() * 0.02) * (0.4 + lv), t + 0.004);
+    g.gain.exponentialRampToValueAtTime((0.04 + this.rand() * 0.035) * (0.4 + lv), t + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
     osc.connect(g).connect(pan);
     osc.start(t);
@@ -254,7 +254,7 @@ export class AmbienceEngine {
       const g = this.ctx.createGain();
       osc.frequency.value = f * mult;
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.05 * lv * amp + 0.0002, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.1 * lv * amp + 0.0002, t + 0.006);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
       osc.connect(g).connect(pan);
       osc.start(t);
@@ -282,7 +282,7 @@ export class AmbienceEngine {
         osc.frequency.setValueAtTime(OWL_HZ * mult * 1.06, at);
         osc.frequency.linearRampToValueAtTime(OWL_HZ * mult * 0.96, at + len);
         g.gain.setValueAtTime(0.0001, at);
-        g.gain.linearRampToValueAtTime(0.07 * lv * amp + 0.0002, at + 0.07);
+        g.gain.linearRampToValueAtTime(0.13 * lv * amp + 0.0002, at + 0.07);
         g.gain.linearRampToValueAtTime(0.0001, at + len + 0.08);
         osc.connect(g).connect(tone);
         osc.start(at);
