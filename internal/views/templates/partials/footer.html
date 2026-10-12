@@ -1,10 +1,10 @@
 {{define "footer"}}
 <footer class="site-footer">
-  <small>&copy; {{year}} Pomosky. Work together under a live sky.</small>
-  <nav class="row" aria-label="Footer">
-    <button type="button" class="btn btn-ghost btn-sm theme-toggle" id="theme-toggle" aria-pressed="false">Dark theme</button>
-    <a href="/privacy">Privacy</a>
-    {{if .User}}<a href="/account">Account</a>{{else}}<a href="/login">Log in</a>{{end}}
+  <small>&copy; {{year}} {{$.T "Pomosky. Work together under a live sky."}}</small>
+  <nav class="row" aria-label="{{$.T "Footer"}}">
+    <button type="button" class="btn btn-ghost btn-sm theme-toggle" id="theme-toggle" aria-pressed="false">{{$.T "Dark theme"}}</button>
+    <a href="/privacy">{{$.T "Privacy"}}</a>
+    {{if .User}}<a href="/account">{{$.T "Account"}}</a>{{else}}<a href="/login">{{$.T "Log in"}}</a>{{end}}
   </nav>
 </footer>
 {{end}}

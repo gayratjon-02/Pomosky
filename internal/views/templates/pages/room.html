@@ -5,7 +5,7 @@
 
 <section class="room-stage">
   <div class="room-top">
-    <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">Connecting</span></span>
+    <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">{{$.T "Connecting"}}</span></span>
     {{template "presence" .}}
     {{template "weather" .}}
   </div>
@@ -15,18 +15,18 @@
   <div class="room-bottom">
     {{template "reactions" .}}
     <div class="row row-wrap room-actions">
-      <button type="button" class="btn btn-ghost btn-sm" id="copy-link" data-url="{{.Data.ShareURL}}">Copy link</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">Sound on</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="notify-toggle" aria-pressed="false">Alerts off</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="music-toggle" aria-pressed="false">Music off</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="ambience-toggle" aria-pressed="false">Ambience off</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="fullscreen">Fullscreen</button>
-      <a class="btn btn-ghost btn-sm" href="?mode=record">Record mode</a>
+      <button type="button" class="btn btn-ghost btn-sm" id="copy-link" data-url="{{.Data.ShareURL}}">{{$.T "Copy link"}}</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">{{$.T "Sound on"}}</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="notify-toggle" aria-pressed="false">{{$.T "Alerts off"}}</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="music-toggle" aria-pressed="false">{{$.T "Music off"}}</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="ambience-toggle" aria-pressed="false">{{$.T "Ambience off"}}</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="fullscreen">{{$.T "Fullscreen"}}</button>
+      <a class="btn btn-ghost btn-sm" href="?mode=record">{{$.T "Record mode"}}</a>
     </div>
     <form class="nick glass" id="nick-form" autocomplete="off">
-      <label class="sr-only" for="nick">Your name (optional)</label>
-      <input class="input" id="nick" maxlength="24" placeholder="Your name (optional)">
-      <button class="btn btn-subtle btn-sm" type="submit">Set</button>
+      <label class="sr-only" for="nick">{{$.T "Your name (optional)"}}</label>
+      <input class="input" id="nick" maxlength="24" placeholder="{{$.T "Your name (optional)"}}">
+      <button class="btn btn-subtle btn-sm" type="submit">{{$.T "Set"}}</button>
     </form>
     {{template "attribution" .}}
   </div>

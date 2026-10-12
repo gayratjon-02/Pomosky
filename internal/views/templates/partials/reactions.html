@@ -1,8 +1,8 @@
 {{define "reactions"}}
-<div class="reactions glass" id="reactions" role="group" aria-label="Send a reaction">
-  <button type="button" data-reaction="clap" aria-label="Clap">👏<small id="count-clap"></small></button>
-  <button type="button" data-reaction="coffee" aria-label="Coffee">☕<small id="count-coffee"></small></button>
-  <button type="button" data-reaction="fire" aria-label="Fire">🔥<small id="count-fire"></small></button>
-  <button type="button" data-reaction="heart" aria-label="Heart">❤️<small id="count-heart"></small></button>
+<div class="reactions glass" id="reactions" role="group" aria-label="{{$.T "Send a reaction"}}">
+  <button type="button" data-reaction="clap" aria-label="{{$.T "Clap"}}">👏<small id="count-clap"></small></button>
+  <button type="button" data-reaction="coffee" aria-label="{{$.T "Coffee"}}">☕<small id="count-coffee"></small></button>
+  <button type="button" data-reaction="fire" aria-label="{{$.T "Fire"}}">🔥<small id="count-fire"></small></button>
+  <button type="button" data-reaction="heart" aria-label="{{$.T "Heart"}}">❤️<small id="count-heart"></small></button>
 </div>
 {{end}}

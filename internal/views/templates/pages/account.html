@@ -6,10 +6,10 @@
   {{if .Data.Preview}}
   <header class="acct-head glass preview-head">
     <div class="acct-who">
-      <h1>Your focus time, month by month</h1>
-      <p class="muted">Host a room while logged in and Pomosky counts every focused minute for you. The numbers below are an example.</p>
+      <h1>{{$.T "Your focus time, month by month"}}</h1>
+      <p class="muted">{{$.T "Host a room while logged in and Pomosky counts every focused minute for you. The numbers below are an example."}}</p>
     </div>
-    <a class="btn btn-primary" href="/login">Log in to see yours</a>
+    <a class="btn btn-primary" href="/login">{{$.T "Log in to see yours"}}</a>
   </header>
   {{else}}
   <header class="acct-head glass">
@@ -20,7 +20,7 @@
     </div>
     <form method="post" action="/logout">
       <input type="hidden" name="csrf" value="{{.CSRFToken}}">
-      <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
+      <button class="btn btn-ghost btn-sm" type="submit">{{$.T "Log out"}}</button>
     </form>
   </header>
   {{end}}
@@ -29,134 +29,134 @@
 
   <section class="acct-section{{if .Data.Preview}} is-preview{{end}}" aria-labelledby="stats-title">
     {{if .Data.Preview}}
-    <div class="preview-gate glass" role="region" aria-label="Log in to see your statistics">
-      <strong>Example data</strong>
-      <p>Log in to see how long you really focused this month. Logging in is optional and free.</p>
-      <a class="btn btn-primary" href="/login">Log in</a>
-      <a class="btn btn-ghost" href="/">Back to the start</a>
+    <div class="preview-gate glass" role="region" aria-label="{{$.T "Log in to see your statistics"}}">
+      <strong>{{$.T "Example data"}}</strong>
+      <p>{{$.T "Log in to see how long you really focused this month. Logging in is optional and free."}}</p>
+      <a class="btn btn-primary" href="/login">{{$.T "Log in"}}</a>
+      <a class="btn btn-ghost" href="/">{{$.T "Back to the start"}}</a>
     </div>
     {{end}}
     <div class="stats-body">
     <div class="month-nav">
-      <h2 id="stats-title">Focus time</h2>
+      <h2 id="stats-title">{{$.T "Focus time"}}</h2>
       <div class="month-switch glass">
-        <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-prev" aria-label="Previous month">&#8249;</button>
-        <span id="month-label" class="month-label" aria-live="polite">Loading</span>
-        <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-next" aria-label="Next month">&#8250;</button>
+        <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-prev" aria-label="{{$.T "Previous month"}}">&#8249;</button>
+        <span id="month-label" class="month-label" aria-live="polite">{{$.T "Loading"}}</span>
+        <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-next" aria-label="{{$.T "Next month"}}">&#8250;</button>
       </div>
     </div>
 
     <div class="cards">
       <article class="glass card-stat">
-        <span class="card-k">Total focus</span>
+        <span class="card-k">{{$.T "Total focus"}}</span>
         <strong class="card-v" id="s-total">-</strong>
         <span class="card-sub" id="s-compare"></span>
       </article>
       <article class="glass card-stat">
-        <span class="card-k">Sessions</span>
+        <span class="card-k">{{$.T "Sessions"}}</span>
         <strong class="card-v" id="s-sessions">-</strong>
         <span class="card-sub" id="s-avg"></span>
       </article>
       <article class="glass card-stat">
-        <span class="card-k">Active days</span>
+        <span class="card-k">{{$.T "Active days"}}</span>
         <strong class="card-v" id="s-days">-</strong>
         <span class="card-sub" id="s-best"></span>
       </article>
       <article class="glass card-stat">
-        <span class="card-k">Current streak</span>
+        <span class="card-k">{{$.T "Current streak"}}</span>
         <strong class="card-v" id="s-streak">-</strong>
-        <span class="card-sub">days in a row</span>
+        <span class="card-sub">{{$.T "days in a row"}}</span>
       </article>
     </div>
 
     <div class="charts">
       <article class="glass chart-card">
-        <h3>Calendar</h3>
-        <div class="weekdays" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <h3>{{$.T "Calendar"}}</h3>
+        <div class="weekdays" aria-hidden="true"><span>{{$.T "Mon"}}</span><span>{{$.T "Tue"}}</span><span>{{$.T "Wed"}}</span><span>{{$.T "Thu"}}</span><span>{{$.T "Fri"}}</span><span>{{$.T "Sat"}}</span><span>{{$.T "Sun"}}</span></div>
         <div class="heatmap" id="heatmap" role="list"></div>
-        <div class="legend" aria-hidden="true"><span>Less</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>More</span></div>
+        <div class="legend" aria-hidden="true"><span>{{$.T "Less"}}</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>{{$.T "More"}}</span></div>
       </article>
       <article class="glass chart-card">
-        <h3>Day by day</h3>
-        <div class="bars" id="bars" role="img" aria-label="Focus time per day"></div>
+        <h3>{{$.T "Day by day"}}</h3>
+        <div class="bars" id="bars" role="img" aria-label="{{$.T "Focus time per day"}}"></div>
         <div class="day-card" aria-live="polite">
-          <span class="day-title" id="day-title">Pick a day</span>
+          <span class="day-title" id="day-title">{{$.T "Pick a day"}}</span>
           <strong class="day-time" id="day-time">-</strong>
           <span class="day-meta"><span id="day-sessions"></span> <span id="day-share"></span></span>
         </div>
       </article>
     </div>
-    <p class="muted fine" id="stats-error" hidden>Could not load your statistics. Please try again.</p>
+    <p class="muted fine" id="stats-error" hidden>{{$.T "Could not load your statistics. Please try again."}}</p>
     </div>
   </section>
 
 
   <section class="acct-section" id="leaderboard" aria-labelledby="board-title">
     <div class="month-nav">
-      <h2 id="board-title">Leaderboard</h2>
-      <div class="tabs glass" id="board-tabs" role="tablist" aria-label="Period">
-        <button type="button" role="tab" data-period="today" aria-selected="true">Today</button>
-        <button type="button" role="tab" data-period="week" aria-selected="false" tabindex="-1">Week</button>
-        <button type="button" role="tab" data-period="month" aria-selected="false" tabindex="-1">Month</button>
-        <button type="button" role="tab" data-period="all" aria-selected="false" tabindex="-1">All time</button>
+      <h2 id="board-title">{{$.T "Leaderboard"}}</h2>
+      <div class="tabs glass" id="board-tabs" role="tablist" aria-label="{{$.T "Period"}}">
+        <button type="button" role="tab" data-period="today" aria-selected="true">{{$.T "Today"}}</button>
+        <button type="button" role="tab" data-period="week" aria-selected="false" tabindex="-1">{{$.T "Week"}}</button>
+        <button type="button" role="tab" data-period="month" aria-selected="false" tabindex="-1">{{$.T "Month"}}</button>
+        <button type="button" role="tab" data-period="all" aria-selected="false" tabindex="-1">{{$.T "All time"}}</button>
       </div>
     </div>
     <div class="glass board-card">
       <ol class="board" id="board-list" aria-live="polite"></ol>
-      <p class="muted board-empty" id="board-empty" hidden>Nobody here yet. Host a room while logged in and be the first.</p>
+      <p class="muted board-empty" id="board-empty" hidden>{{$.T "Nobody here yet. Host a room while logged in and be the first."}}</p>
     </div>
   </section>
 
   <section class="acct-section" id="community" aria-labelledby="community-title">
     <div class="month-nav">
-      <h2 id="community-title">Everyone on Pomosky</h2>
-      <span class="muted fine">Focus time of all hosts, logged in or not</span>
+      <h2 id="community-title">{{$.T "Everyone on Pomosky"}}</h2>
+      <span class="muted fine">{{$.T "Focus time of all hosts, logged in or not"}}</span>
     </div>
     <div class="cards">
-      <article class="glass card-stat"><span class="card-k">Today</span><strong class="card-v" id="c-today">-</strong><span class="card-sub" id="c-today-n"></span></article>
-      <article class="glass card-stat"><span class="card-k">Last 7 days</span><strong class="card-v" id="c-week">-</strong><span class="card-sub" id="c-week-n"></span></article>
-      <article class="glass card-stat"><span class="card-k">This month</span><strong class="card-v" id="c-month">-</strong><span class="card-sub" id="c-month-n"></span></article>
-      <article class="glass card-stat"><span class="card-k">All time</span><strong class="card-v" id="c-all">-</strong><span class="card-sub" id="c-all-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">{{$.T "Today"}}</span><strong class="card-v" id="c-today">-</strong><span class="card-sub" id="c-today-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">{{$.T "Last 7 days"}}</span><strong class="card-v" id="c-week">-</strong><span class="card-sub" id="c-week-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">{{$.T "This month"}}</span><strong class="card-v" id="c-month">-</strong><span class="card-sub" id="c-month-n"></span></article>
+      <article class="glass card-stat"><span class="card-k">{{$.T "All time"}}</span><strong class="card-v" id="c-all">-</strong><span class="card-sub" id="c-all-n"></span></article>
     </div>
     <article class="glass chart-card">
-      <h3>Last 30 days</h3>
-      <div class="bars" id="c-bars" role="img" aria-label="Focus time of everyone, per day"></div>
-      <p class="muted fine" id="c-detail">Hover or tap a day to see it.</p>
+      <h3>{{$.T "Last 30 days"}}</h3>
+      <div class="bars" id="c-bars" role="img" aria-label="{{$.T "Focus time of everyone, per day"}}"></div>
+      <p class="muted fine" id="c-detail">{{$.T "Hover or tap a day to see it."}}</p>
     </article>
   </section>
 
   {{if not .Data.Preview}}
   <section class="acct-section glass settings" id="profile" aria-labelledby="profile-title">
-    <h2 id="profile-title">Your public profile</h2>
-    <p class="muted">Your name and picture are shown on the leaderboard. Your email never is.</p>
+    <h2 id="profile-title">{{$.T "Your public profile"}}</h2>
+    <p class="muted">{{$.T "Your name and picture are shown on the leaderboard. Your email never is."}}</p>
     <form method="post" action="/account/nickname" class="nick-form">
       <input type="hidden" name="csrf" value="{{.CSRFToken}}">
       <div class="field">
-        <label for="nickname">Name</label>
+        <label for="nickname">{{$.T "Name"}}</label>
         <input class="input" id="nickname" name="nickname" value="{{.User.Nickname}}" minlength="2" maxlength="24" required autocomplete="nickname">
       </div>
-      <button class="btn btn-primary" type="submit">Save</button>
+      <button class="btn btn-primary" type="submit">{{$.T "Save"}}</button>
     </form>
     <form method="post" action="/account/leaderboard" class="switch-form">
       <input type="hidden" name="csrf" value="{{.CSRFToken}}">
       <input type="hidden" name="show" value="{{if .User.ShowOnLeaderboard}}0{{else}}1{{end}}">
-      <p>{{if .User.ShowOnLeaderboard}}You are <strong>on</strong> the leaderboard.{{else}}You are <strong>hidden</strong> from the leaderboard.{{end}}</p>
-      <button class="btn btn-ghost" type="submit">{{if .User.ShowOnLeaderboard}}Hide me{{else}}Show me{{end}}</button>
+      <p>{{if .User.ShowOnLeaderboard}}{{$.H "You are <strong>on</strong> the leaderboard."}}{{else}}{{$.H "You are <strong>hidden</strong> from the leaderboard."}}{{end}}</p>
+      <button class="btn btn-ghost" type="submit">{{if .User.ShowOnLeaderboard}}{{$.T "Hide me"}}{{else}}{{$.T "Show me"}}{{end}}</button>
     </form>
   </section>
   {{end}}
 
   {{if not .Data.Preview}}
   <section class="acct-section glass danger-zone">
-    <h2>Your data</h2>
-    <p class="muted">Your account stores your sign-in identity, nickname and focus sessions. You can delete all of it at any time.</p>
+    <h2>{{$.T "Your data"}}</h2>
+    <p class="muted">{{$.T "Your account stores your sign-in identity, nickname and focus sessions. You can delete all of it at any time."}}</p>
     <details class="delete-box">
-      <summary class="btn btn-danger btn-sm">Delete my account</summary>
+      <summary class="btn btn-danger btn-sm">{{$.T "Delete my account"}}</summary>
       <form method="post" action="/account/delete" class="stack">
         <input type="hidden" name="csrf" value="{{.CSRFToken}}">
-        <label class="muted" for="confirm">Type <strong>delete</strong> to confirm. This cannot be undone.</label>
+        <label class="muted" for="confirm">{{$.H "Type <strong>delete</strong> to confirm. This cannot be undone."}}</label>
         <input class="input" id="confirm" name="confirm" autocomplete="off" required pattern="delete">
-        <button class="btn btn-danger" type="submit">Delete everything</button>
+        <button class="btn btn-danger" type="submit">{{$.T "Delete everything"}}</button>
       </form>
     </details>
   </section>

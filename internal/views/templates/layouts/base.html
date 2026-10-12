@@ -1,5 +1,5 @@
 {{define "base"}}<!doctype html>
-<html lang="en"{{if .Mood}} data-mood="{{.Mood}}"{{end}}>
+<html lang="{{.Lang}}"{{if .Mood}} data-mood="{{.Mood}}"{{end}}>
 <head>
 {{template "head" .}}
 </head>

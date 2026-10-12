@@ -5,9 +5,9 @@
 
 <section class="record-frame">
   <div class="record-top">
-    <span class="chip presence"><span class="dot dot-live" id="conn-dot"></span><strong id="viewers">0</strong> <span id="viewers-label">people here</span></span>
+    <span class="chip presence"><span class="dot dot-live" id="conn-dot"></span><strong id="viewers">0</strong> <span id="viewers-label">{{$.T "people here"}}</span></span>
     {{template "weather" .}}
-    <span class="sr-only" id="conn-text">Connecting</span>
+    <span class="sr-only" id="conn-text">{{$.T "Connecting"}}</span>
   </div>
 
   {{template "timer" .}}
@@ -15,7 +15,7 @@
   <div class="record-bottom">
     <div class="record-qr" id="qr"></div>
     <div class="record-join">
-      <span class="record-join-title">Work with me</span>
+      <span class="record-join-title">{{$.T "Work with me"}}</span>
       <span class="record-join-url" id="join-url" data-url="{{.Data.ShareURL}}">{{.Data.ShareURL}}</span>
     </div>
   </div>

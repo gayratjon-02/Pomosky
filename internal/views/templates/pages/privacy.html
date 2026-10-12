@@ -1,48 +1,50 @@
 {{define "bodyclass"}}plain{{end}}
 {{define "content"}}
 <article class="prose container-narrow">
-  <h1>Privacy</h1>
-  <p>Pomosky is built to need as little about you as possible. This page says exactly what is stored.</p>
+  <h1>{{$.H "Privacy"}}</h1>
+  <p>{{$.H "Pomosky is built to need as little about you as possible. This page says exactly what is stored."}}</p>
 
-  <h2>If you only watch or host a room</h2>
+  <h2>{{$.H "If you only watch or host a room"}}</h2>
   <ul>
-    <li>No account, no cookies for tracking, no advertising.</li>
-    <li>Viewers are never asked for their location.</li>
-    <li>A room lives in memory while it is active and disappears shortly after the host leaves.</li>
-    <li>The host's place is stored rounded to about one kilometre, only to draw the sky and weather.</li>
-    <li>The host key stays in the host's browser. The server only keeps a hash of it.</li>
-    <li>There is no free-text chat. Reactions are simple counters.</li>
-    <li>For the community totals on the statistics page, a room hosted without an account leaves only the time a focus phase started and how long it lasted. No room link, no name, no location and no IP address is stored with it.</li>
+    <li>{{$.H "No account, no cookies for tracking, no advertising."}}</li>
+    <li>{{$.H "Viewers are never asked for their location."}}</li>
+    <li>{{$.H "A room lives in memory while it is active and disappears shortly after the host leaves."}}</li>
+    <li>{{$.H "The host's place is stored rounded to about one kilometre, only to draw the sky and weather."}}</li>
+    <li>{{$.H "The host key stays in the host's browser. The server only keeps a hash of it."}}</li>
+    <li>{{$.H "There is no free-text chat. Reactions are simple counters."}}</li>
+    <li>{{$.H "For the community totals on the statistics page, a room hosted without an account leaves only the time a focus phase started and how long it lasted. No room link, no name, no location and no IP address is stored with it."}}</li>
   </ul>
 
-  <h2>If you log in (optional)</h2>
+  <h2>{{$.H "If you log in (optional)"}}</h2>
   <ul>
-    <li>We store your sign-in identity (Google account id or your email), a nickname and your focus statistics: the start and end time of each focus session you hosted.</li>
-    <li>A session cookie keeps you logged in. It is HTTP-only and not used for tracking.</li>
-    <li>Your detailed statistics are visible only to you, on your account page.</li>
-    <li>Your public name and profile picture, and the total time you focused, appear on the public leaderboard. Your email address is never shown. You can change the name or hide yourself from the leaderboard at any time on your account page.</li>
+    <li>{{$.H "We store your sign-in identity (Google account id or your email), a nickname and your focus statistics: the start and end time of each focus session you hosted."}}</li>
+    <li>{{$.H "A session cookie keeps you logged in. It is HTTP-only and not used for tracking."}}</li>
+    <li>{{$.H "Your detailed statistics are visible only to you, on your account page."}}</li>
+    <li>{{$.H "Your public name and profile picture, and the total time you focused, appear on the public leaderboard. Your email address is never shown. You can change the name or hide yourself from the leaderboard at any time on your account page."}}</li>
   </ul>
 
-  <h2>Deleting your data</h2>
-  <p>Logged-in users can delete their account and all of its statistics from the account page. Deletion is permanent.</p>
+  <h2>{{$.H "Deleting your data"}}</h2>
+  <p>{{$.H "Logged-in users can delete their account and all of its statistics from the account page. Deletion is permanent."}}</p>
 
-  <h2>Your mood</h2>
-  <p>When you pick a mood (a ready-made look for the sky and colours), the choice is saved in a small cookie called <code>pomosky_mood</code> for a year, so it is back on your next visit. It holds only the name of the mood, is not used for tracking and is never combined with anything else.</p>
+  <h2>{{$.H "Your mood"}}</h2>
+  <p>{{$.H "When you pick a mood (a ready-made look for the sky and colours), the choice is saved in a small cookie called <code>pomosky_mood</code> for a year, so it is back on your next visit. It holds only the name of the mood, is not used for tracking and is never combined with anything else."}}</p>
 
-  <h2>Phase alerts</h2>
-  <p>If you turn on alerts, your browser gives us a push address (a web address that belongs to your browser's push service, for example Google or Apple) and keys to encrypt messages to it. We keep them in memory only, next to the room you are in, and use them to send you one short message when a focus or break ends. They are never written to the database and are dropped when the room closes or the server restarts. You can turn alerts off at any time with the Alerts button, or in your browser settings.</p>
+  <p>{{$.H "Your language choice is remembered the same way, in a cookie called <code>pomosky_lang</code>."}}</p>
 
-  <h2>Visit statistics</h2>
-  <p>To learn how many people use Pomosky and where they come from, we count visits ourselves. We use no cookies and no third-party tracker, and nothing is sent to an advertising or analytics company. For each page view we store: the page (without any room link), the site or campaign that brought you (for example Instagram), your device type, operating system and browser, and your country (looked up from your address, which is not stored). IP-to-country data by <a href="https://db-ip.com" target="_blank" rel="noopener">DB-IP.com</a> (CC BY 4.0).</p>
+  <h2>{{$.H "Phase alerts"}}</h2>
+  <p>{{$.H "If you turn on alerts, your browser gives us a push address (a web address that belongs to your browser's push service, for example Google or Apple) and keys to encrypt messages to it. We keep them in memory only, next to the room you are in, and use them to send you one short message when a focus or break ends. They are never written to the database and are dropped when the room closes or the server restarts. You can turn alerts off at any time with the Alerts button, or in your browser settings."}}</p>
+
+  <h2>{{$.H "Visit statistics"}}</h2>
+  <p>{{$.H "To learn how many people use Pomosky and where they come from, we count visits ourselves. We use no cookies and no third-party tracker, and nothing is sent to an advertising or analytics company. For each page view we store: the page (without any room link), the site or campaign that brought you (for example Instagram), your device type, operating system and browser, and your country (looked up from your address, which is not stored). IP-to-country data by <a href=\"https://db-ip.com\" target=\"_blank\" rel=\"noopener\">DB-IP.com</a> (CC BY 4.0)."}}</p>
   <ul>
-    <li>We never store your IP address. To count a visitor once, we keep a hash of your address and browser that changes every day, so you cannot be recognised from one day to the next.</li>
-    <li>Visitors who send "Do Not Track" or "Global Privacy Control", and bots, are not counted.</li>
-    <li>These numbers are shown only to the operator of the site, as totals.</li>
+    <li>{{$.H "We never store your IP address. To count a visitor once, we keep a hash of your address and browser that changes every day, so you cannot be recognised from one day to the next."}}</li>
+    <li>{{$.H "Visitors who send \"Do Not Track\" or \"Global Privacy Control\", and bots, are not counted."}}</li>
+    <li>{{$.H "These numbers are shown only to the operator of the site, as totals."}}</li>
   </ul>
 
-  <h2>Technical logs</h2>
-  <p>The server keeps short-lived request logs (path, status, time) for reliability and abuse prevention. They are not linked to profiles.</p>
+  <h2>{{$.H "Technical logs"}}</h2>
+  <p>{{$.H "The server keeps short-lived request logs (path, status, time) for reliability and abuse prevention. They are not linked to profiles."}}</p>
 
-  <p class="muted">Questions? Use the contact address that will be listed here before launch.</p>
+  <p class="muted">{{$.H "Questions? Use the contact address that will be listed here before launch."}}</p>
 </article>
 {{end}}

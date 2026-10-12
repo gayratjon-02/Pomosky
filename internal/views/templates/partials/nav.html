@@ -1,6 +1,6 @@
 {{define "nav"}}
 <header class="site-header">
-  <a class="brand" href="/" aria-label="Pomosky home">
+  <a class="brand" href="/" aria-label="{{$.T "Pomosky home"}}">
     <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
       <defs>
         <linearGradient id="bm-sky" x1="0" y1="0" x2="0" y2="1">
@@ -14,18 +14,28 @@
     </svg>
     <span>Pomosky</span>
   </a>
-  <nav class="site-nav" aria-label="Main">
-    <a href="/account">Statistics</a>
-    <details class="mood-menu" id="mood-menu">
-      <summary class="mood-btn" aria-label="Choose a mood" title="Mood">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4c0-4.1-4-7-9-7Z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="10.5" cy="7.2" r="1.1"/><circle cx="15.2" cy="7.4" r="1.1"/></svg>
-        <span class="mood-btn-name" id="mood-btn-name">Mood</span>
+  <nav class="site-nav" aria-label="{{$.T "Main"}}">
+    <a href="/account">{{$.T "Statistics"}}</a>
+    <details class="mood-menu lang-menu" id="lang-menu">
+      <summary class="mood-btn" aria-label="{{$.T "Language"}}" title="{{$.T "Language"}}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg>
+        <span class="mood-btn-name">{{.Lang}}</span>
       </summary>
-      <div class="mood-panel glass" id="mood-panel" role="group" aria-label="Moods"></div>
+      <div class="mood-panel glass lang-panel" role="group" aria-label="{{$.T "Language"}}">
+        {{range $.Languages}}<button type="button" class="lang-option" data-lang="{{.Code}}" aria-pressed="{{.Current}}" lang="{{.Code}}">{{.Name}}</button>
+        {{end}}
+      </div>
+    </details>
+    <details class="mood-menu" id="mood-menu">
+      <summary class="mood-btn" aria-label="{{$.T "Choose a mood"}}" title="{{$.T "Mood"}}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4c0-4.1-4-7-9-7Z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="10.5" cy="7.2" r="1.1"/><circle cx="15.2" cy="7.4" r="1.1"/></svg>
+        <span class="mood-btn-name" id="mood-btn-name">{{$.T "Mood"}}</span>
+      </summary>
+      <div class="mood-panel glass" id="mood-panel" role="group" aria-label="{{$.T "Moods"}}"></div>
     </details>
     {{if .User}}
     <details class="user-menu" id="user-menu">
-      <summary class="user-menu-btn" aria-label="Account menu">
+      <summary class="user-menu-btn" aria-label="{{$.T "Account menu"}}">
         <span class="avatar avatar-sm">{{template "avatar" .User}}</span>
         <span class="user-menu-name">{{.User.Nickname}}</span>
       </summary>
@@ -34,14 +44,14 @@
           <strong>{{.User.Nickname}}</strong>
           {{if .User.Email}}<small>{{.User.Email}}</small>{{end}}
         </div>
-        <a href="/account" role="menuitem">My statistics</a>
+        <a href="/account" role="menuitem">{{$.T "My statistics"}}</a>
         <form method="post" action="/logout">
           <input type="hidden" name="csrf" value="{{.CSRFToken}}">
-          <button type="submit" role="menuitem">Log out</button>
+          <button type="submit" role="menuitem">{{$.T "Log out"}}</button>
         </form>
       </div>
     </details>
-    {{else}}<a href="/login">Log in</a>{{end}}
+    {{else}}<a href="/login">{{$.T "Log in"}}</a>{{end}}
   </nav>
 </header>
 {{end}}

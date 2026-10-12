@@ -3,96 +3,96 @@
 <canvas id="sky" class="sky-canvas" aria-hidden="true"></canvas>
 
 <section class="hero container">
-  <p class="eyebrow chip"><span class="dot dot-live"></span> Live rooms, no sign-up</p>
-  <h1 class="hero-title">Focus together<br><span class="grad">under a living sky.</span></h1>
-  <p class="hero-sub">Start a pomodoro room in one click. Everyone who opens your link sees the same timer, the same sky and the same quiet company, with the real sun, moon and weather of the host's place.</p>
+  <p class="eyebrow chip"><span class="dot dot-live"></span> {{$.T "Live rooms, no sign-up"}}</p>
+  <h1 class="hero-title">{{$.T "Focus together"}}<br><span class="grad">{{$.T "under a living sky."}}</span></h1>
+  <p class="hero-sub">{{$.T "Start a pomodoro room in one click. Everyone who opens your link sees the same timer, the same sky and the same quiet company, with the real sun, moon and weather of the host's place."}}</p>
   <form class="hero-cta" method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}">
-    <button class="btn btn-primary btn-lg" type="submit">Start a room</button>
-    <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
+    <button class="btn btn-primary btn-lg" type="submit">{{$.T "Start a room"}}</button>
+    <a class="btn btn-ghost btn-lg" href="#how">{{$.T "How it works"}}</a>
   </form>
-  <p class="hero-note muted">Free. No account needed. Viewers are never asked for their location.</p>
-  <p class="hero-count" id="community-line" hidden><strong id="community-hours"></strong> <span>focused together on Pomosky so far</span></p>
+  <p class="hero-note muted">{{$.T "Free. No account needed. Viewers are never asked for their location."}}</p>
+  <p class="hero-count" id="community-line" hidden><strong id="community-hours"></strong> <span>{{$.T "focused together on Pomosky so far"}}</span></p>
 </section>
 
 <section class="section container" id="how">
-  <h2 class="section-title">Three steps, no friction</h2>
+  <h2 class="section-title">{{$.T "Three steps, no friction"}}</h2>
   <ol class="steps">
     <li class="glass step">
       <span class="step-n">1</span>
-      <h3>Start a room</h3>
-      <p>One click creates a private link. You get host controls; nobody else does.</p>
+      <h3>{{$.T "Start a room"}}</h3>
+      <p>{{$.T "One click creates a private link. You get host controls; nobody else does."}}</p>
     </li>
     <li class="glass step">
       <span class="step-n">2</span>
-      <h3>Share the link</h3>
-      <p>Friends, a study group, your livestream. Viewers join instantly, with no login.</p>
+      <h3>{{$.T "Share the link"}}</h3>
+      <p>{{$.T "Friends, a study group, your livestream. Viewers join instantly, with no login."}}</p>
     </li>
     <li class="glass step">
       <span class="step-n">3</span>
-      <h3>Work in sync</h3>
-      <p>25 minutes of focus, 5 of rest. Everyone sees the same second ticking away.</p>
+      <h3>{{$.T "Work in sync"}}</h3>
+      <p>{{$.T "25 minutes of focus, 5 of rest. Everyone sees the same second ticking away."}}</p>
     </li>
   </ol>
 </section>
 
 <section class="section container">
-  <h2 class="section-title">Made for calm, shared focus</h2>
+  <h2 class="section-title">{{$.T "Made for calm, shared focus"}}</h2>
   <div class="features">
     <article class="glass feature">
       <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span>
-      <h3>A sky that is really there</h3>
-      <p>The sun and moon follow true astronomy for the host's place. The light shifts from dawn to dusk while you work.</p>
+      <h3>{{$.T "A sky that is really there"}}</h3>
+      <p>{{$.T "The sun and moon follow true astronomy for the host's place. The light shifts from dawn to dusk while you work."}}</p>
     </article>
     <article class="glass feature">
       <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></span>
-      <h3>Truly in sync</h3>
-      <p>The server owns the clock, so every device shows the same remaining time, even after a reconnect.</p>
+      <h3>{{$.T "Truly in sync"}}</h3>
+      <p>{{$.T "The server owns the clock, so every device shows the same remaining time, even after a reconnect."}}</p>
     </article>
     <article class="glass feature">
       <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6.4 5.2 5.2 0 0 1 21.3 12c-2.3 4.6-9.3 9-9.3 9z"/></svg></span>
-      <h3>Silent cheering</h3>
-      <p>Send a clap, a coffee or a flame. No chat, no noise, nothing to moderate.</p>
+      <h3>{{$.T "Silent cheering"}}</h3>
+      <p>{{$.T "Send a clap, a coffee or a flame. No chat, no noise, nothing to moderate."}}</p>
     </article>
     <article class="glass feature">
       <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><circle cx="12" cy="17.5" r="1"/></svg></span>
-      <h3>Record mode</h3>
-      <p>A clean vertical view for streams and short videos, with a QR code so people can join.</p>
+      <h3>{{$.T "Record mode"}}</h3>
+      <p>{{$.T "A clean vertical view for streams and short videos, with a QR code so people can join."}}</p>
     </article>
     <article class="glass feature">
       <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
-      <h3>Monthly statistics</h3>
-      <p>Log in if you like, and see how many hours you focused this month. Login is always optional.</p>
+      <h3>{{$.T "Monthly statistics"}}</h3>
+      <p>{{$.T "Log in if you like, and see how many hours you focused this month. Login is always optional."}}</p>
     </article>
     <article class="glass feature">
       <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></span>
-      <h3>Private by default</h3>
-      <p>No chat, no tracking of viewers, and the host's place is rounded to about one kilometre.</p>
+      <h3>{{$.T "Private by default"}}</h3>
+      <p>{{$.T "No chat, no tracking of viewers, and the host's place is rounded to about one kilometre."}}</p>
     </article>
   </div>
 </section>
 
 <section class="section container-narrow" id="faq">
-  <h2 class="section-title">Questions</h2>
+  <h2 class="section-title">{{$.T "Questions"}}</h2>
   <div class="faq">
     <details class="glass">
-      <summary>Do I need an account?</summary>
-      <p>No. Hosting and joining work without one. An account only adds your personal focus statistics.</p>
+      <summary>{{$.T "Do I need an account?"}}</summary>
+      <p>{{$.T "No. Hosting and joining work without one. An account only adds your personal focus statistics."}}</p>
     </details>
     <details class="glass">
-      <summary>Who controls the timer?</summary>
-      <p>Only the host, through a secret token that stays in their browser. Viewers just watch and react.</p>
+      <summary>{{$.T "Who controls the timer?"}}</summary>
+      <p>{{$.T "Only the host, through a secret token that stays in their browser. Viewers just watch and react."}}</p>
     </details>
     <details class="glass">
-      <summary>Where does the weather come from?</summary>
-      <p>From the host's rounded location. Viewers are never asked where they are.</p>
+      <summary>{{$.T "Where does the weather come from?"}}</summary>
+      <p>{{$.T "From the host's rounded location. Viewers are never asked where they are."}}</p>
     </details>
     <details class="glass">
-      <summary>What if the host loses the link?</summary>
-      <p>Keep the host page open or bookmarked. The token is stored in that browser so you can come back.</p>
+      <summary>{{$.T "What if the host loses the link?"}}</summary>
+      <p>{{$.T "Keep the host page open or bookmarked. The token is stored in that browser so you can come back."}}</p>
     </details>
   </div>
   <form class="center" method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}">
-    <button class="btn btn-primary btn-lg" type="submit">Start your room</button>
+    <button class="btn btn-primary btn-lg" type="submit">{{$.T "Start your room"}}</button>
   </form>
 </section>
 {{end}}

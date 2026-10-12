@@ -4,11 +4,11 @@
 <section class="auth-wrap">
   <div class="auth-card glass center-text">
     <p class="error-emoji" aria-hidden="true">☁️</p>
-    <h1>{{if .Title}}{{.Title}}{{else}}Something went wrong{{end}}</h1>
+    <h1>{{if .Title}}{{.Title}}{{else}}{{$.T "Something went wrong"}}{{end}}</h1>
     {{if .Data}}<p class="muted">{{.Data}}</p>{{end}}
     <div class="row row-wrap error-actions">
-      <a class="btn btn-ghost" href="/">Back to the start</a>
-      <form method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}"><button class="btn btn-primary" type="submit">Start a room</button></form>
+      <a class="btn btn-ghost" href="/">{{$.T "Back to the start"}}</a>
+      <form method="post" action="/r/new"><input type="hidden" name="csrf" value="{{.CSRFToken}}"><button class="btn btn-primary" type="submit">{{$.T "Start a room"}}</button></form>
     </div>
   </div>
 </section>

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gayratjon-02/Pomosky/internal/i18n"
 	"github.com/gayratjon-02/Pomosky/internal/platform/reqctx"
 	"github.com/gayratjon-02/Pomosky/internal/views"
 )
@@ -18,6 +19,19 @@ func (c *Controllers) render(w http.ResponseWriter, r *http.Request, status int,
 	if cookie, err := r.Cookie(views.MoodCookie); err == nil && views.ValidMood(cookie.Value) {
 		data.Mood = cookie.Value // so the page is painted in the chosen mood from the first frame
 	}
+	cookie := ""
+	if c, err := r.Cookie(i18n.Cookie); err == nil {
+		cookie = c.Value
+	}
+	lang := i18n.Pick(cookie, r.Header.Get("Accept-Language"))
+	data.Lang = string(lang)
+	data.Title = i18n.T(lang, data.Title)
+	data.Description = i18n.T(lang, data.Description)
+	data.Flash = i18n.T(lang, data.Flash)
+	if msg, ok := data.Data.(string); ok { // the error page passes its message as a plain string
+		data.Data = i18n.T(lang, msg)
+	}
+	w.Header().Add("Vary", "Accept-Language")
 	if data.User == nil {
 		data.User = reqctx.User(r.Context())
 	}

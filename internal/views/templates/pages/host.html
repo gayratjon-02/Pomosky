@@ -5,8 +5,8 @@
 <section class="host-stage container">
   <div class="host-main">
     <div class="room-top">
-      <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">Connecting</span></span>
-      <span class="chip" id="host-badge" data-state="pending">Checking host access</span>
+      <span class="chip" id="conn"><span class="dot dot-off" id="conn-dot"></span><span id="conn-text">{{$.T "Connecting"}}</span></span>
+      <span class="chip" id="host-badge" data-state="pending">{{$.T "Checking host access"}}</span>
       {{template "presence" .}}
       {{template "weather" .}}
     </div>
@@ -14,21 +14,21 @@
 
     <div class="host-run">
       <div class="host-controls">
-        <button type="button" class="btn btn-primary" id="btn-focus">Start focus</button>
-        <button type="button" class="btn btn-warm" id="btn-break">Start break</button>
-        <button type="button" class="btn btn-ghost" id="btn-pause">Pause</button>
-        <button type="button" class="btn btn-danger" id="btn-reset">Reset</button>
+        <button type="button" class="btn btn-primary" id="btn-focus">{{$.T "Start focus"}}</button>
+        <button type="button" class="btn btn-warm" id="btn-break">{{$.T "Start break"}}</button>
+        <button type="button" class="btn btn-ghost" id="btn-pause">{{$.T "Pause"}}</button>
+        <button type="button" class="btn btn-danger" id="btn-reset">{{$.T "Reset"}}</button>
       </div>
       <p class="plan-line" id="plan-line" aria-live="polite"></p>
-      <p class="key-hint">Keys: <kbd class="kbd">Space</kbd> pause or resume, <kbd class="kbd">F</kbd> focus, <kbd class="kbd">B</kbd> break, <kbd class="kbd">Shift</kbd>+<kbd class="kbd">R</kbd> reset</p>
+      <p class="key-hint">{{$.T "Keys:"}} <kbd class="kbd">Space</kbd> {{$.T "pause or resume,"}} <kbd class="kbd">F</kbd> {{$.T "focus,"}} <kbd class="kbd">B</kbd> {{$.T "break,"}} <kbd class="kbd">Shift</kbd>+<kbd class="kbd">R</kbd> {{$.T "reset"}}</p>
     </div>
   </div>
 
-  <aside class="host-panel glass" aria-label="Session settings">
-    <h1 class="host-title">Session settings</h1>
+  <aside class="host-panel glass" aria-label="{{$.T "Session settings"}}">
+    <h1 class="host-title">{{$.T "Session settings"}}</h1>
 
     <div class="stack">
-      <span class="label">Quick presets</span>
+      <span class="label">{{$.T "Quick presets"}}</span>
       <div class="row row-wrap" id="presets">
         <button type="button" class="chip" data-focus="25" data-break="5">25 / 5</button>
         <button type="button" class="chip" data-focus="50" data-break="10">50 / 10</button>
@@ -38,49 +38,49 @@
 
     <div class="host-fields">
       <div class="field">
-        <label for="focus-min">Focus, min</label>
+        <label for="focus-min">{{$.T "Focus, min"}}</label>
         <input class="input" id="focus-min" type="number" min="1" max="720" value="25" inputmode="numeric">
       </div>
       <div class="field">
-        <label for="break-min">Break, min</label>
+        <label for="break-min">{{$.T "Break, min"}}</label>
         <input class="input" id="break-min" type="number" min="1" max="720" value="5" inputmode="numeric">
       </div>
     </div>
     <div class="field">
-      <label for="label">What are you working on?</label>
-      <input class="input" id="label" maxlength="80" placeholder="Go backend, essay, revision...">
+      <label for="label">{{$.T "What are you working on?"}}</label>
+      <input class="input" id="label" maxlength="80" placeholder="{{$.T "Go backend, essay, revision..."}}">
     </div>
 
     <div class="field">
-      <label for="place">Sky place</label>
+      <label for="place">{{$.T "Sky place"}}</label>
       <div class="share-row">
-        <select class="select" id="place"><option value="">Choose a city</option></select>
-        <button type="button" class="btn btn-subtle" id="use-device-place" title="Use this device's location">Here</button>
+        <select class="select" id="place"><option value="">{{$.T "Choose a city"}}</option></select>
+        <button type="button" class="btn btn-subtle" id="use-device-place" title="{{$.T "Use this device's location"}}">{{$.T "Here"}}</button>
       </div>
       <div class="place-search">
-        <input class="input" id="place-q" type="search" placeholder="Search any city" autocomplete="off" maxlength="60" aria-label="Search for a city">
+        <input class="input" id="place-q" type="search" placeholder="{{$.T "Search any city"}}" autocomplete="off" maxlength="60" aria-label="{{$.T "Search for a city"}}">
         <ul class="place-results glass" id="place-results" hidden></ul>
       </div>
     </div>
 
     <div class="stack">
-      <span class="label">Share with viewers</span>
+      <span class="label">{{$.T "Share with viewers"}}</span>
       <div class="share-row">
-        <input class="input" id="share-url" readonly value="{{.Data.ShareURL}}" aria-label="Viewer link">
-        <button type="button" class="btn btn-subtle" id="copy-link" data-url="{{.Data.ShareURL}}">Copy</button>
+        <input class="input" id="share-url" readonly value="{{.Data.ShareURL}}" aria-label="{{$.T "Viewer link"}}">
+        <button type="button" class="btn btn-subtle" id="copy-link" data-url="{{.Data.ShareURL}}">{{$.T "Copy"}}</button>
       </div>
       <div class="row row-wrap">
-        <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">Sound on</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="notify-toggle" aria-pressed="false">Alerts off</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="music-toggle" aria-pressed="false">Music off</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="ambience-toggle" aria-pressed="false">Ambience off</button>
-        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}" target="_blank" rel="noopener">Open viewer page</a>
-        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}?mode=record" target="_blank" rel="noopener">Open record mode</a>
+        <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">{{$.T "Sound on"}}</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="notify-toggle" aria-pressed="false">{{$.T "Alerts off"}}</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="music-toggle" aria-pressed="false">{{$.T "Music off"}}</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="ambience-toggle" aria-pressed="false">{{$.T "Ambience off"}}</button>
+        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}" target="_blank" rel="noopener">{{$.T "Open viewer page"}}</a>
+        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}?mode=record" target="_blank" rel="noopener">{{$.T "Open record mode"}}</a>
       </div>
     </div>
 
     {{template "attribution" .}}
-    <p class="muted host-note">Keep this page bookmarked: your host key lives in this browser only.</p>
+    <p class="muted host-note">{{$.T "Keep this page bookmarked: your host key lives in this browser only."}}</p>
   </aside>
 </section>
 {{end}}
