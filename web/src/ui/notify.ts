@@ -7,7 +7,7 @@ import { toast } from "./toast";
 
 const KEY = "pomosky.notify";
 const ASKED_KEY = "pomosky.notify-asked";
-const ASK_DELAY_MS = 4000;
+const ASK_DELAY_MS = 1500;
 
 /** The text of the "phase ended" notification. */
 export function endMessage(t: TimerView): { title: string; body: string } {
@@ -46,37 +46,38 @@ async function turnOn(roomId: string): Promise<boolean> {
   return true;
 }
 
-/** A small card, shown once, that offers to turn alerts on. The button click is the permission request's gesture. */
-function offerAlerts(roomId: string, onChange: () => void): void {
-  const card = document.createElement("div");
-  card.className = "alert-ask glass";
-  card.setAttribute("role", "dialog");
-  card.setAttribute("aria-label", "Phase alerts");
-  const text = document.createElement("p");
-  text.textContent = "Get an alert when a focus or break ends, even if you close this page.";
-  const yes = document.createElement("button");
-  yes.type = "button";
-  yes.className = "btn btn-primary btn-sm";
-  yes.textContent = "Turn on";
-  const no = document.createElement("button");
-  no.type = "button";
-  no.className = "btn btn-ghost btn-sm";
-  no.textContent = "Not now";
-  const row = document.createElement("div");
-  row.className = "row";
-  row.append(yes, no);
-  card.append(text, row);
-  const close = () => {
-    save(ASKED_KEY, "1"); // asked once; the Alerts button is still there
-    card.remove();
+/**
+ * Shows the browser's own permission prompt on arrival, once. Chrome allows that
+ * without a click; Firefox and Safari only show it after one, so there it waits for
+ * the first click or key press. A prompt that was answered or dismissed is not repeated.
+ */
+function askOnArrival(roomId: string, onChange: () => void): void {
+  const pending = () => Notification.permission === "default" && load(ASKED_KEY) === null;
+  const ask = async () => {
+    if (!pending()) return;
+    const started = performance.now();
+    const result = await Notification.requestPermission().catch(() => "default" as NotificationPermission);
+    if (result === "granted") {
+      save(ASKED_KEY, "1");
+      await turnOn(roomId);
+      onChange();
+    } else if (performance.now() - started > 400 || result === "denied") {
+      save(ASKED_KEY, "1"); // the person saw the prompt and chose; do not ask again
+      onChange();
+    } else {
+      waitForGesture(); // no prompt appeared without a gesture
+    }
   };
-  yes.addEventListener("click", async () => {
-    close();
-    await turnOn(roomId);
-    onChange();
-  });
-  no.addEventListener("click", close);
-  document.body.appendChild(card);
+  const waitForGesture = () => {
+    const once = () => {
+      window.removeEventListener("pointerdown", once, true);
+      window.removeEventListener("keydown", once, true);
+      void ask();
+    };
+    window.addEventListener("pointerdown", once, true);
+    window.addEventListener("keydown", once, true);
+  };
+  window.setTimeout(() => void ask(), ASK_DELAY_MS);
 }
 
 /**
@@ -116,9 +117,5 @@ export function initNotifyToggle(client: RoomClient, roomId: string): void {
   });
   paint();
 
-  if (Notification.permission === "default" && load(ASKED_KEY) === null) {
-    window.setTimeout(() => {
-      if (Notification.permission === "default" && load(ASKED_KEY) === null) offerAlerts(roomId, paint);
-    }, ASK_DELAY_MS);
-  }
+  askOnArrival(roomId, paint);
 }
