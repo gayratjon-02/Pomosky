@@ -1,6 +1,7 @@
 import { maybeById } from "../core/dom";
 import type { PeopleData } from "../core/protocol";
 import { avatarElement } from "./avatar";
+import { t } from "../core/i18n";
 
 /** Shows the named people of the room as a row of small pictures with a "+N" for the rest. */
 export function setPeople(data: PeopleData): void {
@@ -21,5 +22,6 @@ export function setPeople(data: PeopleData): void {
     box.appendChild(more);
   }
   const names = data.people.map((p) => p.name).join(", ");
-  box.setAttribute("aria-label", names ? `Working now: ${names}${data.more > 0 ? ` and ${data.more} more` : ""}` : "");
+  const label = data.more > 0 ? t("Working now: {names} and {n} more", { names, n: data.more }) : t("Working now: {names}", { names });
+  box.setAttribute("aria-label", names ? label : "");
 }

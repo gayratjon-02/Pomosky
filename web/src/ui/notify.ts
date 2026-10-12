@@ -4,6 +4,7 @@ import type { RoomClient } from "../core/room-client";
 import { load, save } from "../core/storage";
 import { pushActive, pushSupported, subscribePush, unsubscribePush } from "./push";
 import { toast } from "./toast";
+import { t as tr } from "../core/i18n";
 
 const KEY = "pomosky.notify";
 const ASKED_KEY = "pomosky.notify-asked";
@@ -12,8 +13,8 @@ const ASK_DELAY_MS = 1500;
 /** The text of the "phase ended" notification. */
 export function endMessage(t: TimerView): { title: string; body: string } {
   const label = t.label.trim();
-  if (t.phase === "break") return { title: "Break is over", body: "Ready for the next focus session?" };
-  return { title: "Focus session finished", body: label ? `${label}. Time for a break.` : "Time for a break." };
+  if (t.phase === "break") return { title: tr("Break is over"), body: tr("Ready for the next focus session?") };
+  return { title: tr("Focus session finished"), body: label ? tr("{label}. Time for a break.", { label }) : tr("Time for a break.") };
 }
 
 function supported(): boolean {
@@ -42,7 +43,7 @@ async function turnOn(roomId: string): Promise<boolean> {
   if (result !== "granted") return false;
   save(KEY, "on");
   const remote = await subscribePush(roomId);
-  toast(remote ? "You will get an alert when a phase ends, even if this page is closed" : "You will get an alert when a phase ends while this page is open");
+  toast(remote ? tr("You will get an alert when a phase ends, even if this page is closed") : tr("You will get an alert when a phase ends while this page is open"));
   return true;
 }
 
@@ -95,12 +96,12 @@ export function initNotifyToggle(client: RoomClient, roomId: string): void {
   }
   const paint = () => {
     if (Notification.permission === "denied") {
-      btn.textContent = "Alerts blocked";
+      btn.textContent = tr("Alerts blocked");
       btn.disabled = true;
-      btn.title = "Allow notifications for this site in your browser settings";
+      btn.title = tr("Allow notifications for this site in your browser settings");
       return;
     }
-    btn.textContent = enabled() ? "Alerts on" : "Alerts off";
+    btn.textContent = enabled() ? tr("Alerts on") : tr("Alerts off");
     btn.setAttribute("aria-pressed", String(enabled()));
   };
   btn.addEventListener("click", async () => {

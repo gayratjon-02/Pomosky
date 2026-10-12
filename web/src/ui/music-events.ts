@@ -1,5 +1,6 @@
 import { maybeById } from "../core/dom";
 import { musicPlaying, musicWanted, setMusic } from "./music";
+import { t } from "../core/i18n";
 
 /**
  * Wires the #music-toggle button. Browsers need a gesture before audio, so a
@@ -9,7 +10,7 @@ export function initMusic(): void {
   const toggle = maybeById<HTMLButtonElement>("music-toggle");
   const paint = () => {
     if (!toggle) return;
-    toggle.textContent = musicPlaying() ? "Music on" : "Music off";
+    toggle.textContent = musicPlaying() ? t("Music on") : t("Music off");
     toggle.setAttribute("aria-pressed", String(musicPlaying()));
   };
   toggle?.addEventListener("click", () => {

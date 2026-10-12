@@ -1,4 +1,5 @@
 import { maybeById } from "../core/dom";
+import { t } from "../core/i18n";
 
 export interface FoundPlace {
   name: string;
@@ -30,7 +31,7 @@ export function initPlaceSearch(onPick: (p: FoundPlace) => void): void {
     if (places.length === 0) {
       const empty = document.createElement("li");
       empty.className = "place-empty";
-      empty.textContent = "No city found";
+      empty.textContent = t("No city found");
       list.appendChild(empty);
     }
     for (const p of places) {

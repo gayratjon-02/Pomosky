@@ -1,4 +1,5 @@
 import { load, save } from "../core/storage";
+import { t } from "../core/i18n";
 
 // The light theme only applies to the plain text pages (privacy, admin, errors).
 // Pages that show the live sky keep their own night and day look.
@@ -20,7 +21,7 @@ export function initTheme(): void {
   const toggle = document.getElementById("theme-toggle");
   if (!toggle) return;
   const paint = () => {
-    toggle.textContent = currentTheme() === "light" ? "Light theme" : "Dark theme";
+    toggle.textContent = currentTheme() === "light" ? t("Light theme") : t("Dark theme");
     toggle.setAttribute("aria-pressed", String(currentTheme() === "light"));
   };
   toggle.addEventListener("click", () => {

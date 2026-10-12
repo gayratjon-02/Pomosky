@@ -1,6 +1,7 @@
 import { maybeById } from "../core/dom";
 import { avatarElement } from "../ui/avatar";
 import { formatTotal, type BoardPeriod, type LeaderRow } from "./format";
+import { t, tn } from "../core/i18n";
 
 const PERIODS: BoardPeriod[] = ["today", "week", "month", "all"];
 
@@ -43,7 +44,7 @@ function renderRows(list: HTMLElement, rows: LeaderRow[]): void {
     if (row.you) {
       const you = document.createElement("span");
       you.className = "board-you";
-      you.textContent = "You";
+      you.textContent = t("You");
       who.appendChild(you);
     }
 
@@ -52,7 +53,7 @@ function renderRows(list: HTMLElement, rows: LeaderRow[]): void {
     const total = document.createElement("strong");
     total.textContent = formatTotal(row.seconds);
     const sessions = document.createElement("small");
-    sessions.textContent = `${row.sessions} session${row.sessions === 1 ? "" : "s"}`;
+    sessions.textContent = tn("{n} session|{n} sessions", row.sessions);
     time.append(total, sessions);
 
     li.append(rank, avatarElement(row.name, row.avatarUrl), who, time);
@@ -84,12 +85,12 @@ export function initLeaderboard(): void {
       const empty = maybeById("board-empty");
       if (empty) {
         empty.hidden = false;
-        empty.textContent = "The leaderboard is not available right now.";
+        empty.textContent = t("The leaderboard is not available right now.");
       }
       return;
     }
     const empty = maybeById("board-empty");
-    if (empty) empty.textContent = "Nobody here yet. Host a room while logged in and be the first.";
+    if (empty) empty.textContent = t("Nobody here yet. Host a room while logged in and be the first.");
     renderRows(list, rows);
   };
 

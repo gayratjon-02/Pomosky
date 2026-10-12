@@ -16,6 +16,7 @@ import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { PLACES } from "../core/places";
 import { initPlaceSearch } from "../ui/place-search";
+import { t } from "../core/i18n";
 
 
 const tokenKey = (roomId: string) => `pomosky.host.${roomId}`;
@@ -62,15 +63,15 @@ export function initHostPage(): void {
     badge.textContent = text;
     controls.forEach((b) => (b.disabled = state !== "ok"));
   };
-  setBadge(token ? "pending" : "denied", token ? "Checking host access" : "No host key in this browser");
+  setBadge(token ? "pending" : "denied", token ? t("Checking host access") : t("No host key in this browser"));
 
   client.on("status", createConnectionChip());
-  client.on("hostOk", () => setBadge("ok", "You are the host"));
+  client.on("hostOk", () => setBadge("ok", t("You are the host")));
   client.on("error", (e) => {
-    if (e.code === "forbidden") setBadge("denied", "Host key rejected");
-    else if (e.code === "invalid_transition") toast("That is not possible right now");
-    else if (e.code === "invalid") toast("Check the minutes and the label");
-    else if (e.code === "rate_limited") toast("Slow down a little");
+    if (e.code === "forbidden") setBadge("denied", t("Host key rejected"));
+    else if (e.code === "invalid_transition") toast(t("That is not possible right now"));
+    else if (e.code === "invalid") toast(t("Check the minutes and the label"));
+    else if (e.code === "rate_limited") toast(t("Slow down a little"));
   });
   client.on("people", setPeople);
   client.on("state", (s) => {
@@ -91,7 +92,7 @@ export function initHostPage(): void {
     if (breakBtn) breakBtn.hidden = !c.showStart;
     if (pause) {
       pause.hidden = !c.showPause;
-      pause.textContent = c.pauseLabel;
+      pause.textContent = t(c.pauseLabel);
     }
     if (resetBtn) resetBtn.hidden = !c.showReset;
     settings.forEach((el) => (el.disabled = !c.editable));
@@ -116,7 +117,7 @@ export function initHostPage(): void {
   // A line under the buttons says what "start" will do, from the minutes below.
   const planLine = maybeById("plan-line");
   const showPlan = () => {
-    if (planLine) planLine.textContent = `${num("focus-min", 25)} min focus, ${num("break-min", 5)} min break`;
+    if (planLine) planLine.textContent = t("{focus} min focus, {rest} min break", { focus: num("focus-min", 25), rest: num("break-min", 5) });
   };
   showPlan();
   maybeById("focus-min")?.addEventListener("input", showPlan);
@@ -157,18 +158,18 @@ export function initHostPage(): void {
   }
   initPlaceSearch((p) => {
     client.setLocation({ city: p.name, lat: p.lat, lon: p.lon, tz: p.tz });
-    toast(`Sky moved to ${p.name}`);
+    toast(t("Sky moved to {place}", { place: p.name }));
   });
   maybeById("use-device-place")?.addEventListener("click", () => {
-    if (!navigator.geolocation) return toast("Your browser cannot share a location");
+    if (!navigator.geolocation) return toast(t("Your browser cannot share a location"));
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         // Rounded by the server; the exact point is never stored.
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
         client.setLocation({ city: "My place", lat: pos.coords.latitude, lon: pos.coords.longitude, tz });
-        toast("Sky moved to your place");
+        toast(t("Sky moved to your place"));
       },
-      () => toast("Could not read your location"),
+      () => toast(t("Could not read your location")),
       { maximumAge: 600_000, timeout: 10_000 },
     );
   });

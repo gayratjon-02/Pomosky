@@ -1,5 +1,6 @@
 import { maybeById } from "../core/dom";
 import { dayLabel, formatDuration, formatTotal, type CommunityStats } from "./format";
+import { t, tn } from "../core/i18n";
 
 function timeZone(): string {
   try {
@@ -18,7 +19,7 @@ export async function fetchCommunity(): Promise<CommunityStats | null> {
   }
 }
 
-const sessionsText = (n: number): string => `${n.toLocaleString("en-US")} session${n === 1 ? "" : "s"}`;
+const sessionsText = (n: number): string => tn("{n} session|{n} sessions", n);
 
 /** Fills the "Everyone on Pomosky" section of the statistics page. */
 export async function initCommunity(): Promise<void> {
@@ -57,7 +58,7 @@ export async function initCommunity(): Promise<void> {
     fill.style.height = max > 0 ? `${Math.max(2, (d.seconds / max) * 100)}%` : "2%";
     bar.appendChild(fill);
     const show = () => {
-      if (detail) detail.textContent = `${dayLabel(d.date)}: ${formatDuration(d.seconds)} in ${sessionsText(d.sessions)}`;
+      if (detail) detail.textContent = t("{day}: {time} in {sessions}", { day: dayLabel(d.date), time: formatDuration(d.seconds), sessions: sessionsText(d.sessions) });
     };
     bar.addEventListener("click", show);
     bar.addEventListener("focus", show);

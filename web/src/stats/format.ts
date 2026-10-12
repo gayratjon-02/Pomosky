@@ -1,3 +1,5 @@
+import { intlLocale, t } from "../core/i18n";
+
 // Pure helpers for the monthly statistics view.
 
 export interface DayStat {
@@ -16,18 +18,13 @@ export interface MonthStats {
   days: DayStat[];
 }
 
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
 /** "12h 05m", "45m", "0m". Seconds are rounded down to whole minutes. */
 export function formatDuration(seconds: number): string {
   const minutes = Math.floor(Math.max(0, seconds) / 60);
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (h === 0) return `${m}m`;
-  return `${h}h ${String(m).padStart(2, "0")}m`;
+  if (h === 0) return t("{m}m", { m });
+  return t("{h}h {m}m", { h, m: String(m).padStart(2, "0") });
 }
 
 /** Exact time: "3h 20m 15s", "12m 04s", "45s", "0s". */
@@ -36,15 +33,17 @@ export function formatExact(seconds: number): string {
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
-  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
-  if (m > 0) return `${m}m ${String(s).padStart(2, "0")}s`;
-  return `${s}s`;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  if (h > 0) return t("{h}h {m}m {s}s", { h, m: mm, s: ss });
+  if (m > 0) return t("{m}m {s}s", { m, s: ss });
+  return t("{s}s", { s });
 }
 
 /** "2026-10" -> "October 2026". */
 export function monthLabel(month: string): string {
   const [y, m] = month.split("-").map(Number) as [number, number];
-  return `${MONTHS[m - 1] ?? "?"} ${y}`;
+  return new Intl.DateTimeFormat(intlLocale(), { month: "long", year: "numeric" }).format(new Date(y, m - 1, 1));
 }
 
 /** Moves a YYYY-MM string by whole months. */
@@ -77,10 +76,10 @@ export function leadingBlanks(month: string): number {
 
 /** Short sentence comparing this month with the previous one. */
 export function compareText(current: number, previous: number): string {
-  if (previous <= 0) return current > 0 ? "First focused month on record" : "No focus time yet";
+  if (previous <= 0) return current > 0 ? t("First focused month on record") : t("No focus time yet");
   const pct = Math.round(((current - previous) / previous) * 100);
-  if (pct === 0) return "Same as last month";
-  return `${pct > 0 ? "+" : ""}${pct}% vs last month`;
+  if (pct === 0) return t("Same as last month");
+  return t("{pct}% vs last month", { pct: `${pct > 0 ? "+" : ""}${pct}` });
 }
 
 export function busiest(days: DayStat[]): DayStat | null {
@@ -93,8 +92,9 @@ export function busiest(days: DayStat[]): DayStat | null {
 export function dayLabel(date: string): string {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   const dt = new Date(y, m - 1, d);
-  const wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.getDay()];
-  return `${wd} ${d} ${MONTHS[m - 1]?.slice(0, 3)}`;
+  const parts = new Intl.DateTimeFormat(intlLocale(), { weekday: "short", month: "short" }).formatToParts(dt);
+  const pick = (type: string): string => parts.find((p) => p.type === type)?.value ?? "";
+  return `${pick("weekday")} ${d} ${pick("month")}`;
 }
 
 /** Share of the month's focus time that one day makes up, as a whole percent. */
@@ -112,7 +112,7 @@ export function defaultDay(days: DayStat[], todayKey: string): string {
 /** Big totals read better in hours: "42m", "7h 05m", "1,234 h". */
 export function formatTotal(seconds: number): string {
   const hours = Math.floor(Math.max(0, seconds) / 3600);
-  if (hours >= 100) return `${hours.toLocaleString("en-US")} h`;
+  if (hours >= 100) return t("{n} h", { n: hours.toLocaleString("en-US") });
   return formatDuration(seconds);
 }
 

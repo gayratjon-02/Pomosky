@@ -3,6 +3,7 @@ import type { Phase, TimerView } from "../core/protocol";
 import { formatMMSS, remainingMs } from "../core/timer";
 import { celebrate } from "./celebrate";
 import { chime } from "./sound";
+import { t as tr } from "../core/i18n";
 
 const PHASE_TEXT: Record<Phase, string> = {
   idle: "Waiting for the host",
@@ -31,7 +32,7 @@ export class TimerRenderer {
     const ended = (t.phase === "focus" || t.phase === "break") && remaining === 0;
 
     if (this.digits) this.digits.textContent = text;
-    if (this.phase) this.phase.textContent = ended ? "Time's up" : PHASE_TEXT[t.phase];
+    if (this.phase) this.phase.textContent = ended ? tr("Time's up") : tr(PHASE_TEXT[t.phase]);
     if (this.label) this.label.textContent = t.label;
     document.body.dataset["phase"] = ended ? "ended" : t.phase;
     document.body.dataset["running"] = t.phase === "focus" || t.phase === "break" ? "1" : "0";
@@ -44,7 +45,7 @@ export class TimerRenderer {
       if (this.knob) this.knob.style.transform = `rotate(${progress * 360}deg)`; // the knob rides the end of the arc
     }
 
-    document.title = t.phase === "idle" ? "Pomosky" : `${text} · ${ended ? "Done" : PHASE_TEXT[t.phase]} · Pomosky`;
+    document.title = t.phase === "idle" ? "Pomosky" : `${text} · ${ended ? tr("Done") : tr(PHASE_TEXT[t.phase])} · Pomosky`;
 
     if (ended && this.chimedFor !== t.startedAtMs) {
       this.chimedFor = t.startedAtMs;

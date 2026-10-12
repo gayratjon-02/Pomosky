@@ -123,6 +123,7 @@ canvas {
 }
 
 .brand-mark {
+  flex: none;
   width: 28px;
   height: 28px;
 }

@@ -2,6 +2,7 @@ import { maybeById } from "../core/dom";
 import type { RoomClient } from "../core/room-client";
 import type { TimerView } from "../core/protocol";
 import { cueFor } from "./sound-cues";
+import { t } from "../core/i18n";
 import {
   playClick,
   playPause,
@@ -28,7 +29,7 @@ export function initSounds(client: RoomClient): void {
   const toggle = maybeById<HTMLButtonElement>("sound-toggle");
   const paint = () => {
     if (!toggle) return;
-    toggle.textContent = soundEnabled() ? "Sound on" : "Sound off";
+    toggle.textContent = soundEnabled() ? t("Sound on") : t("Sound off");
     toggle.setAttribute("aria-pressed", String(soundEnabled()));
   };
   toggle?.addEventListener("click", () => {

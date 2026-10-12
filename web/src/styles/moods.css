@@ -15,8 +15,14 @@
 .mood-btn::-webkit-details-marker { display: none; }
 .mood-btn:hover, .mood-menu[open] .mood-btn { background: rgba(255, 255, 255, 0.12); }
 .mood-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.mood-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Korean has no spaces inside words: keep words whole and break only between them. */
+html[lang="ko"] body { word-break: keep-all; overflow-wrap: break-word; }
+.site-nav a, .site-nav .mood-btn { white-space: nowrap; }
+.hero-count strong { white-space: nowrap; }
+
+.mood-btn svg { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .mood-btn svg circle { fill: currentColor; stroke: none; }
+.lang-menu .mood-btn svg circle { fill: none; stroke: currentColor; }
 .mood-btn-name { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 560px) { .mood-btn-name { display: none; } .mood-btn { padding: 0 9px; } }
 
@@ -30,6 +36,17 @@
 }
 @keyframes mood-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
 @media (max-width: 560px) { .mood-panel { position: fixed; right: var(--space-4); left: var(--space-4); width: auto; top: calc(var(--header-h) + 8px); } }
+
+.lang-panel { grid-template-columns: minmax(0, 1fr); width: min(220px, calc(100vw - 2 * var(--space-4))); }
+.lang-option {
+  min-height: 42px; padding: 0 var(--space-4); text-align: left; border: 1.5px solid transparent; border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.06); color: var(--fg); font: 600 var(--text-md) / 1 var(--font-sans); cursor: pointer;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.lang-option:hover { background: rgba(255, 255, 255, 0.14); }
+.lang-option:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.lang-option[aria-pressed="true"] { border-color: var(--accent); background: rgba(255, 255, 255, 0.16); }
+@media (max-width: 560px) { .lang-panel { left: auto; width: min(220px, calc(100vw - 2 * var(--space-4))); } }
 
 .mood-sound {
   grid-column: 1 / -1; min-height: 38px; border: 1px solid var(--glass-border); border-radius: var(--radius-pill);

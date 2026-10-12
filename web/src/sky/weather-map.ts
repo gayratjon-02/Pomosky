@@ -1,4 +1,5 @@
 import type { SkyInputs } from "./types";
+import { t } from "../core/i18n";
 
 /** The JSON of GET /api/weather (see docs/api.md). */
 export interface WeatherData {
@@ -31,22 +32,22 @@ export function skyFromWeather(w: WeatherData): Partial<SkyInputs> {
 
 /** Plain-words description of a WMO weather code (Open-Meteo's table). */
 export function describeWeather(code: number): string {
-  if (code === 0) return "Clear";
-  if (code === 1) return "Mostly clear";
-  if (code === 2) return "Partly cloudy";
-  if (code === 3) return "Overcast";
-  if (code === 45 || code === 48) return "Fog";
-  if (code >= 51 && code <= 57) return "Drizzle";
-  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return "Rain";
-  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "Snow";
-  if (code >= 95 && code <= 99) return "Thunderstorm";
-  return "Weather";
+  if (code === 0) return t("Clear");
+  if (code === 1) return t("Mostly clear");
+  if (code === 2) return t("Partly cloudy");
+  if (code === 3) return t("Overcast");
+  if (code === 45 || code === 48) return t("Fog");
+  if (code >= 51 && code <= 57) return t("Drizzle");
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return t("Rain");
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return t("Snow");
+  if (code >= 95 && code <= 99) return t("Thunderstorm");
+  return t("Weather");
 }
 
 /** "just now", "5 min ago", "2 h ago". */
 export function ageText(sinceMs: number, nowMs: number): string {
   const min = Math.floor(Math.max(0, nowMs - sinceMs) / 60_000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min} min ago`;
-  return `${Math.floor(min / 60)} h ago`;
+  if (min < 1) return t("just now");
+  if (min < 60) return t("{n} min ago", { n: min });
+  return t("{n} h ago", { n: Math.floor(min / 60) });
 }

@@ -2,6 +2,7 @@ import { load, save } from "../core/storage";
 import { onBolt, onSky } from "../sky/sky-feed";
 import { AmbienceEngine } from "./ambience-engine";
 import { sceneFor } from "./ambience-scene";
+import { t } from "../core/i18n";
 
 // The sound that goes with the sky: whatever mood is chosen (or the live sky) decides
 // what you hear, see ambience-scene.ts. It has its own switch, off until the visitor
@@ -97,7 +98,7 @@ export function initAmbience(): void {
   const btn = document.getElementById("ambience-toggle") as HTMLButtonElement | null;
   const paint = () => {
     if (!btn) return;
-    btn.textContent = ambienceWanted() ? "Ambience on" : "Ambience off";
+    btn.textContent = ambienceWanted() ? t("Ambience on") : t("Ambience off");
     btn.setAttribute("aria-pressed", String(ambienceWanted()));
   };
   btn?.addEventListener("click", () => setAmbience(!ambienceWanted()));

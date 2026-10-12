@@ -13,6 +13,7 @@ import { initWakeLock } from "../ui/wake-lock";
 import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { createConnectionChip } from "../ui/connection";
+import { t } from "../core/i18n";
 
 const NICK_KEY = "pomosky.nick";
 
@@ -45,7 +46,7 @@ export function initRoomPage(): void {
     setReactionCounts({ [t.kind]: t.count });
   });
   client.on("error", (e) => {
-    if (e.code === "rate_limited") toast("Slow down a little");
+    if (e.code === "rate_limited") toast(t("Slow down a little"));
   });
 
   window.setInterval(() => {
@@ -57,7 +58,7 @@ export function initRoomPage(): void {
     const value = (nickInput?.value ?? "").trim();
     save(NICK_KEY, value);
     client.setNickname(value);
-    toast(value ? `Hello, ${value}` : "Name cleared");
+    toast(value ? t("Hello, {name}", { name: value }) : t("Name cleared"));
   });
 
   initSounds(client);

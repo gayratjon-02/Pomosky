@@ -1,5 +1,6 @@
 import { maybeById } from "../core/dom";
 import { toast } from "./toast";
+import { t } from "../core/i18n";
 
 /** Copy-link and fullscreen buttons shared by the room, host and record pages. */
 export function initShare(): void {
@@ -7,9 +8,9 @@ export function initShare(): void {
     const url = maybeById("copy-link")?.dataset["url"] ?? location.href.split("#")[0]!;
     try {
       await navigator.clipboard.writeText(url);
-      toast("Link copied");
+      toast(t("Link copied"));
     } catch {
-      toast("Could not copy. Select the link and copy it by hand.");
+      toast(t("Could not copy. Select the link and copy it by hand."));
     }
   });
 
@@ -17,6 +18,6 @@ export function initShare(): void {
   if (fs && !document.documentElement.requestFullscreen) fs.hidden = true;
   fs?.addEventListener("click", () => {
     if (document.fullscreenElement) void document.exitFullscreen();
-    else void document.documentElement.requestFullscreen().catch(() => toast("Fullscreen is not available"));
+    else void document.documentElement.requestFullscreen().catch(() => toast(t("Fullscreen is not available")));
   });
 }

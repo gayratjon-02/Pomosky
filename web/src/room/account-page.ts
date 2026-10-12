@@ -17,6 +17,7 @@ import {
 import { initCommunity } from "../stats/community";
 import { initLeaderboard } from "../stats/leaderboard";
 import { initAmbientSky } from "./ambient-sky";
+import { t, tn } from "../core/i18n";
 
 /** Account page: monthly focus statistics with a calendar heatmap and daily bars. */
 export function initAccountPage(): void {
@@ -75,10 +76,10 @@ function render(stats: MonthStats, isCurrent: boolean): void {
   byId("s-total").textContent = formatDuration(stats.totalSeconds);
   byId("s-compare").textContent = compareText(stats.totalSeconds, stats.prevTotalSeconds);
   byId("s-sessions").textContent = String(stats.sessions);
-  byId("s-avg").textContent = stats.sessions > 0 ? `${formatDuration(stats.totalSeconds / stats.sessions)} on average` : "";
+  byId("s-avg").textContent = stats.sessions > 0 ? t("{time} on average", { time: formatDuration(stats.totalSeconds / stats.sessions) }) : "";
   byId("s-days").textContent = `${stats.activeDays} / ${stats.days.length}`;
   const best = busiest(stats.days);
-  byId("s-best").textContent = best ? `Best: ${dayLabel(best.date)}, ${formatDuration(best.seconds)}` : "";
+  byId("s-best").textContent = best ? t("Best: {day}, {time}", { day: dayLabel(best.date), time: formatDuration(best.seconds) }) : "";
   byId("s-streak").textContent = String(stats.streakDays);
 
   const max = Math.max(0, ...stats.days.map((d) => d.seconds));
@@ -143,6 +144,6 @@ function showDay(d: DayStat, monthSeconds: number): void {
   byId("day-title").textContent = dayLabel(d.date);
   byId("day-time").textContent = formatDuration(d.seconds);
   byId("day-sessions").textContent =
-    d.seconds > 0 ? `${d.sessions} session${d.sessions === 1 ? "" : "s"}` : "No focus time this day";
-  byId("day-share").textContent = d.seconds > 0 ? `${dayShare(d.seconds, monthSeconds)}% of the month` : "";
+    d.seconds > 0 ? tn("{n} session|{n} sessions", d.sessions) : t("No focus time this day");
+  byId("day-share").textContent = d.seconds > 0 ? t("{pct}% of the month", { pct: dayShare(d.seconds, monthSeconds) }) : "";
 }

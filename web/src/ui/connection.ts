@@ -1,6 +1,7 @@
 import { maybeById } from "../core/dom";
 import type { SocketStatus } from "../core/ws";
 import { toast } from "./toast";
+import { t } from "../core/i18n";
 
 const TEXT: Record<SocketStatus, string> = {
   connecting: "Connecting",
@@ -20,19 +21,19 @@ export function createConnectionChip(): (status: SocketStatus) => void {
   let outageTimer: number | undefined;
   let told = false;
   return (status) => {
-    if (text) text.textContent = TEXT[status];
+    if (text) text.textContent = t(TEXT[status]);
     if (dot) dot.className = `dot ${status === "open" ? "dot-live" : status === "reconnecting" ? "dot-warn" : "dot-off"}`;
     if (status === "reconnecting" && wasOpen && outageTimer === undefined && !told) {
       outageTimer = window.setTimeout(() => {
         outageTimer = undefined;
         told = true;
-        toast("Connection lost, reconnecting");
+        toast(t("Connection lost, reconnecting"));
       }, OUTAGE_TOAST_MS);
     }
     if (status === "open") {
       window.clearTimeout(outageTimer);
       outageTimer = undefined;
-      if (told) toast("Back online");
+      if (told) toast(t("Back online"));
       told = false;
     }
     if (status === "open") wasOpen = true;

@@ -5,6 +5,7 @@ import { overcastOf } from "../sky/engine";
 import { MOODS, currentMood, onMoodChange, setMood, type Mood } from "../sky/moods";
 import { skyGradient } from "../sky/palette";
 import { DEFAULT_INPUTS } from "../sky/types";
+import { t } from "../core/i18n";
 
 /** The preview of a mood: its own sky colours from top to horizon, with the sun or moon where it sits. */
 function swatchBackground(mood: Mood): string {
@@ -31,7 +32,7 @@ export function initMoodPicker(): void {
   sound.addEventListener("click", () => setAmbience(!ambienceWanted()));
   panel.appendChild(sound);
   const paintSound = () => {
-    sound.textContent = ambienceWanted() ? "Mood sound: on" : "Mood sound: off";
+    sound.textContent = ambienceWanted() ? t("Mood sound: on") : t("Mood sound: off");
     sound.setAttribute("aria-pressed", String(ambienceWanted()));
   };
   paintSound();
@@ -50,9 +51,9 @@ export function initMoodPicker(): void {
     const text = document.createElement("span");
     text.className = "mood-text";
     const name = document.createElement("strong");
-    name.textContent = mood.name;
+    name.textContent = t(mood.name);
     const hint = document.createElement("small");
-    hint.textContent = mood.hint;
+    hint.textContent = t(mood.hint);
     text.append(name, hint);
 
     btn.append(swatch, text);
@@ -61,7 +62,7 @@ export function initMoodPicker(): void {
       // The first time someone picks a mood, its sound starts too (this click lets the browser play it).
       if (mood.id !== "live" && ambienceUnset()) {
         setAmbience(true);
-        toast("Mood sound is on. Switch it off at the top of this panel.");
+        toast(t("Mood sound is on. Switch it off at the top of this panel."));
       }
     });
     panel.appendChild(btn);
@@ -71,7 +72,7 @@ export function initMoodPicker(): void {
   const paint = () => {
     const active = currentMood();
     for (const [id, btn] of buttons) btn.setAttribute("aria-pressed", String(id === active.id));
-    if (label) label.textContent = active.id === "live" ? "Mood" : active.name;
+    if (label) label.textContent = active.id === "live" ? t("Mood") : t(active.name);
   };
   paint();
   onMoodChange(paint);

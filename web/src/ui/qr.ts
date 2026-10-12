@@ -1,4 +1,5 @@
 import qrcode from "qrcode-generator";
+import { t } from "../core/i18n";
 
 /** Draws the QR code of a link as an inline SVG. Generated locally: no data leaves the page. */
 export function renderQr(target: HTMLElement, url: string): void {
@@ -15,6 +16,6 @@ export function renderQr(target: HTMLElement, url: string): void {
     }
   }
   target.innerHTML =
-    `<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="QR code of the room link" shape-rendering="crispEdges">` +
+    `<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="${t("QR code of the room link")}" shape-rendering="crispEdges">` +
     `<rect width="${size}" height="${size}" fill="#fff"/><path d="${path}" fill="#0b1020"/></svg>`;
 }
