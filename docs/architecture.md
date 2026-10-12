@@ -36,6 +36,7 @@ only the internal packages listed in `allowed` in `archtest_test.go`. In short:
 | Package | May import |
 |---|---|
 | room, apperr, weather, config | nothing internal (room/apperr/weather/models: no third-party either) |
+| i18n | nothing internal (translations, see i18n.md) |
 | devreload | nothing internal (development-only helper, standard library only) |
 | models | room |
 | ports | room, models |
@@ -45,6 +46,7 @@ only the internal packages listed in `allowed` in `archtest_test.go`. In short:
 | auth/google | auth, models, apperr |
 | mail | ports |
 | stats | models, ports, apperr |
+| views | models, i18n |
 | realtime | room, models, ports, moderation, platform/ratelimit |
 | middleware | models, platform/httpx, platform/ratelimit, platform/reqctx |
 | controllers | models, ports, room, views, config, weather, platform/httpx, platform/reqctx, apperr |
