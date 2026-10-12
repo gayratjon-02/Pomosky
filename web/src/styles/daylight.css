@@ -1,0 +1,102 @@
+/* Daytime look of the room pages: frosted white glass with deep-blue ink, like a
+   light material on a bright sky. Active while the sun is up (html[data-daylight],
+   set by the sky engine). At night the dark glass from tokens.css is used. */
+
+html[data-daylight] body:is(.room, .host) {
+  --ink: #0d2a5c;
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-bg-strong: rgba(255, 255, 255, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 20px 56px rgba(22, 62, 138, 0.22), 0 2px 8px rgba(22, 62, 138, 0.08);
+  --blur: 28px;
+  --success: #0a8a5b;
+  --danger: #d12f50;
+  --focus-ring: 0 0 0 3px rgba(31, 92, 214, 0.45);
+}
+
+/* The settings panel holds a lot of text, so it is more opaque than the chips. */
+html[data-daylight] body:is(.room, .host) .host-panel { background: rgba(255, 255, 255, 0.58); }
+
+/* Everything that sits on glass reads in ink. */
+html[data-daylight] body:is(.room, .host) :is(.glass, .chip, .btn-ghost, .site-header, .site-footer, .toast, .user-menu-panel, .place-results, .timer-inner) {
+  --fg: var(--ink);
+  --fg-muted: rgba(13, 42, 92, 0.8);
+  --fg-dim: rgba(13, 42, 92, 0.62);
+  color: var(--ink);
+}
+
+/* Header and footer: a light frosted strip that melts into the sky instead of a hard slab. */
+html[data-daylight] body:is(.room, .host) .site-header {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.22));
+  border-bottom-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 30px rgba(22, 62, 138, 0.1);
+}
+html[data-daylight] body:is(.room, .host) .site-footer {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
+  border-top-color: rgba(255, 255, 255, 0.55);
+}
+html[data-daylight] body:is(.room, .host) .site-nav a:not(.btn):hover { background: rgba(13, 42, 92, 0.08); }
+html[data-daylight] body:is(.room, .host) .brand { color: var(--ink); }
+
+/* Fields and chips. */
+html[data-daylight] body:is(.room, .host) .input,
+html[data-daylight] body:is(.room, .host) .select {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(13, 42, 92, 0.12);
+  box-shadow: inset 0 1px 2px rgba(13, 42, 92, 0.06);
+}
+html[data-daylight] body:is(.room, .host) .input:hover,
+html[data-daylight] body:is(.room, .host) .select:hover { background: rgba(255, 255, 255, 0.8); }
+html[data-daylight] body:is(.room, .host) .input:focus-visible,
+html[data-daylight] body:is(.room, .host) .select:focus-visible { border-color: #2f6fe0; background: #fff; }
+html[data-daylight] body:is(.room, .host) .select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230d2a5c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+html[data-daylight] body:is(.room, .host) .input:disabled { background: rgba(255, 255, 255, 0.35); }
+html[data-daylight] body:is(.room, .host) .chip { box-shadow: 0 2px 10px rgba(22, 62, 138, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8); }
+html[data-daylight] body:is(.room, .host) button.chip:hover,
+html[data-daylight] body:is(.room, .host) .btn-ghost:hover { background: rgba(255, 255, 255, 0.72); border-color: #fff; }
+html[data-daylight] body:is(.room, .host) .btn-subtle:hover { background: rgba(13, 42, 92, 0.08); }
+html[data-daylight] body:is(.room, .host) .btn-danger { background: rgba(255, 255, 255, 0.5); border-color: rgba(209, 47, 80, 0.35); }
+html[data-daylight] body:is(.room, .host) .btn-danger:hover { background: rgba(255, 255, 255, 0.8); }
+html[data-daylight] body:is(.room, .host) .range::-webkit-slider-runnable-track { background: rgba(13, 42, 92, 0.16); }
+html[data-daylight] body:is(.room, .host) #host-badge[data-state="ok"] { color: var(--success); }
+
+/* Pop-up menus have their own opaque background. */
+html[data-daylight] body:is(.room, .host) :is(.user-menu-panel, .place-results) {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--glass-shadow);
+}
+html[data-daylight] body:is(.room, .host) :is(.user-menu-panel a, .user-menu-panel button, .place-results button):hover { background: rgba(13, 42, 92, 0.07); }
+
+/* The timer: a frosted white disc with deep-blue digits. */
+html[data-daylight] body:is(.room, .host) .ring-disc { fill: rgba(255, 255, 255, 0.4); stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; }
+html[data-daylight] body:is(.room, .host) .ring-track { stroke: rgba(13, 42, 92, 0.12); }
+html[data-daylight] body:is(.room, .host) .ring-ticks { stroke: rgba(255, 255, 255, 0.85); }
+html[data-daylight] body:is(.room, .host) .timer-inner { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7); }
+html[data-daylight] body:is(.room, .host) .timer-digits { color: var(--ink); }
+html[data-daylight] body:is(.room, .host) .ring-knob circle { fill: #fff; filter: drop-shadow(0 2px 8px rgba(22, 62, 138, 0.45)); }
+
+/* Primary actions get a clean gloss and a soft coloured shadow. */
+html[data-daylight] body:is(.room, .host) .btn-primary {
+  background: linear-gradient(180deg, #7fb0ff 0%, #3f7ff0 100%);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(47, 111, 224, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+html[data-daylight] body:is(.room, .host) .btn-warm {
+  background: linear-gradient(180deg, #ffc177 0%, #ff8f3a 100%);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(150, 70, 0, 0.35);
+  box-shadow: 0 10px 26px rgba(255, 143, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* Text that sits straight on the sky (under the timer) stays white with a soft shadow. */
+html[data-daylight] body:is(.room, .host) :is(.plan-line, .key-hint, .attribution) {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 10px rgba(14, 50, 120, 0.55);
+}
+html[data-daylight] body:is(.room, .host) .attribution a { color: #fff; }
+html[data-daylight] body:is(.room, .host) .kbd { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.5); color: #fff; text-shadow: none; }
