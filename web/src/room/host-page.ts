@@ -16,6 +16,7 @@ import { TimerRenderer } from "../ui/timer-view";
 import { toast } from "../ui/toast";
 import { PLACES } from "../core/places";
 import { initPlaceSearch } from "../ui/place-search";
+import { initSettingsSheet } from "../ui/settings-sheet";
 import { t } from "../core/i18n";
 
 
@@ -56,6 +57,7 @@ export function initHostPage(): void {
   const pause = maybeById<HTMLButtonElement>("btn-pause");
   const controls = Array.from(document.querySelectorAll<HTMLButtonElement>(".host-controls button"));
   initShare();
+  initSettingsSheet();
 
   const setBadge = (state: "ok" | "denied" | "pending", text: string) => {
     if (!badge) return;
@@ -84,7 +86,7 @@ export function initHostPage(): void {
   const focusBtn = maybeById<HTMLButtonElement>("btn-focus");
   const breakBtn = maybeById<HTMLButtonElement>("btn-break");
   const resetBtn = maybeById<HTMLButtonElement>("btn-reset");
-  const settings = Array.from(document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#focus-min, #break-min, #label, #presets button"));
+  const settings = Array.from(document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#focus-min, #break-min, #label, #presets button, .stepper button"));
   const applyControls = () => {
     if (!client.state) return;
     const c = controlsFor(client.state.timer, client.clock.serverNow());
@@ -117,7 +119,13 @@ export function initHostPage(): void {
   // A line under the buttons says what "start" will do, from the minutes below.
   const planLine = maybeById("plan-line");
   const showPlan = () => {
-    if (planLine) planLine.textContent = t("{focus} min focus, {rest} min break", { focus: num("focus-min", 25), rest: num("break-min", 5) });
+    const focus = num("focus-min", 25);
+    const rest = num("break-min", 5);
+    if (planLine) planLine.textContent = t("{focus} min focus, {rest} min break", { focus, rest });
+    // The preset that matches the minutes is highlighted.
+    document.querySelectorAll<HTMLButtonElement>("#presets button").forEach((b) => {
+      b.setAttribute("aria-pressed", String(Number(b.dataset["focus"]) === focus && Number(b.dataset["break"]) === rest));
+    });
   };
   showPlan();
   maybeById("focus-min")?.addEventListener("input", showPlan);

@@ -20,67 +20,101 @@
         <button type="button" class="btn btn-danger" id="btn-reset">{{$.T "Reset"}}</button>
       </div>
       <p class="plan-line" id="plan-line" aria-live="polite"></p>
+      <div class="host-quick">
+        <button type="button" class="btn btn-ghost" id="open-settings" aria-expanded="false" aria-controls="host-panel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+          {{$.T "Settings"}}
+        </button>
+        <button type="button" class="btn btn-ghost" id="share-quick">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+          {{$.T "Share"}}
+        </button>
+      </div>
       <p class="key-hint">{{$.T "Keys:"}} <kbd class="kbd">Space</kbd> {{$.T "pause or resume,"}} <kbd class="kbd">F</kbd> {{$.T "focus,"}} <kbd class="kbd">B</kbd> {{$.T "break,"}} <kbd class="kbd">Shift</kbd>+<kbd class="kbd">R</kbd> {{$.T "reset"}}</p>
     </div>
   </div>
 
-  <aside class="host-panel glass" aria-label="{{$.T "Session settings"}}">
-    <h1 class="host-title">{{$.T "Session settings"}}</h1>
+  <div class="sheet-backdrop" id="sheet-backdrop"></div>
+  <aside class="host-panel glass" id="host-panel" aria-label="{{$.T "Session settings"}}">
+    <header class="sheet-head">
+      <h1 class="host-title">{{$.T "Session settings"}}</h1>
+      <button type="button" class="sheet-close" id="close-settings" aria-label="{{$.T "Close"}}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
 
-    <div class="stack">
-      <span class="label">{{$.T "Quick presets"}}</span>
-      <div class="row row-wrap" id="presets">
+    <section class="set-group" aria-labelledby="g-timer">
+      <h2 class="set-title" id="g-timer">{{$.T "Timer"}}</h2>
+      <div class="presets" id="presets" role="group" aria-label="{{$.T "Quick presets"}}">
         <button type="button" class="chip" data-focus="25" data-break="5">25 / 5</button>
         <button type="button" class="chip" data-focus="50" data-break="10">50 / 10</button>
         <button type="button" class="chip" data-focus="90" data-break="15">90 / 15</button>
       </div>
-    </div>
-
-    <div class="host-fields">
-      <div class="field">
-        <label for="focus-min">{{$.T "Focus, min"}}</label>
-        <input class="input" id="focus-min" type="number" min="1" max="720" value="25" inputmode="numeric">
+      <div class="host-fields">
+        <div class="field">
+          <label for="focus-min">{{$.T "Focus, min"}}</label>
+          <div class="stepper">
+            <button type="button" data-step="-5" data-for="focus-min" aria-label="{{$.T "Decrease"}}">&minus;</button>
+            <input class="input" id="focus-min" type="number" min="1" max="720" value="25" inputmode="numeric">
+            <button type="button" data-step="5" data-for="focus-min" aria-label="{{$.T "Increase"}}">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="break-min">{{$.T "Break, min"}}</label>
+          <div class="stepper">
+            <button type="button" data-step="-5" data-for="break-min" aria-label="{{$.T "Decrease"}}">&minus;</button>
+            <input class="input" id="break-min" type="number" min="1" max="720" value="5" inputmode="numeric">
+            <button type="button" data-step="5" data-for="break-min" aria-label="{{$.T "Increase"}}">+</button>
+          </div>
+        </div>
       </div>
       <div class="field">
-        <label for="break-min">{{$.T "Break, min"}}</label>
-        <input class="input" id="break-min" type="number" min="1" max="720" value="5" inputmode="numeric">
+        <label for="label">{{$.T "What are you working on?"}}</label>
+        <input class="input" id="label" maxlength="80" placeholder="{{$.T "Go backend, essay, revision..."}}">
       </div>
-    </div>
-    <div class="field">
-      <label for="label">{{$.T "What are you working on?"}}</label>
-      <input class="input" id="label" maxlength="80" placeholder="{{$.T "Go backend, essay, revision..."}}">
-    </div>
+    </section>
 
-    <div class="field">
-      <label for="place">{{$.T "Sky place"}}</label>
+    <section class="set-group" aria-labelledby="g-sky">
+      <h2 class="set-title" id="g-sky"><label for="place">{{$.T "Sky place"}}</label></h2>
       <div class="share-row">
         <select class="select" id="place"><option value="">{{$.T "Choose a city"}}</option></select>
-        <button type="button" class="btn btn-subtle" id="use-device-place" title="{{$.T "Use this device's location"}}">{{$.T "Here"}}</button>
+        <button type="button" class="btn btn-ghost here-btn" id="use-device-place" title="{{$.T "Use this device's location"}}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg>
+          {{$.T "Here"}}
+        </button>
       </div>
       <div class="place-search">
         <input class="input" id="place-q" type="search" placeholder="{{$.T "Search any city"}}" autocomplete="off" maxlength="60" aria-label="{{$.T "Search for a city"}}">
         <ul class="place-results glass" id="place-results" hidden></ul>
       </div>
-    </div>
+    </section>
 
-    <div class="stack">
-      <span class="label">{{$.T "Share with viewers"}}</span>
+    <section class="set-group" aria-labelledby="g-share">
+      <h2 class="set-title" id="g-share">{{$.T "Share with viewers"}}</h2>
       <div class="share-row">
         <input class="input" id="share-url" readonly value="{{.Data.ShareURL}}" aria-label="{{$.T "Viewer link"}}">
-        <button type="button" class="btn btn-subtle" id="copy-link" data-url="{{.Data.ShareURL}}">{{$.T "Copy"}}</button>
+        <button type="button" class="btn btn-ghost" id="copy-link" data-url="{{.Data.ShareURL}}">{{$.T "Copy"}}</button>
       </div>
-      <div class="row row-wrap">
-        <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">{{$.T "Sound on"}}</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="notify-toggle" aria-pressed="false">{{$.T "Alerts off"}}</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="music-toggle" aria-pressed="false">{{$.T "Music off"}}</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="ambience-toggle" aria-pressed="false">{{$.T "Ambience off"}}</button>
-        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}" target="_blank" rel="noopener">{{$.T "Open viewer page"}}</a>
-        <a class="btn btn-ghost btn-sm" href="{{.Data.ShareURL}}?mode=record" target="_blank" rel="noopener">{{$.T "Open record mode"}}</a>
+      <div class="link-list">
+        <a class="link-row" href="{{.Data.ShareURL}}" target="_blank" rel="noopener">{{$.T "Open viewer page"}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+        <a class="link-row" href="{{.Data.ShareURL}}?mode=record" target="_blank" rel="noopener">{{$.T "Open record mode"}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
       </div>
-    </div>
+    </section>
 
-    {{template "attribution" .}}
-    <p class="muted host-note">{{$.T "Keep this page bookmarked: your host key lives in this browser only."}}</p>
+    <section class="set-group" aria-labelledby="g-sound">
+      <h2 class="set-title" id="g-sound">{{$.T "Sound and alerts"}}</h2>
+      <div class="toggle-list">
+        <button type="button" class="toggle-row" id="sound-toggle" aria-pressed="true">{{$.T "Sound on"}}</button>
+        <button type="button" class="toggle-row" id="notify-toggle" aria-pressed="false">{{$.T "Alerts off"}}</button>
+        <button type="button" class="toggle-row" id="music-toggle" aria-pressed="false">{{$.T "Music off"}}</button>
+        <button type="button" class="toggle-row" id="ambience-toggle" aria-pressed="false">{{$.T "Ambience off"}}</button>
+      </div>
+    </section>
+
+    <footer class="host-foot">
+      {{template "attribution" .}}
+      <p class="muted host-note">{{$.T "Keep this page bookmarked: your host key lives in this browser only."}}</p>
+    </footer>
   </aside>
 </section>
 {{end}}
