@@ -1,5 +1,5 @@
 import { byId, maybeById } from "../core/dom";
-import { dayLabel, formatBytes, formatDuration, formatTotal, formatUptime, initialOf, percent } from "../stats/format";
+import { dayLabel, formatBytes, formatDuration, formatExact, formatTotal, formatUptime, initialOf, percent } from "../stats/format";
 import { initAmbientSky } from "./ambient-sky";
 import { initTraffic } from "./admin-traffic";
 
@@ -27,6 +27,7 @@ interface Overview {
   newUsers: { today: number; week: number; month: number };
   activeHosts: { today: number; week: number; month: number };
   days: AdminDay[];
+  recentAnonymous: { startedAtMs: number; seconds: number }[];
   system: {
     startedAtMs: number;
     goVersion: string;
@@ -111,6 +112,44 @@ function renderBars(
   });
 }
 
+/** People without an account: exact focus time for several periods and their latest sessions. */
+function renderAnonymous(o: Overview): void {
+  const sum = (days: AdminDay[]) => days.reduce((n, d) => n + d.anonymousSeconds, 0);
+  const count = (days: AdminDay[]) => days.reduce((n, d) => n + d.anonymousSessions, 0);
+  const today = o.days.slice(-1);
+  const week = o.days.slice(-7);
+  const t = o.totals;
+  set("n-today", formatExact(sum(today)));
+  set("n-today-sub", `${count(today)} session${count(today) === 1 ? "" : "s"}`);
+  set("n-week", formatExact(sum(week)));
+  set("n-week-sub", `${count(week)} sessions`);
+  set("n-month", formatExact(sum(o.days)));
+  set("n-month-sub", `${count(o.days)} sessions`);
+  set("n-all", formatExact(t.anonymousSeconds));
+  set("n-all-sub", `${t.anonymousSessions.toLocaleString("en-US")} sessions`);
+  set("n-avg", t.anonymousSessions > 0 ? formatExact(t.anonymousSeconds / t.anonymousSessions) : "-");
+
+  const list = byId("n-recent");
+  list.replaceChildren();
+  if (o.recentAnonymous.length === 0) {
+    const li = document.createElement("li");
+    li.className = "muted fine";
+    li.textContent = "No anonymous sessions yet.";
+    list.appendChild(li);
+    return;
+  }
+  for (const a of o.recentAnonymous) {
+    const li = document.createElement("li");
+    li.className = "anon-row";
+    const when = document.createElement("span");
+    when.textContent = new Date(a.startedAtMs).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const dur = document.createElement("strong");
+    dur.textContent = formatExact(a.seconds);
+    li.append(when, dur);
+    list.appendChild(li);
+  }
+}
+
 function renderOverview(o: Overview): void {
   set("l-rooms", String(o.live.rooms));
   set("l-clients", String(o.live.clients));
@@ -131,6 +170,8 @@ function renderOverview(o: Overview): void {
   set("o-sessions", allSessions.toLocaleString("en-US"));
   set("o-sessions-sub", `${t.registeredSessions.toLocaleString("en-US")} logged in · ${t.anonymousSessions.toLocaleString("en-US")} anonymous`);
   set("o-anon", percent(t.anonymousSeconds, allSeconds));
+
+  renderAnonymous(o);
 
   renderBars(
     "a-focus",

@@ -90,6 +90,12 @@ type adminDayJSON struct {
 	ActiveHosts        int    `json:"activeHosts"`
 }
 
+// adminAnonymousJSON is one focus phase of someone without an account: when and how long, nothing else.
+type adminAnonymousJSON struct {
+	StartedAtMS int64 `json:"startedAtMs"`
+	Seconds     int64 `json:"seconds"`
+}
+
 type adminOverviewJSON struct {
 	Live struct {
 		Rooms   int `json:"rooms"`
@@ -118,8 +124,9 @@ type adminOverviewJSON struct {
 		Week  int `json:"week"`
 		Month int `json:"month"`
 	} `json:"activeHosts"`
-	Days   []adminDayJSON `json:"days"`
-	System struct {
+	Days            []adminDayJSON       `json:"days"`
+	RecentAnonymous []adminAnonymousJSON `json:"recentAnonymous"`
+	System          struct {
 		StartedAtMS   int64  `json:"startedAtMs"`
 		GoVersion     string `json:"goVersion"`
 		Goroutines    int    `json:"goroutines"`
@@ -146,6 +153,10 @@ func toAdminOverviewJSON(o models.AdminOverview) adminOverviewJSON {
 			Date: d.Date, NewUsers: d.NewUsers, RegisteredSeconds: d.RegisteredSeconds, RegisteredSessions: d.RegisteredSessions,
 			AnonymousSeconds: d.AnonymousSeconds, AnonymousSessions: d.AnonymousSessions, ActiveHosts: d.ActiveHosts,
 		})
+	}
+	j.RecentAnonymous = make([]adminAnonymousJSON, 0, len(o.RecentAnonymous))
+	for _, a := range o.RecentAnonymous {
+		j.RecentAnonymous = append(j.RecentAnonymous, adminAnonymousJSON{StartedAtMS: a.StartedAt.UnixMilli(), Seconds: int64(a.Focused.Seconds())})
 	}
 	s := o.System
 	j.System.StartedAtMS, j.System.GoVersion, j.System.Goroutines, j.System.HeapBytes = s.StartedAt.UnixMilli(), s.GoVersion, s.Goroutines, s.HeapBytes

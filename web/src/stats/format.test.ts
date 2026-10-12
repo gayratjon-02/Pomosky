@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBytes, formatUptime, percent, initialOf, formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
+import { formatBytes, formatExact, formatUptime, percent, initialOf, formatTotal, busiest, dayShare, defaultDay, compareText, formatDuration, heatLevel, leadingBlanks, monthLabel, shiftMonth } from "./format";
 
 describe("formatDuration", () => {
   it("formats minutes and hours", () => {
@@ -113,5 +113,16 @@ describe("admin formatters", () => {
   it("formats percent", () => {
     expect(percent(1, 4)).toBe("25%");
     expect(percent(1, 0)).toBe("-");
+  });
+});
+
+describe("formatExact", () => {
+  it("shows hours, minutes and seconds only as far as needed", () => {
+    expect(formatExact(0)).toBe("0s");
+    expect(formatExact(45)).toBe("45s");
+    expect(formatExact(724)).toBe("12m 04s");
+    expect(formatExact(12015)).toBe("3h 20m 15s");
+    expect(formatExact(-5)).toBe("0s");
+    expect(formatExact(59.9)).toBe("59s");
   });
 });

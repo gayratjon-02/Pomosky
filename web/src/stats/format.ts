@@ -30,6 +30,17 @@ export function formatDuration(seconds: number): string {
   return `${h}h ${String(m).padStart(2, "0")}m`;
 }
 
+/** Exact time: "3h 20m 15s", "12m 04s", "45s", "0s". */
+export function formatExact(seconds: number): string {
+  const total = Math.floor(Math.max(0, seconds));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+  if (m > 0) return `${m}m ${String(s).padStart(2, "0")}s`;
+  return `${s}s`;
+}
+
 /** "2026-10" -> "October 2026". */
 export function monthLabel(month: string): string {
   const [y, m] = month.split("-").map(Number) as [number, number];
