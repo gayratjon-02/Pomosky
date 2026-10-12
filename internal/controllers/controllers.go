@@ -37,9 +37,10 @@ type Deps struct {
 	Clock      ports.Clock
 	IDs        ports.IDGenerator
 	Weather    WeatherSource
-	Places     PlaceSearcher       // nil: no place search
-	Visits     ports.VisitTracker  // nil: usage is not counted
-	Traffic    ports.TrafficReader // nil without a database
+	Places     PlaceSearcher           // nil: no place search
+	Visits     ports.VisitTracker      // nil: usage is not counted
+	Traffic    ports.TrafficReader     // nil without a database
+	Push       ports.PushSubscriptions // nil: Web Push is off
 }
 
 // Controllers groups all handlers; methods are split over files per area.

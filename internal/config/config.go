@@ -30,6 +30,12 @@ type Config struct {
 	// GeoIPFile is the DB-IP "IP to Country Lite" CSV (plain or .gz). When set, the
 	// country of a visit is looked up from the address if no proxy header gives it.
 	GeoIPFile string
+	// VAPID keys switch on Web Push (alerts when a phase ends while the page is
+	// closed). Generate them with `go run ./cmd/vapid`. VAPIDSubject is a mailto: or
+	// https: contact for the push services; it defaults to BaseURL.
+	VAPIDPublicKey  string
+	VAPIDPrivateKey string
+	VAPIDSubject    string
 
 	// TrustProxy makes the server believe X-Forwarded-For. Enable it only when
 	// every request comes through a proxy you control (Caddy), otherwise clients
@@ -71,20 +77,23 @@ type MailConfig struct {
 // Load reads the configuration from the environment, applying defaults.
 func Load() Config {
 	return Config{
-		Env:           getenv("APP_ENV", "development"),
-		Addr:          getenv("ADDR", ":"+getenv("PORT", "8080")),
-		BaseURL:       getenv("BASE_URL", "http://localhost:8080"),
-		StaticDir:     getenv("STATIC_DIR", "web/dist"),
-		DatabaseURL:   os.Getenv("DATABASE_URL"),
-		HostTokenSalt: os.Getenv("HOST_TOKEN_SALT"),
-		RoomIdleTTL:   getenvDuration("ROOM_IDLE_TTL", 10*time.Minute),
-		AdminEmails:   splitEmails(os.Getenv("ADMIN_EMAILS")),
-		AdminHost:     strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_HOST"))),
-		CookieDomain:  strings.ToLower(strings.TrimSpace(os.Getenv("COOKIE_DOMAIN"))),
-		GeoIPFile:     strings.TrimSpace(os.Getenv("GEOIP_FILE")),
-		TrustProxy:    getenvBool("TRUST_PROXY", false),
-		Dev:           getenvBool("DEV_RELOAD", false),
-		DevViewsDir:   getenv("DEV_VIEWS_DIR", "internal/views"),
+		Env:             getenv("APP_ENV", "development"),
+		Addr:            getenv("ADDR", ":"+getenv("PORT", "8080")),
+		BaseURL:         getenv("BASE_URL", "http://localhost:8080"),
+		StaticDir:       getenv("STATIC_DIR", "web/dist"),
+		DatabaseURL:     os.Getenv("DATABASE_URL"),
+		HostTokenSalt:   os.Getenv("HOST_TOKEN_SALT"),
+		RoomIdleTTL:     getenvDuration("ROOM_IDLE_TTL", 10*time.Minute),
+		AdminEmails:     splitEmails(os.Getenv("ADMIN_EMAILS")),
+		AdminHost:       strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_HOST"))),
+		CookieDomain:    strings.ToLower(strings.TrimSpace(os.Getenv("COOKIE_DOMAIN"))),
+		GeoIPFile:       strings.TrimSpace(os.Getenv("GEOIP_FILE")),
+		VAPIDPublicKey:  strings.TrimSpace(os.Getenv("VAPID_PUBLIC_KEY")),
+		VAPIDPrivateKey: strings.TrimSpace(os.Getenv("VAPID_PRIVATE_KEY")),
+		VAPIDSubject:    strings.TrimSpace(os.Getenv("VAPID_SUBJECT")),
+		TrustProxy:      getenvBool("TRUST_PROXY", false),
+		Dev:             getenvBool("DEV_RELOAD", false),
+		DevViewsDir:     getenv("DEV_VIEWS_DIR", "internal/views"),
 		Weather: WeatherConfig{
 			// Default is the public Open-Meteo host; verify its terms and limits.
 			BaseURL:      getenv("OPEN_METEO_BASE", "https://api.open-meteo.com"),

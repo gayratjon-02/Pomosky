@@ -32,6 +32,8 @@ Neither file is ever committed. A test fails if the code reads a variable that i
 | `ADMIN_HOST` | Host that serves `/admin` and `/api/admin/*`, for example `dash.example.com`. When set, everywhere else answers 404 and the root of that host redirects to `/admin`. Empty: `/admin` works on every host. It needs its own DNS record and Caddy block |
 | `COOKIE_DOMAIN` | Domain of the login cookie, for example `.example.com`, so one login also works on `ADMIN_HOST`. Empty: the cookie belongs to the one host that set it |
 | `GEOIP_FILE` | Path of the DB-IP "IP to Country Lite" CSV (plain or `.gz`), for example `/opt/pomosky/geoip/dbip-country-lite.csv.gz`. Fills in the country of visits when no `CF-IPCountry` header exists. Empty: countries need a proxy. Refresh monthly with `deploy/bare/update-geoip.sh`. Data by DB-IP.com, CC BY 4.0 |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Web Push keys; both are needed. They switch on alerts for a finished phase that arrive even when the page is closed or the phone is locked. Create a pair with `go run ./cmd/vapid`. Empty: alerts only show while the page is open in a background tab |
+| `VAPID_SUBJECT` | Contact the push services may use, `mailto:you@example.com` or an `https:` URL. Defaults to `BASE_URL` |
 
 ## Rooms
 

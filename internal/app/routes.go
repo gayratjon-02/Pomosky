@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -50,6 +51,12 @@ func (a *App) routes(c *controllers.Controllers, ws http.Handler) http.Handler {
 	mux.HandleFunc("GET /api/admin/overview", c.AdminOverviewAPI)
 	mux.HandleFunc("GET /api/admin/users", c.AdminUsersAPI)
 	mux.HandleFunc("GET /api/admin/traffic", c.AdminTrafficAPI)
+	// Web Push: subscribing is limited per client like place search.
+	pushLimit := middleware.RateLimit(ratelimit.New(1, 10, time.Now), a.cfg.TrustProxy)
+	mux.HandleFunc("GET /api/push/key", c.PushKey)
+	mux.Handle("POST /api/push/subscribe", pushLimit(http.HandlerFunc(c.PushSubscribe)))
+	mux.Handle("POST /api/push/unsubscribe", pushLimit(http.HandlerFunc(c.PushUnsubscribe)))
+	mux.HandleFunc("GET /sw.js", a.serviceWorker)
 	mux.Handle("GET /ws/{id}", ws)
 	mux.HandleFunc("GET /healthz", c.Health)
 	mux.HandleFunc("GET /robots.txt", c.Robots)
@@ -87,6 +94,15 @@ func (a *App) securityHeaders() middleware.Middleware {
 		return middleware.SecurityHeaders(middleware.DevCSP, true)
 	}
 	return middleware.SecurityHeaders(middleware.DefaultCSP)
+}
+
+// serviceWorker serves the push service worker from the site root, so that its
+// scope is the whole site. It is revalidated on every load so a new version
+// reaches browsers quickly.
+func (a *App) serviceWorker(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+	http.ServeFile(w, r, filepath.Join(a.cfg.StaticDir, "sw.js"))
 }
 
 // staticHandler serves the built frontend. Files with a content hash in their

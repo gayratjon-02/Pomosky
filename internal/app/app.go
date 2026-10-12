@@ -21,6 +21,7 @@ import (
 	"github.com/gayratjon-02/Pomosky/internal/platform/idgen"
 	"github.com/gayratjon-02/Pomosky/internal/platform/logger"
 	"github.com/gayratjon-02/Pomosky/internal/ports"
+	"github.com/gayratjon-02/Pomosky/internal/push"
 	"github.com/gayratjon-02/Pomosky/internal/realtime"
 	"github.com/gayratjon-02/Pomosky/internal/stats"
 	"github.com/gayratjon-02/Pomosky/internal/store/postgres"
@@ -37,6 +38,7 @@ type App struct {
 	dev      *devreload.Watcher // nil unless cfg.Dev
 	db       *postgres.DB       // nil when DATABASE_URL is not set
 	hub      *realtime.Hub
+	push     *push.Service           // nil unless VAPID keys are set
 	janitor  *janitor                // nil without a database
 	recorder *stats.Recorder         // nil without a database
 	visits   *analytics.Collector    // nil without a database
@@ -131,6 +133,15 @@ func New(cfg config.Config) (*App, error) {
 		focusRecorder = recorder
 	}
 	hub := realtime.NewHub(log, clk, focusRecorder)
+	var pushSvc *push.Service
+	if cfg.VAPIDPublicKey != "" && cfg.VAPIDPrivateKey != "" {
+		subject := cfg.VAPIDSubject
+		if subject == "" {
+			subject = cfg.BaseURL
+		}
+		pushSvc = push.New(log, cfg.VAPIDPublicKey, cfg.VAPIDPrivateKey, subject)
+		hub.SetPhaseNotifier(pushSvc)
+	}
 	if cfg.RoomIdleTTL > 0 {
 		hub.SetIdleTTL(cfg.RoomIdleTTL)
 	}
@@ -145,6 +156,9 @@ func New(cfg config.Config) (*App, error) {
 
 		Live:       hub,
 		HostTokens: auth.HostTokens{Salt: cfg.HostTokenSalt},
+	}
+	if pushSvc != nil {
+		deps.Push = pushSvc
 	}
 	// Assigned only when set: a nil *Service inside the interface would not be nil.
 	if accounts != nil {
@@ -179,7 +193,7 @@ func New(cfg config.Config) (*App, error) {
 		return nil, err
 	}
 
-	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, recorder: recorder, janitor: jan, visits: visits}
+	a := &App{cfg: cfg, log: log, dev: watcher, db: db, hub: hub, push: pushSvc, recorder: recorder, janitor: jan, visits: visits}
 	if visits != nil {
 		a.tracker = visits // an interface holding a nil pointer would not be nil
 	}
@@ -224,9 +238,12 @@ func (a *App) Run(ctx context.Context) error {
 	}
 
 	// Focus phases that run to their end are noticed by a sweep, not by an event.
-	go a.hub.RunSweeper(ctx, 5*time.Second)
+	go a.hub.RunSweeper(ctx, time.Second)
 	if a.janitor != nil {
 		go a.janitor.run(ctx, time.Hour)
+	}
+	if a.push != nil {
+		go a.prunePush(ctx, time.Minute)
 	}
 
 	errCh := make(chan error, 1)
@@ -246,6 +263,20 @@ func (a *App) Run(ctx context.Context) error {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		return srv.Shutdown(shutdownCtx)
+	}
+}
+
+// prunePush drops push subscriptions of rooms that have closed.
+func (a *App) prunePush(ctx context.Context, every time.Duration) {
+	t := time.NewTicker(every)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			a.push.Prune(a.hub.Has)
+		}
 	}
 }
 
