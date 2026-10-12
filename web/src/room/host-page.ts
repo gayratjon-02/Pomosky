@@ -187,7 +187,7 @@ export function initHostPage(): void {
 
   initSounds(client);
   renderer.onEnd = notifyEnd;
-  initNotifyToggle();
+  initNotifyToggle(client, roomId);
   initMusic();
   initWakeLock(client);
 

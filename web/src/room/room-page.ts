@@ -62,7 +62,7 @@ export function initRoomPage(): void {
 
   initSounds(client);
   renderer.onEnd = notifyEnd;
-  initNotifyToggle();
+  initNotifyToggle(client, roomId);
   initMusic();
   initWakeLock(client);
 
