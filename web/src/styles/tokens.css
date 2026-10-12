@@ -65,6 +65,15 @@
   --header-h: 64px;
 }
 
+/* Daytime over the live sky: lighter, bluer glass so panels do not sit like dark slabs on a bright sky. */
+html[data-daylight] {
+  --glass-bg: rgba(26, 62, 120, 0.3);
+  --glass-bg-strong: rgba(22, 52, 104, 0.52);
+  --glass-border: rgba(255, 255, 255, 0.26);
+  --glass-highlight: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 14px 40px rgba(18, 44, 96, 0.28);
+}
+
 /* Light theme: only for pages without the live sky (privacy). */
 html[data-theme="light"] body.plain {
   color-scheme: light;

@@ -166,6 +166,9 @@ canvas {
   background: rgba(6, 10, 24, 0.6);
 }
 
+html[data-daylight] .site-header { background: rgba(22, 56, 116, 0.38); }
+html[data-daylight] .site-footer { background: rgba(16, 40, 86, 0.42); }
+
 .site-footer a {
   color: var(--fg-muted);
 }

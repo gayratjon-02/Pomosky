@@ -126,8 +126,19 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
     current.thunder = target.thunder;
   };
 
+  // Pages tint their glass panels lighter by day (html[data-daylight]); flip with some hysteresis.
+  let daylight = false;
+  const markDaylight = () => {
+    const e = current.sunElevationDeg;
+    const now = daylight ? e > 6 : e > 10;
+    if (now === daylight) return;
+    daylight = now;
+    document.documentElement.toggleAttribute("data-daylight", now);
+  };
+
   const render = (timeMs: number, dt: number) => {
     if (!ctx) return;
+    markDaylight();
     frame.timeMs = timeMs;
     frame.dt = dt;
     frame.quality = quality;
@@ -194,6 +205,7 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
     },
     destroy() {
       destroyed = true;
+      document.documentElement.removeAttribute("data-daylight");
       pause();
       observer.disconnect();
       stopWatching();
