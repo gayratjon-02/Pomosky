@@ -64,12 +64,12 @@
 
 .btn-primary {
   color: var(--accent-contrast);
-  background: linear-gradient(135deg, #b4d0ff 0%, var(--accent) 45%, var(--accent-strong) 100%);
-  box-shadow: 0 8px 28px rgba(106, 155, 255, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, #fff) 0%, var(--accent) 45%, var(--accent-strong) 100%);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--accent-strong) 38%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 12px 34px rgba(106, 155, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  box-shadow: 0 12px 34px color-mix(in srgb, var(--accent-strong) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .btn-warm {

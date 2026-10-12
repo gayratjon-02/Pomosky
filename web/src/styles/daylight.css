@@ -19,7 +19,7 @@ html[data-daylight] body:is(.room, .host) {
 html[data-daylight] body:is(.room, .host) .host-panel { background: rgba(255, 255, 255, 0.58); }
 
 /* Everything that sits on glass reads in ink. */
-html[data-daylight] body:is(.room, .host) :is(.glass, .chip, .btn-ghost, .site-header, .site-footer, .toast, .user-menu-panel, .place-results, .timer-inner) {
+html[data-daylight] body:is(.room, .host) :is(.glass, .chip, .btn-ghost, .site-header, .site-footer, .toast, .user-menu-panel, .mood-panel, .place-results, .timer-inner) {
   --fg: var(--ink);
   --fg-muted: rgba(13, 42, 92, 0.8);
   --fg-dim: rgba(13, 42, 92, 0.62);
@@ -66,11 +66,11 @@ html[data-daylight] body:is(.room, .host) .range::-webkit-slider-runnable-track 
 html[data-daylight] body:is(.room, .host) #host-badge[data-state="ok"] { color: var(--success); }
 
 /* Pop-up menus have their own opaque background. */
-html[data-daylight] body:is(.room, .host) :is(.user-menu-panel, .place-results) {
-  background: rgba(255, 255, 255, 0.96);
+html[data-daylight] body:is(.room, .host) :is(.user-menu-panel, .mood-panel, .place-results) {
+  background: rgba(255, 255, 255, 0.985);
   box-shadow: var(--glass-shadow);
 }
-html[data-daylight] body:is(.room, .host) :is(.user-menu-panel a, .user-menu-panel button, .place-results button):hover { background: rgba(13, 42, 92, 0.07); }
+html[data-daylight] body:is(.room, .host) :is(.user-menu-panel a, .user-menu-panel button, .place-results button, .mood-option):hover { background: rgba(13, 42, 92, 0.07); }
 
 /* The timer: a frosted white disc with deep-blue digits. */
 html[data-daylight] body:is(.room, .host) .ring-disc { fill: rgba(255, 255, 255, 0.4); stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; }

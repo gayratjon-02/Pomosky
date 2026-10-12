@@ -1,0 +1,116 @@
+/* Mood picker in the header, and the colours of every mood.
+   A mood sets tokens on html[data-mood]; everything else already reads the tokens.
+   Dark-scheme glass is tinted only while the sky is dark (no html[data-daylight]);
+   light moods use the frosted white glass of daylight.css. Accents apply to all. */
+
+/* ---- Picker */
+
+.mood-menu { position: relative; }
+.mood-btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  min-height: 36px; padding: 0 12px; border-radius: var(--radius-pill);
+  cursor: pointer; list-style: none; color: var(--fg); font-weight: 600; font-size: var(--text-sm);
+  transition: background var(--dur) var(--ease);
+}
+.mood-btn::-webkit-details-marker { display: none; }
+.mood-btn:hover, .mood-menu[open] .mood-btn { background: rgba(255, 255, 255, 0.12); }
+.mood-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.mood-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mood-btn svg circle { fill: currentColor; stroke: none; }
+.mood-btn-name { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 560px) { .mood-btn-name { display: none; } .mood-btn { padding: 0 9px; } }
+
+.mood-panel {
+  position: absolute; right: 0; top: calc(100% + 10px); z-index: 70;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2);
+  width: min(400px, calc(100vw - 2 * var(--space-4))); padding: var(--space-3);
+  border-radius: var(--radius-l); background: rgba(10, 15, 36, 0.94);
+  max-height: calc(100dvh - var(--header-h) - 24px); overflow-y: auto;
+  animation: mood-in var(--dur) var(--ease) both;
+}
+@keyframes mood-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (max-width: 560px) { .mood-panel { position: fixed; right: var(--space-4); left: var(--space-4); width: auto; top: calc(var(--header-h) + 8px); } }
+
+.mood-option {
+  display: grid; gap: var(--space-2); padding: var(--space-2); text-align: left;
+  border: 1.5px solid transparent; border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.06); color: var(--fg); font: inherit; cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.mood-option:hover { background: rgba(255, 255, 255, 0.14); transform: translateY(-1px); }
+.mood-option:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.mood-option[aria-pressed="true"] { border-color: var(--accent); background: rgba(255, 255, 255, 0.16); }
+.mood-swatch { display: block; height: 54px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28); }
+.mood-text { display: grid; gap: 1px; padding: 0 2px 2px; }
+.mood-text strong { font-size: var(--text-sm); }
+.mood-text small { font-size: var(--text-xs); color: var(--fg-dim); line-height: 1.25; }
+
+/* ---- Moods: accents, ring colours, page backdrop */
+
+html[data-mood="dawn"] {
+  --accent: #ffb0c8; --accent-strong: #ff86ab; --accent-contrast: #3a0f24; --warm: #ffc59a;
+  --mood-ring-a: #ffc2d6; --mood-ring-b: #ffa88a; --mood-ring-glow: rgba(255, 170, 190, 0.6);
+  --bg: #1a0c24; --focus-ring: 0 0 0 3px rgba(255, 176, 200, 0.55);
+}
+html[data-mood="golden"] {
+  --accent: #ffc16b; --accent-strong: #ff9a3d; --accent-contrast: #2a1200; --warm: #ffb36b;
+  --mood-ring-a: #ffd98a; --mood-ring-b: #ff9a5c; --mood-ring-glow: rgba(255, 190, 110, 0.6);
+  --bg: #1c1209; --focus-ring: 0 0 0 3px rgba(255, 193, 107, 0.55);
+}
+html[data-mood="sunset"] {
+  --accent: #ff9bb5; --accent-strong: #ff6f9b; --accent-contrast: #3a0b20; --warm: #ffae7a;
+  --mood-ring-a: #ffae9a; --mood-ring-b: #d78bff; --mood-ring-glow: rgba(255, 140, 170, 0.6);
+  --bg: #1b0a22; --focus-ring: 0 0 0 3px rgba(255, 155, 181, 0.55);
+}
+html[data-mood="blue"] {
+  --accent: #a5b8ff; --accent-strong: #7d95ff; --accent-contrast: #0b1240;
+  --mood-ring-a: #9db6ff; --mood-ring-b: #c79bff; --mood-ring-glow: rgba(150, 170, 255, 0.6);
+  --bg: #080c26;
+}
+html[data-mood="night"] { --bg: #04060f; }
+html[data-mood="moon"] {
+  --accent: #d3dcff; --accent-strong: #aebaf0; --accent-contrast: #0c1630;
+  --mood-ring-a: #e6ecff; --mood-ring-b: #a9b8ee; --mood-ring-glow: rgba(214, 224, 255, 0.55);
+  --bg: #070c18;
+}
+html[data-mood="rain"] {
+  --accent: #46a9bf; --accent-strong: #2d8aa3; --accent-contrast: #04222b;
+  --mood-ring-a: #5cc0d3; --mood-ring-b: #7c97e8; --mood-ring-glow: rgba(90, 190, 210, 0.55);
+  --focus-ring: 0 0 0 3px rgba(70, 169, 191, 0.5);
+}
+html[data-mood="snow"] {
+  --accent: #7fb2ff; --accent-strong: #5b8fd9;
+  --mood-ring-a: #8fbaff; --mood-ring-b: #c3b0ff;
+}
+html[data-mood="storm"] {
+  --accent: #b9a0ff; --accent-strong: #9577ff; --accent-contrast: #140a33;
+  --mood-ring-a: #c4a8ff; --mood-ring-b: #7aa0ff; --mood-ring-glow: rgba(170, 140, 255, 0.6);
+  --bg: #070913; --focus-ring: 0 0 0 3px rgba(185, 160, 255, 0.55);
+}
+
+/* ---- Moods: tinted dark glass, header and footer (only while the sky is dark) */
+
+html[data-mood="dawn"]:not([data-daylight]) {
+  --glass-bg: rgba(74, 30, 70, 0.36); --glass-bg-strong: rgba(62, 24, 58, 0.66); --glass-border: rgba(255, 220, 232, 0.3);
+  --chrome-bg: rgba(60, 24, 58, 0.42); --chrome-bg-footer: rgba(52, 20, 50, 0.5);
+}
+html[data-mood="golden"]:not([data-daylight]) {
+  --glass-bg: rgba(70, 38, 16, 0.36); --glass-bg-strong: rgba(56, 30, 12, 0.66); --glass-border: rgba(255, 224, 170, 0.3);
+  --chrome-bg: rgba(60, 32, 14, 0.42); --chrome-bg-footer: rgba(50, 26, 10, 0.5);
+}
+html[data-mood="sunset"]:not([data-daylight]) {
+  --glass-bg: rgba(66, 20, 54, 0.4); --glass-bg-strong: rgba(54, 14, 44, 0.68); --glass-border: rgba(255, 200, 220, 0.3);
+  --chrome-bg: rgba(58, 16, 50, 0.46); --chrome-bg-footer: rgba(48, 12, 42, 0.55);
+}
+html[data-mood="blue"]:not([data-daylight]) {
+  --glass-bg: rgba(20, 28, 80, 0.42); --glass-bg-strong: rgba(14, 20, 66, 0.68); --glass-border: rgba(190, 200, 255, 0.28);
+  --chrome-bg: rgba(14, 20, 66, 0.5); --chrome-bg-footer: rgba(10, 16, 56, 0.58);
+}
+html[data-mood="moon"]:not([data-daylight]) {
+  --glass-bg: rgba(20, 32, 60, 0.42); --glass-bg-strong: rgba(14, 24, 48, 0.7); --glass-border: rgba(220, 230, 255, 0.28);
+  --chrome-bg: rgba(12, 20, 42, 0.5); --chrome-bg-footer: rgba(8, 14, 32, 0.58);
+}
+html[data-mood="storm"]:not([data-daylight]) {
+  --glass-bg: rgba(20, 24, 40, 0.5); --glass-bg-strong: rgba(14, 18, 32, 0.74); --glass-border: rgba(200, 190, 255, 0.24);
+  --chrome-bg: rgba(12, 16, 28, 0.55); --chrome-bg-footer: rgba(8, 10, 20, 0.62);
+}
