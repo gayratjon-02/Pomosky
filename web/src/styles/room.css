@@ -26,6 +26,16 @@ body.record .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; 
   place-items: center;
 }
 
+/* A frosted disc under the ring, so the sky behind the digits is softened. */
+.timer::before {
+  content: "";
+  position: absolute;
+  inset: 6.9%;
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+}
+
 .timer-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
 
 /* The ring takes its colours from the phase: blue to violet for focus, green to teal for a break. */
@@ -55,7 +65,7 @@ body[data-phase="ended"] .ring-progress { animation: pulse 1.4s ease-in-out infi
 body[data-running="1"] .ring-ticks { animation: ticks-spin 90s linear infinite; transform-origin: 130px 130px; }
 @keyframes ticks-spin { to { transform: rotate(360deg); } }
 
-.timer-inner { display: grid; justify-items: center; gap: var(--space-2); text-align: center; padding: 0 12%; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55); }
+.timer-inner { position: relative; z-index: 1; /* above the ring and its disc */ display: grid; justify-items: center; gap: var(--space-2); text-align: center; padding: 0 12%; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55); }
 .timer-phase {
   font-size: var(--text-sm);
   font-weight: 700;
