@@ -34,6 +34,7 @@ var allowed = map[string][]string{
 	"admin":              {"models", "ports", "weather"},
 	"devreload":          {},
 	"assets":             {},
+	"push":               {"models", "ports", "room", "apperr"},
 	"analytics":          {"room", "models", "ports", "platform/httpx"},
 	"views":              {"models"},
 	"auth":               {"models", "ports", "apperr"},
