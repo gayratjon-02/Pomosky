@@ -145,3 +145,31 @@
 @media (prefers-reduced-motion: reduce) {
   .host-panel, .sheet-backdrop { transition: none; }
 }
+
+/* The share button that appears when a focus phase ends. */
+.share-session { width: min(100%, 460px); min-height: 50px; border-radius: var(--radius-l); animation: share-pop 420ms var(--ease-spring) both; }
+@keyframes share-pop { from { opacity: 0; transform: translateY(8px) scale(0.96); } }
+@media (prefers-reduced-motion: reduce) { .share-session { animation: none; } }
+
+/* ---- Wide screens: a compact panel that scrolls quietly inside the window ---- */
+
+.host-panel { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.35) transparent; }
+.host-panel::-webkit-scrollbar { width: 8px; }
+.host-panel::-webkit-scrollbar-track { background: transparent; margin-block: 14px; }
+.host-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.32); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+.host-panel::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); background-clip: padding-box; }
+
+@media (min-width: 901px) {
+  .host-panel { gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-5); border-radius: var(--radius-xl); }
+  .host-title { font-size: var(--text-lg); }
+  .sheet-head { position: static; margin: 0; padding: 0; background: none; }
+  .set-group { gap: var(--space-2); padding: var(--space-3); }
+  .toggle-row, .link-row { min-height: 42px; }
+  .toggle-row { font-size: var(--text-sm); }
+  .toggle-row::after { width: 40px; height: 24px; background-image: radial-gradient(circle at 12px 12px, #fff 9.5px, transparent 10.5px); }
+  .toggle-row[aria-pressed="true"]::after { background-position: 16px 0; }
+  .stepper button, .stepper .input { min-height: 42px; }
+  .stepper { grid-template-columns: 40px minmax(0, 1fr) 40px; }
+  .set-group .share-row .btn, .set-group .share-row .input, .set-group .share-row .select { min-height: 42px; }
+  .presets .chip { min-height: 38px; }
+}

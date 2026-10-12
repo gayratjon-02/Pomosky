@@ -114,3 +114,7 @@ html[data-daylight] body.host .presets .chip[aria-pressed="true"] { background: 
 @media (max-width: 900px) {
   html[data-daylight] body.host .host-panel { --sheet-bg: rgba(247, 250, 255, 0.98); background: var(--sheet-bg); }
 }
+
+/* Scrollbars on the light glass are light too. */
+html[data-daylight] body.host .host-panel { color-scheme: light; scrollbar-color: rgba(13, 42, 92, 0.3) transparent; }
+html[data-daylight] body.host .host-panel::-webkit-scrollbar-thumb { background: rgba(13, 42, 92, 0.28); background-clip: padding-box; }
