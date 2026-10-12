@@ -37,6 +37,28 @@ export function sunLayer(): Layer {
       ctx.arc(x, y, r * 3.2, 0, Math.PI * 2);
       ctx.fill();
 
+      // Soft rays fanning out from the sun by day, turning very slowly.
+      const rays = smoothstep(4, 22, e) * clear;
+      if (rays > 0.01) {
+        const reach = Math.max(w, h) * 0.7;
+        const spin = f.timeMs * 0.00002;
+        const count = 14;
+        for (let i = 0; i < count; i++) {
+          const a = spin + (i / count) * Math.PI * 2 + Math.sin(i * 12.9898) * 0.2;
+          const half = 0.025 + 0.025 * Math.abs(Math.sin(i * 4.1));
+          const g = ctx.createRadialGradient(x, y, r, x, y, reach);
+          g.addColorStop(0, css(color, 0.05 * rays));
+          g.addColorStop(0.6, css(color, 0.015 * rays));
+          g.addColorStop(1, css(color, 0));
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.arc(x, y, reach, a - half, a + half);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
       const disc = ctx.createRadialGradient(x, y, 0, x, y, r);
       disc.addColorStop(0, css([255, 255, 255], visible * clear));
       disc.addColorStop(0.7, css(color, visible * clear));

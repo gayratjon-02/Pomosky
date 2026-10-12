@@ -1,5 +1,5 @@
 import { clamp01, css, smoothstep, type RGB } from "../color";
-import { cloudLit, cloudShade } from "../palette";
+import { cloudLit, cloudShade, dayAmount } from "../palette";
 import { createRandom } from "../random";
 import type { Layer } from "../types";
 
@@ -27,7 +27,7 @@ function buildSprite(seed: number): HTMLCanvasElement {
   const ctx = canvas.getContext("2d")!;
   const rnd = createRandom(seed);
 
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 44; i++) {
     const t = rnd();
     const hump = Math.sin(t * Math.PI); // taller in the middle
     const r = (26 + rnd() * 48) * (0.5 + 0.8 * hump);
@@ -36,6 +36,22 @@ function buildSprite(seed: number): HTMLCanvasElement {
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, "rgba(255,255,255,0.6)");
     g.addColorStop(0.55, "rgba(255,255,255,0.26)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Bright domes on the sun side give the top a rounded, billowy look.
+  for (let i = 0; i < 12; i++) {
+    const t = 0.15 + rnd() * 0.7;
+    const hump = Math.sin(t * Math.PI);
+    const r = (22 + rnd() * 34) * (0.5 + 0.7 * hump);
+    const x = SPRITE_W * 0.1 + t * SPRITE_W * 0.8;
+    const y = SPRITE_H * 0.5 - hump * SPRITE_H * 0.22 * rnd();
+    const g = ctx.createRadialGradient(x - r * 0.2, y - r * 0.25, 0, x, y, r);
+    g.addColorStop(0, "rgba(255,255,255,0.7)");
+    g.addColorStop(0.6, "rgba(255,255,255,0.22)");
     g.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = g;
     ctx.beginPath();
@@ -107,7 +123,9 @@ export function cloudsLayer(seed = 11): Layer {
   return {
     draw({ ctx, w, dt, timeMs, inputs, overcast, quality, horizonY }) {
       const cover = clamp01(inputs.cloudCoverPct / 100);
-      const wanted = Math.round(Math.pow(cover, 1.25) * MAX_CLOUDS * Math.min(1, 0.55 + quality * 0.6));
+      const fromCover = Math.round(Math.pow(cover, 1.25) * MAX_CLOUDS * Math.min(1, 0.55 + quality * 0.6));
+      // A blue day sky is never completely bare: a few fair-weather clouds drift by.
+      const wanted = Math.max(fromCover, Math.round(4 * dayAmount(inputs.sunElevationDeg) * (1 - 0.5 * overcast)));
 
       // Even a clear sky is allowed a whisper of cloud; nothing is drawn at 0 and no cloud exists.
       if (wanted === 0 && clouds.every((c) => c.presence < 0.01)) return;
