@@ -7,6 +7,7 @@ import { setPeople } from "../ui/people";
 import { setViewers } from "../ui/presence";
 import { controlsFor } from "../ui/host-controls";
 import { initMusic } from "../ui/music-events";
+import { initSessionCard } from "../ui/session-card";
 import { initNotifyToggle, notifyEnd } from "../ui/notify";
 import { initSounds } from "../ui/sound-events";
 import { shortcutFor } from "../ui/shortcuts";
@@ -198,7 +199,11 @@ export function initHostPage(): void {
   });
 
   initSounds(client);
-  renderer.onEnd = notifyEnd;
+  const rememberSession = initSessionCard(client);
+  renderer.onEnd = (t) => {
+    notifyEnd(t);
+    rememberSession(t);
+  };
   initNotifyToggle(client, roomId);
   initMusic();
   initWakeLock(client);

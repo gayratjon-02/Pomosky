@@ -15,6 +15,7 @@
   <div class="room-bottom">
     {{template "reactions" .}}
     <div class="row row-wrap room-actions">
+      <button type="button" class="btn btn-primary btn-sm" id="share-session" hidden>{{$.T "Share this session"}}</button>
       <button type="button" class="btn btn-ghost btn-sm" id="copy-link" data-url="{{.Data.ShareURL}}">{{$.T "Copy link"}}</button>
       <button type="button" class="btn btn-ghost btn-sm" id="sound-toggle" aria-pressed="true">{{$.T "Sound on"}}</button>
       <button type="button" class="btn btn-ghost btn-sm" id="notify-toggle" aria-pressed="false">{{$.T "Alerts off"}}</button>

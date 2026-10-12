@@ -39,6 +39,7 @@
     <div class="stats-body">
     <div class="month-nav">
       <h2 id="stats-title">{{$.T "Focus time"}}</h2>
+      {{if not .Data.Preview}}<button type="button" class="btn btn-ghost btn-sm" id="share-month" hidden>{{$.T "Share my month"}}</button>{{end}}
       <div class="month-switch glass">
         <button type="button" class="btn btn-subtle btn-icon btn-sm" id="month-prev" aria-label="{{$.T "Previous month"}}">&#8249;</button>
         <span id="month-label" class="month-label" aria-live="polite">{{$.T "Loading"}}</span>

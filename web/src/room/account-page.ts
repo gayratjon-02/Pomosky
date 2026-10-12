@@ -18,6 +18,7 @@ import { initCommunity } from "../stats/community";
 import { initLeaderboard } from "../stats/leaderboard";
 import { initAmbientSky } from "./ambient-sky";
 import { t, tn } from "../core/i18n";
+import { monthContent, shareCard } from "../ui/share-card";
 
 /** Account page: monthly focus statistics with a calendar heatmap and daily bars. */
 export function initAccountPage(): void {
@@ -32,6 +33,11 @@ export function initAccountPage(): void {
   const nowMonth = currentMonth();
   let month = nowMonth;
   let request = 0;
+  let shown: MonthStats | null = null; // the month on screen, for the share picture
+  const shareBtn = maybeById<HTMLButtonElement>("share-month");
+  shareBtn?.addEventListener("click", () => {
+    if (shown) void shareCard(shareBtn, monthContent(shown.totalSeconds, shown.sessions, shown.activeDays, monthLabel(shown.month)), "pomosky-month.png");
+  });
 
   const load = async () => {
     const mine = ++request;
@@ -44,6 +50,8 @@ export function initAccountPage(): void {
       if (mine !== request) return; // a newer month was requested meanwhile
       byId("stats-error").hidden = true;
       render(data, month === nowMonth);
+      shown = data;
+      if (shareBtn) shareBtn.hidden = data.totalSeconds <= 0;
     } catch {
       if (mine === request) byId("stats-error").hidden = false;
     }
