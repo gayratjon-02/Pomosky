@@ -12,6 +12,7 @@ import { starsLayer } from "./layers/stars";
 import { sunLayer } from "./layers/sun";
 import { vignetteLayer } from "./layers/vignette";
 import { moodSky, onMoodChange } from "./moods";
+import { publishSky } from "./sky-feed";
 import { onVisibilityChange, prefersReducedMotion } from "./perf";
 import { DEFAULT_INPUTS, type Frame, type Layer, type SkyController, type SkyInputs } from "./types";
 
@@ -68,7 +69,10 @@ export function createSky(canvas: HTMLCanvasElement, options: SkyOptions = {}): 
   // therefore never has to wait for the page to send its values again.
   const live: SkyInputs = { ...DEFAULT_INPUTS };
   const target: SkyInputs = { ...DEFAULT_INPUTS };
-  const retarget = () => Object.assign(target, live, moodSky() ?? {});
+  const retarget = () => {
+    Object.assign(target, live, moodSky() ?? {});
+    publishSky(target);
+  };
   const current: SkyInputs = { ...DEFAULT_INPUTS };
   const frame: Frame = {
     ctx: ctx as CanvasRenderingContext2D,

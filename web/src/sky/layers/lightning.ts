@@ -1,4 +1,5 @@
 import { createRandom } from "../random";
+import { publishBolt } from "../sky-feed";
 import type { Layer } from "../types";
 
 interface Bolt {
@@ -58,6 +59,7 @@ export function lightningLayer(seed = 13): Layer {
       if (startedAt < 0 && timeMs >= nextAt) {
         startedAt = timeMs;
         bolt = makeBolt(rnd);
+        publishBolt(); // the ambient sound answers with thunder
       }
       if (startedAt < 0) return;
 
