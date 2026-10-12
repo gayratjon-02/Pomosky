@@ -149,7 +149,10 @@ export function initHostPage(): void {
       if (p) client.setLocation({ city: p.name, lat: p.lat, lon: p.lon, tz: p.tz });
     });
     client.on("state", (s) => {
-      if (s.city && document.activeElement !== placeSelect) placeSelect.value = s.city;
+      if (!s.city || document.activeElement === placeSelect) return;
+      // A place from the search or "Here" is not in the list: show it as an extra option.
+      if (![...placeSelect.options].some((o) => o.value === s.city)) placeSelect.add(new Option(s.city, s.city));
+      placeSelect.value = s.city;
     });
   }
   initPlaceSearch((p) => {
