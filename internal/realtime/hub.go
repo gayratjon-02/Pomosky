@@ -18,6 +18,7 @@ type Hub struct {
 	log      *slog.Logger
 	clock    ports.Clock
 	recorder ports.FocusRecorder // may be nil
+	notifier ports.PhaseNotifier // may be nil
 	idleTTL  time.Duration       // how long a room without any client is kept
 
 	mu    sync.RWMutex
@@ -40,6 +41,9 @@ func NewHub(log *slog.Logger, clock ports.Clock, recorder ports.FocusRecorder) *
 // is long enough for the host to reload the page or lose the network.
 const DefaultIdleTTL = 10 * time.Minute
 
+// SetPhaseNotifier sets who is told when a phase ends (call before serving).
+func (h *Hub) SetPhaseNotifier(n ports.PhaseNotifier) { h.notifier = n }
+
 // SetIdleTTL changes how long an empty room is kept (call before serving).
 func (h *Hub) SetIdleTTL(d time.Duration) { h.idleTTL = d }
 
@@ -52,6 +56,7 @@ func (h *Hub) Open(state room.State, owner models.UserID) *RoomHub {
 		return rh
 	}
 	rh := newRoomHub(state, owner, h.log, h.recorder)
+	rh.notifier = h.notifier
 	h.rooms[state.ID] = rh
 	return rh
 }
@@ -175,12 +180,14 @@ type RoomHub struct {
 	log      *slog.Logger
 	owner    models.UserID // "" for anonymous rooms
 	recorder ports.FocusRecorder
+	notifier ports.PhaseNotifier // may be nil
 
 	mu       sync.Mutex
 	state    room.State
 	clients  map[*Client]struct{}
 	peak     int       // most clients seen since the last recorded focus phase
 	credited time.Time // StartedAt of the focus phase already recorded at its natural end
+	notified time.Time // StartedAt of the phase whose end was already announced
 	emptyAt  time.Time // since when no client is connected; zero while someone is
 	people   []byte    // the last people message sent, to skip identical ones
 }
@@ -226,6 +233,8 @@ func (r *RoomHub) sweep(now time.Time, idleTTL time.Duration) (expired bool) {
 		r.credited = t.StartedAt
 	}
 
+	r.notifyEndLocked(t, now)
+
 	if len(r.clients) > 0 {
 		r.emptyAt = time.Time{}
 		return false
@@ -239,6 +248,26 @@ func (r *RoomHub) sweep(now time.Time, idleTTL time.Duration) (expired bool) {
 	}
 	r.recordLocked(t, now) // a phase still running when the room closes counts up to now
 	return true
+}
+
+// lateNotice is how long after its end a phase is still announced. A timer
+// that ended long ago (a room restored after a restart) must not ping anyone.
+const lateNotice = 2 * time.Minute
+
+// notifyEndLocked tells the notifier, once, that a running phase has run out.
+func (r *RoomHub) notifyEndLocked(t room.Timer, now time.Time) {
+	if r.notifier == nil || (t.Phase != room.PhaseFocus && t.Phase != room.PhaseBreak) {
+		return
+	}
+	end := t.StartedAt.Add(t.Duration)
+	if now.Before(end) || t.StartedAt.Equal(r.notified) {
+		return
+	}
+	r.notified = t.StartedAt
+	if now.Sub(end) > lateNotice {
+		return
+	}
+	r.notifier.PhaseEnded(r.state.ID, t.Phase, t.Label)
 }
 
 // State returns a copy of the current room state.
